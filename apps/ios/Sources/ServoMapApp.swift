@@ -2,6 +2,7 @@ import SwiftUI
 
 @main
 struct ServoMapApp: App {
+    @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     // Opens on the fuel from the car profile (CarForm writes "defaultFuel").
     @State private var store = Store(fuel: FuelType(rawValue: UserDefaults.standard.string(forKey: "defaultFuel") ?? "") ?? .u91)
     @State private var log = FillUpLog()

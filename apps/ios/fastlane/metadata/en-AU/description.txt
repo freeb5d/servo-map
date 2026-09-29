@@ -1,0 +1,23 @@
+ServoMap shows what fuel costs at every reporting station near you, cheapest first, from the official state price feeds.
+
+The map
+The cheapest stations are tagged with their price and brand; the rest are coloured dots by price. Pull the sheet up for the full list, or down to see the whole map.
+
+Trends
+The state average for your fuel over 30 or 90 days, the cheapest day of the week, how far prices spread nearby, and which brands sit under the local average.
+
+Your log
+Record each fill-up and see what you spent this month, six months of spending, and how much you saved against the local average when you filled.
+
+Saved stations
+Keep the stations you use and see how each price moved since you last looked. Price-drop alerts can be switched on now and will arrive once they launch.
+
+Widgets and Siri
+Home Screen and Lock Screen widgets show the cheapest price for your fuel. Ask Siri for the cheapest fuel nearby.
+
+Fuels: U91, E10, U95, U98 and Diesel.
+Coverage: New South Wales and Western Australia today, with more states as their feeds are connected.
+
+Prices come from government reporting schemes and refresh every 15 minutes. Always check the price at the pump.
+
+No account, no ads, no tracking. Your saved stations and fill-ups stay on your iPhone.

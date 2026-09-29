@@ -29,6 +29,7 @@ struct SavedScreen: View {
                     } footer: {
                         Text("Changes are since you last opened Saved. Saved stations stay on this iPhone.")
                     }
+                    PriceAlertsSection()
                 }
             }
             .paperList()

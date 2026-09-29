@@ -10,11 +10,12 @@
 
 ServoMap is an Australia-wide fuel price map. It aggregates every state's
 fuel reporting API into one normalised dataset, serves it through a
-Cloudflare Worker, and renders it in a Next.js + Mapbox frontend.
+Cloudflare Worker, and renders it in a Next.js + Mapbox frontend and a
+SwiftUI iOS app.
 
 - **Domain:** `servo-map.com` (pending)
 - **API:** `api.servo-map.com` (Cloudflare)
-- **Status:** Phase 1 — NSW + QLD live; WA / VIC / SA pending (see `plan.md`)
+- **Status:** NSW + WA live; QLD / VIC / SA pending (see `plan.md`). iOS app in TestFlight.
 - **Cost target:** $0/month on free tiers
 
 ---
@@ -24,6 +25,7 @@ Cloudflare Worker, and renders it in a Next.js + Mapbox frontend.
 | Layer       | Choice                                     |
 |-------------|--------------------------------------------|
 | Frontend    | Next.js 15 (App Router), React 19, Tailwind 4, Mapbox GL, `@vercel/analytics` |
+| iOS         | SwiftUI (iOS 27), MapKit, WidgetKit, App Intents; xcodegen; fastlane → TestFlight |
 | Backend     | Cloudflare Worker + Hono 4, KV for cache   |
 | Types       | Shared TS package (`@servo-map/shared`)    |
 | Ingest cron | GitHub Actions (`*/15 * * * *`) → `scripts/fetch-data.ts` → CF KV REST API |
@@ -37,6 +39,10 @@ Cloudflare Worker, and renders it in a Next.js + Mapbox frontend.
 
 ```
 servo-map/
+├── apps/
+│   └── ios/         # SwiftUI app. xcodegen project.yml; fastlane lanes; version in Config/Version.xcconfig.
+├── design/
+│   └── app-icon/    # generate.py: one fuel-gauge geometry → favicon, web mark, iOS Icon Composer icon.
 ├── packages/
 │   ├── design-tokens/ # Design system tokens (素). Generates web CSS + iOS Swift. See docs/design/system.md.
 │   ├── shared/      # Pure TS types, enums and reference tables (fuel types, brand families). No I/O.
@@ -46,7 +52,10 @@ servo-map/
 │   └── fetch-data.ts  # Invoked by GH Actions cron. Calls adapters, writes KV via CF REST API.
 ├── docs/
 │   ├── openapi.yaml   # Source of truth for the REST contract.
+│   ├── design/        # Design system spec and screenshots.
+│   ├── decisions/     # Decision records.
 │   └── claude/*.md    # Rule docs (see below).
+├── README.md          # Human entry point.
 ├── plan.md            # Product + roadmap narrative.
 └── CLAUDE.md          # This file.
 ```
@@ -64,6 +73,8 @@ pnpm -r typecheck                               # repo-wide type gate
 pnpm -r lint                                    # repo-wide lint gate
 pnpm -r test                                    # repo-wide tests (vitest)
 pnpm -r build                                   # repo-wide build
+cd apps/ios && xcodegen generate                # iOS project (then xcodebuild test)
+apps/ios/scripts/beta.sh                        # iOS: archive and upload to TestFlight
 ```
 
 - Frontend expects `NEXT_PUBLIC_API_URL` (falls back to `http://localhost:8787` in `packages/web/src/lib/api.ts`).

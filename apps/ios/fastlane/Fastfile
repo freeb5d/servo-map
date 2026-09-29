@@ -1,0 +1,207 @@
+# frozen_string_literal: true
+
+# ServoMap iOS delivery lanes, after kioku-ios's.
+#
+# Auth: one App Store Connect API key drives bundle ID registration, the app
+# record, the provisioning profiles and the TestFlight upload, so no Apple ID
+# session is needed. It arrives as environment variables (scripts/beta.sh reads
+# them from 1Password; nothing is written to the repository):
+#
+#   ASC_KEY_ID, ASC_ISSUER_ID  — the key's id and issuer
+#   ASC_KEY_CONTENT            — the .p8 contents, base64 when ASC_KEY_IS_BASE64=1
+#
+# Versions: MARKETING_VERSION comes from Config/Version.xcconfig, which
+# release-please owns. The build number is the latest TestFlight build + 1 and
+# is set only in the generated, uncommitted project.
+#
+# Signing: manual, against App Store profiles that sigh fetches or creates and
+# the Apple Distribution certificate in the login keychain.
+
+require "shellwords"
+
+TEAM_ID = "BZVKP6884D"
+APP_BUNDLE_ID = "com.misoto22.servomap"
+REVIEW_NOTES = "No sign-in is needed. The app opens on Sydney CBD; allow location to see prices near you. " \
+               "Prices come from the NSW FuelCheck and WA FuelWatch government feeds."
+
+# Every bundle the archive signs, each with its own App ID and profile.
+SIGNED_TARGETS = {
+  "ServoMap" => { bundle_id: APP_BUNDLE_ID, name: "ServoMap" },
+  "ServoMapWidgets" => { bundle_id: "#{APP_BUNDLE_ID}.widgets", name: "ServoMap Widgets" }
+}.freeze
+
+default_platform(:ios)
+
+platform :ios do
+  desc "Regenerate the Xcode project, archive, and upload to TestFlight"
+  lane :beta do
+    api_key = app_store_connect_api_key(
+      key_id: ENV.fetch("ASC_KEY_ID"),
+      issuer_id: ENV.fetch("ASC_ISSUER_ID"),
+      key_content: ENV.fetch("ASC_KEY_CONTENT"),
+      is_key_content_base64: ENV["ASC_KEY_IS_BASE64"] == "1",
+      in_house: false
+    )
+
+    # Idempotent: register each App ID on first run.
+    SIGNED_TARGETS.each_value do |spec|
+      next if Spaceship::ConnectAPI::BundleId.find(spec[:bundle_id])
+
+      Spaceship::ConnectAPI::BundleId.create(
+        name: spec[:name],
+        platform: Spaceship::ConnectAPI::BundleIdPlatform::IOS,
+        identifier: spec[:bundle_id]
+      )
+      UI.success("Registered App ID #{spec[:bundle_id]}")
+    end
+    # Price alerts need Push Notifications on the app's App ID. Enabling it invalidates the old
+    # profile, and sigh below then makes a new one that carries the capability.
+    app_id = Spaceship::ConnectAPI::BundleId.find(APP_BUNDLE_ID)
+    push = Spaceship::ConnectAPI::BundleIdCapability::Type::PUSH_NOTIFICATIONS
+    unless app_id.get_capabilities.any? { |c| c.capability_type == push }
+      app_id.create_capability(push)
+      UI.success("Enabled Push Notifications on #{APP_BUNDLE_ID}")
+    end
+
+    # The App Store Connect API cannot create apps ("apps does not allow CREATE"),
+    # so the record is made once by hand; stop with the exact fields if it is missing.
+    if Spaceship::ConnectAPI::App.find(APP_BUNDLE_ID).nil?
+      UI.user_error!(
+        "No App Store Connect record for #{APP_BUNDLE_ID}. Create it once at " \
+        "appstoreconnect.apple.com → Apps → + → New App: iOS, name ServoMap, " \
+        "bundle ID #{APP_BUNDLE_ID}, SKU servomap. Then run this lane again."
+      )
+    end
+
+    # xcodebuild needs the key on disk for provisioning auth; it lives only in
+    # the ignored build/ directory for the length of the lane.
+    key_path = File.expand_path("../build/AuthKey_#{ENV.fetch('ASC_KEY_ID')}.p8", __dir__)
+    FileUtils.mkdir_p(File.dirname(key_path))
+    key = ENV.fetch("ASC_KEY_CONTENT")
+    File.binwrite(key_path, ENV["ASC_KEY_IS_BASE64"] == "1" ? Base64.decode64(key) : key)
+    File.chmod(0o600, key_path)
+
+    # sigh reuses an active App Store profile or creates one; never run it readonly,
+    # or a new App ID (or one whose capabilities changed) would have none.
+    profiles = SIGNED_TARGETS.values.to_h do |spec|
+      get_provisioning_profile(
+        app_identifier: spec[:bundle_id],
+        output_path: File.expand_path("../build", __dir__),
+        filename: "AppStore_#{spec[:bundle_id]}.mobileprovision"
+      )
+      [spec[:bundle_id], lane_context[SharedValues::SIGH_NAME]]
+    end
+
+    # The project is generated and never committed; each target gets its own profile
+    # there, because a profile passed to xcodebuild would reach every target.
+    sh("xcodegen --spec ../project.yml")
+    SIGNED_TARGETS.each do |target, spec|
+      update_code_signing_settings(
+        path: "ServoMap.xcodeproj",
+        targets: [target],
+        build_configurations: ["Release"],
+        use_automatic_signing: false,
+        team_id: TEAM_ID,
+        code_sign_identity: "Apple Distribution",
+        profile_name: profiles.fetch(spec[:bundle_id])
+      )
+    end
+
+    increment_build_number(
+      build_number: latest_testflight_build_number(
+        api_key: api_key,
+        app_identifier: APP_BUNDLE_ID,
+        initial_build_number: 0
+      ) + 1,
+      xcodeproj: "ServoMap.xcodeproj"
+    )
+
+    build_app(
+      scheme: "ServoMap",
+      configuration: "Release",
+      export_method: "app-store",
+      export_options: {
+        signingStyle: "manual",
+        signingCertificate: "Apple Distribution",
+        teamID: TEAM_ID,
+        provisioningProfiles: profiles
+      },
+      xcargs: [
+        "CODE_SIGN_STYLE=Manual",
+        "CODE_SIGN_IDENTITY=#{'Apple Distribution'.shellescape}",
+        "DEVELOPMENT_TEAM=#{TEAM_ID}",
+        "-allowProvisioningUpdates",
+        "-authenticationKeyPath", key_path,
+        "-authenticationKeyID", ENV.fetch("ASC_KEY_ID"),
+        "-authenticationKeyIssuerID", ENV.fetch("ASC_ISSUER_ID")
+      ].join(" "),
+      output_directory: "build",
+      output_name: "ServoMap.ipa",
+      # Raw xcodebuild output: the default formatter (xcbeautify) is not reliably installed, and
+      # when its shim fails the pipe fails the archive.
+      xcodebuild_formatter: ""
+    )
+
+    FileUtils.rm_f(key_path)
+    verify_push_entitlement(ipa_path: lane_context[SharedValues::IPA_OUTPUT_PATH])
+
+    upload_to_testflight(
+      api_key: api_key,
+      skip_waiting_for_build_processing: true,
+      notify_external_testers: false
+    )
+  end
+
+  # A missing entitlement is silent until a device fails to register, so read it back out of
+  # the exported app before uploading.
+  desc "Fail unless the exported app carries the production aps-environment"
+  private_lane :verify_push_entitlement do |options|
+    unpacked = File.expand_path("../build/ipa-verify", __dir__)
+    FileUtils.rm_rf(unpacked)
+    FileUtils.mkdir_p(unpacked)
+    sh("unzip", "-q", options.fetch(:ipa_path), "-d", unpacked, log: false)
+    shipped = sh("codesign", "-d", "--entitlements", "-", "--xml", File.join(unpacked, "Payload", "ServoMap.app"), log: false)
+    FileUtils.rm_rf(unpacked)
+    unless shipped.match?(%r{<key>aps-environment</key>\s*<string>production</string>})
+      UI.user_error!("ServoMap.app in the exported IPA lacks aps-environment=production; not uploading.")
+    end
+    UI.success("ServoMap.app carries aps-environment=production.")
+  end
+
+  # Store listing text lives in fastlane/metadata and screenshots in fastlane/screenshots (6.9",
+  # 1320 x 2868). This updates the listing only: no binary, no submission for review.
+  desc "Upload the App Store listing text and screenshots"
+  lane :metadata do
+    api_key = app_store_connect_api_key(
+      key_id: ENV.fetch("ASC_KEY_ID"),
+      issuer_id: ENV.fetch("ASC_ISSUER_ID"),
+      key_content: ENV.fetch("ASC_KEY_CONTENT"),
+      is_key_content_base64: ENV["ASC_KEY_IS_BASE64"] == "1",
+      in_house: false
+    )
+    deliver(
+      api_key: api_key,
+      app_identifier: APP_BUNDLE_ID,
+      skip_binary_upload: true,
+      submit_for_review: false,
+      overwrite_screenshots: true,
+      run_precheck_before_submit: false,
+      # deliver reads the review detail before creating it and crashes on a new app ("No data").
+      # FIRST_LISTING=1 passes review notes so it creates the record; once it exists, updating it
+      # needs the review contact (name, phone, email), which is entered in App Store Connect.
+      app_review_information: ENV["FIRST_LISTING"] == "1" ? { notes: REVIEW_NOTES } : nil,
+      force: true
+    )
+  end
+
+  desc "Build for the simulator and run the test suite"
+  lane :test do
+    sh("xcodegen --spec ../project.yml")
+    run_tests(scheme: "ServoMap", device: "iPhone 17 (27.0)", derived_data_path: "build/DerivedData")
+  end
+
+  error do |_lane, _exception|
+    sh("rm -f ../build/AuthKey_*.p8")
+  end
+end
+

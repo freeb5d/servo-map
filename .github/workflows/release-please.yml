@@ -14,6 +14,12 @@
 # version of its own. version.txt is the single version; the three packages
 # follow it through extra-files.
 #
+# The iOS app is a second component (apps/ios): its own version, CHANGELOG and
+# `ios-vX.Y.Z` tag, written into apps/ios/Config/Version.xcconfig. It stays 0.x
+# (bump-minor-pre-major) until the App Store launch, when a `Release-As: 1.0.0`
+# footer takes it to 1.0.0. The root package excludes apps/ios, so iOS-only
+# commits do not bump the web and worker version.
+#
 # This repository has never been tagged, so release-please-config.json carries a
 # bootstrap-sha pinned to the main HEAD this workflow was added at. Commits
 # before it are not considered.

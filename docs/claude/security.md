@@ -11,6 +11,8 @@
 | Web (local)        | `packages/web/.env.local`                        | `KEY=value` per line    |
 | Web (prod)         | Vercel project env (build-time)                  | Injected at deploy      |
 | CI (GH Actions)    | Repo secrets (Settings → Secrets → Actions)      | Referenced as `${{ secrets.NAME }}` |
+| iOS release (local)| 1Password `op://02 Personal Production/App Store Connect API Key - kioku-ios-ops` (team App Manager key, shared with kioku-ios) | Read by `apps/ios/scripts/beta.sh` into the environment; the `.p8` exists only in ignored `apps/ios/build/` during a lane |
+| iOS push (future)  | 1Password `02 Personal Production / jade-apns` (the team's APNs auth key; one key serves every app on team `BZVKP6884D`) | For the server that will send price alerts |
 
 **Never commit** `.dev.vars`, `.env`, `.env.local`, or anything under `.wrangler/`. `.gitignore` already excludes them — verify before every commit.
 

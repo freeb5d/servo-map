@@ -74,6 +74,14 @@ export function DocFooter({ lastUpdated }: { lastUpdated: string | null }) {
       <Link href="/about" className="link">
         How it works
       </Link>
+      {" · "}
+      <Link href="/privacy" className="link">
+        Privacy
+      </Link>
+      {" · "}
+      <Link href="/support" className="link">
+        Support
+      </Link>
     </p>
   );
 }

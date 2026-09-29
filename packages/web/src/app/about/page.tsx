@@ -49,7 +49,7 @@ const PROVENANCE: Record<
   wa: {
     source: "WA FuelWatch",
     url: "https://www.fuelwatch.wa.gov.au/",
-    note: "Pending integration. FuelWatch publishes next-day prices.",
+    note: "FuelWatch publishes each day's prices for the next day, so WA prices change once a day.",
   },
   sa: {
     source: "South Australian fuel-price data",

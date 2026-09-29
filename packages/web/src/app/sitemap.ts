@@ -48,6 +48,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // /saved is per-device and noindex, so it is deliberately absent.
     { url: `${BASE}/trends`, lastModified: siteLastMod, changeFrequency: "daily", priority: 0.6 },
     { url: `${BASE}/about`, lastModified: siteLastMod, changeFrequency: "monthly", priority: 0.4 },
+    { url: `${BASE}/support`, lastModified: siteLastMod, changeFrequency: "yearly", priority: 0.2 },
+    { url: `${BASE}/privacy`, lastModified: siteLastMod, changeFrequency: "yearly", priority: 0.2 },
   ];
 
   for (const state of live) {

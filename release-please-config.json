@@ -55,6 +55,21 @@
           "path": "packages/worker/package.json",
           "jsonpath": "$.version"
         }
+      ],
+      "exclude-paths": [
+        "apps/ios"
+      ]
+    },
+    "apps/ios": {
+      "component": "ios",
+      "include-component-in-tag": true,
+      "initial-version": "0.1.0",
+      "bump-minor-pre-major": true,
+      "extra-files": [
+        {
+          "type": "generic",
+          "path": "Config/Version.xcconfig"
+        }
       ]
     }
   }
