@@ -1,4 +1,6 @@
 import { ImageResponse } from "next/og";
+import { BrandMark } from "@/components/brand/BrandMark";
+import { MARK_COLORS } from "@/components/brand/mark";
 
 export const alt = "Cheapest fuel prices by suburb — ServoMap";
 export const size = { width: 1200, height: 630 };
@@ -29,17 +31,20 @@ export default async function Image({ params }: Props) {
           color: "#FAF7F2",
         }}
       >
-        <div
-          style={{
-            display: "flex",
-            fontSize: 32,
-            color: "#E8A33D",
-            fontWeight: 700,
-            letterSpacing: 2,
-            textTransform: "uppercase",
-          }}
-        >
-          ServoMap · Cheapest Fuel
+        <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
+          <BrandMark size={72} {...MARK_COLORS.dark} />
+          <div
+            style={{
+              display: "flex",
+              fontSize: 32,
+              color: MARK_COLORS.dark.ink,
+              fontWeight: 700,
+              letterSpacing: 2,
+              textTransform: "uppercase",
+            }}
+          >
+            ServoMap · Cheapest Fuel
+          </div>
         </div>
         <div
           style={{

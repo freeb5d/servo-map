@@ -1,4 +1,6 @@
 import { ImageResponse } from "next/og";
+import { BrandMark } from "@/components/brand/BrandMark";
+import { MARK_COLORS } from "@/components/brand/mark";
 
 export const alt = "ServoMap — Australian Fuel Prices";
 export const size = { width: 1200, height: 630 };
@@ -20,17 +22,20 @@ export default function Image() {
           color: "#FAF7F2",
         }}
       >
-        <div
-          style={{
-            display: "flex",
-            fontSize: 36,
-            color: "#E8A33D",
-            fontWeight: 700,
-            letterSpacing: 2,
-            textTransform: "uppercase",
-          }}
-        >
-          ServoMap
+        <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
+          <BrandMark size={72} {...MARK_COLORS.dark} />
+          <div
+            style={{
+              display: "flex",
+              fontSize: 36,
+              color: MARK_COLORS.dark.ink,
+              fontWeight: 700,
+              letterSpacing: 2,
+              textTransform: "uppercase",
+            }}
+          >
+            ServoMap
+          </div>
         </div>
         <div
           style={{
