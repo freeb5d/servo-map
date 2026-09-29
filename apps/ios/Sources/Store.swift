@@ -27,13 +27,26 @@ final class Store {
     private(set) var placeName = "Sydney CBD"
     var located: Bool { placeName == "you" }
 
-    var fuel: FuelType = .u91 { didSet { Task { await loadStations() } } }
-    var filters = Filters()
-    private(set) var stations: [Station] = []
+    var fuel: FuelType = .u91 {
+        didSet { derive(); Task { await loadStations() } }
+    }
+    var filters = Filters() { didSet { derive() } }
+    private(set) var stations: [Station] = [] { didSet { derive() } }
     /** Daily history for every fuel; `trend` narrows it to the selected one. */
-    private(set) var history: [Snapshot] = []
-    var trend: [Snapshot] { history.filter { $0.fuel == fuel.rawValue } }
-    func trend(for fuel: FuelType) -> [Snapshot] { history.filter { $0.fuel == fuel.rawValue } }
+    private(set) var history: [Snapshot] = [] { didSet { byFuel = Dictionary(grouping: history, by: \.fuel) } }
+    private var byFuel: [String: [Snapshot]] = [:]
+    var trend: [Snapshot] { byFuel[fuel.rawValue] ?? [] }
+    func trend(for fuel: FuelType) -> [Snapshot] { byFuel[fuel.rawValue] ?? [] }
+
+    // Derived once per change of stations, filters or fuel. Views read these on every redraw (the
+    // map reads `range` for every annotation), and recomputing them each time cost ~110 ms a frame.
+
+    /** Stations after filters, cheapest first; prices older than a day are left out of the ranking. */
+    private(set) var ranked: [Station] = []
+    /** Price tiers across every station nearby for the selected fuel. */
+    private(set) var range = PriceRange([])
+    /** Mean price nearby for the selected fuel. */
+    private(set) var localAverage: Double?
     private(set) var loading = false
     /** Upper-case codes of states with live prices, from /metadata. */
     private(set) var liveStates: [String] = []
@@ -53,6 +66,9 @@ final class Store {
         self.stations = stations
         self.history = history
         self.fuel = fuel
+        // didSet does not run for assignments in init.
+        byFuel = Dictionary(grouping: history, by: \.fuel)
+        derive()
     }
 
     func load() async {
@@ -81,26 +97,32 @@ final class Store {
         }
     }
 
-    /** Stations after filters, cheapest first; prices older than a day are left out of the ranking. */
-    var ranked: [Station] { matching(filters) }
+    private func derive() {
+        let prices = stations.compactMap { $0.price(fuel)?.price }
+        ranked = matching(filters)
+        range = PriceRange(prices)
+        localAverage = prices.isEmpty ? nil : prices.reduce(0, +) / Double(prices.count)
+    }
 
     /** Stations passing `f`, cheapest first; the filter form uses it to preview counts. */
     func matching(_ f: Filters) -> [Station] {
         let filters = f
+        let now = Date()
+        // Price is looked up once per station, not once per comparison in the sort.
         return stations.filter { s in
             guard let p = s.price(fuel) else { return false }
             if let max = filters.maxPrice, p.price > max { return false }
             if let km = filters.radiusKm, (s.distance ?? 0) > Double(km) { return false }
-            if let h = filters.freshHours, p.updatedAt < Date().addingTimeInterval(Double(-h) * 3600) { return false }
+            if let h = filters.freshHours, p.updatedAt < now.addingTimeInterval(Double(-h) * 3600) { return false }
             if !filters.brands.isEmpty, filters.brands.contains(s.family.id) == filters.hideBrands { return false }
             if filters.alsoSells.contains(where: { s.price($0) == nil }) { return false }
             if filters.hideMembersOnly, s.family.group == .members { return false }
-            return p.updatedAt > Date().addingTimeInterval(-86_400)
+            return p.updatedAt > now.addingTimeInterval(-86_400)
         }
-        .sorted { ($0.price(fuel)?.price ?? .infinity) < ($1.price(fuel)?.price ?? .infinity) }
+        .map { ($0, $0.price(fuel)?.price ?? .infinity) }
+        .sorted { $0.1 < $1.1 }
+        .map(\.0)
     }
-
-    var range: PriceRange { PriceRange(stations.compactMap { $0.price(fuel)?.price }) }
 
     /** Where the cheapest price sits in recent history and against the local average, in one line. */
     var verdictLine: String? {
@@ -109,11 +131,6 @@ final class Store {
                      localAverage.map { "\(($0 - cheapest).formatted(.number.precision(.fractionLength(1))))¢ below the local average." }]
         let text = parts.compactMap { $0 }.joined(separator: " ")
         return text.isEmpty ? nil : text
-    }
-
-    var localAverage: Double? {
-        let prices = stations.compactMap { $0.price(fuel)?.price }
-        return prices.isEmpty ? nil : prices.reduce(0, +) / Double(prices.count)
     }
 
     func move(to lat: Double, _ lng: Double, name: String) async {

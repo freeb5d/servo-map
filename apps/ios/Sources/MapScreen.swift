@@ -189,11 +189,16 @@ struct MapScreen: View {
 
     private var topControls: some View {
         @Bindable var store = store
-        return HStack(spacing: 10) {
+        // Spacing below the 10 pt gap, so the picker and the two buttons stay separate pieces of glass.
+        return GlassEffectContainer(spacing: 4) {
+          HStack(spacing: 10) {
             Picker("Fuel", selection: $store.fuel) {
                 ForEach(FuelType.allCases) { Text($0.rawValue).tag($0) }
             }
             .pickerStyle(.segmented)
+            // Map labels showed through the bare segmented control; glass blurs them out.
+            .padding(3)
+            .glassEffect(.regular, in: .capsule)
             Button { showFilters = true } label: {
                 Image(systemName: store.filters.activeCount > 0 ? "line.3.horizontal.decrease.circle.fill" : "line.3.horizontal.decrease")
             }
@@ -205,6 +210,7 @@ struct MapScreen: View {
             }
             .buttonStyle(.glass)
             .accessibilityLabel(store.located ? "Showing prices near you" : "Use my location")
+          }
         }
         .padding(.horizontal, 16)
         .padding(.top, 4)

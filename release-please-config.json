@@ -70,7 +70,8 @@
           "type": "generic",
           "path": "Config/Version.xcconfig"
         }
-      ]
+      ],
+      "make-latest": false
     }
   }
 }

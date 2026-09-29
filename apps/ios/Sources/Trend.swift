@@ -2,11 +2,25 @@ import Foundation
 
 /** Reads over the daily state series, mirroring packages/web/src/lib/trends.ts. */
 enum TrendMath {
+    /**
+     * Midnight UTC of a "yyyy-MM-dd" date. Parsed by hand: it runs for every point of every chart on
+     * each redraw, and a DateFormatter per call made the Trends screen take ~130 ms a frame.
+     */
     static func day(_ date: String) -> Date {
-        let f = DateFormatter()
-        f.dateFormat = "yyyy-MM-dd"
-        f.timeZone = TimeZone(identifier: "UTC")
-        return f.date(from: date) ?? .distantPast
+        let parts = date.split(separator: "-")
+        guard parts.count == 3, let y = Int(parts[0]), let m = Int(parts[1]), let d = Int(parts[2]),
+              (1...12).contains(m), (1...31).contains(d) else { return .distantPast }
+        return Date(timeIntervalSince1970: Double(daysFromCivil(y, m, d)) * 86_400)
+    }
+
+    /** Days since 1970-01-01 for a proleptic Gregorian date (Howard Hinnant's days_from_civil). */
+    private static func daysFromCivil(_ year: Int, _ month: Int, _ day: Int) -> Int {
+        let y = month <= 2 ? year - 1 : year
+        let era = (y >= 0 ? y : y - 399) / 400
+        let yoe = y - era * 400
+        let doy = (153 * ((month + 9) % 12) + 2) / 5 + day - 1
+        let doe = yoe * 365 + yoe / 4 - yoe / 100 + doy
+        return era * 146_097 + doe - 719_468
     }
 
     /** Runs of consecutive days; a missing day starts a new run so charts never bridge a gap. */

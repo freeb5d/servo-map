@@ -1,3 +1,4 @@
+import Foundation
 import Testing
 @testable import ServoMap
 
@@ -51,5 +52,25 @@ struct FilterTests {
         #expect(f.activeCount == 0)
         f.maxPrice = 230; f.brands = ["bp"]; f.alsoSells = [.e10]
         #expect(f.activeCount == 3)
+    }
+
+    @Test func cachedRankingFollowsFilterChanges() {
+        let store = Store(stations: [Fixture.station("a", u91: 230), Fixture.station("b", brand: "Shell", u91: 220),
+                                     Fixture.station("c", u91: 250)])
+        #expect(store.ranked.map(\.id) == ["b", "a", "c"])
+        #expect(store.localAverage == 700.0 / 3)
+        store.filters.maxPrice = 235
+        #expect(store.ranked.map(\.id) == ["b", "a"])
+        // The average and tiers describe every station nearby, not just the ones that pass filters.
+        #expect(store.localAverage == 700.0 / 3)
+        store.filters = Filters()
+        #expect(store.ranked.count == 3)
+    }
+
+    @Test func familyIsResolvedWhenAStationIsBuilt() throws {
+        let json = #"{"id":"x","name":"Metro Croydon","brand":"Metro Fuel","address":"1 A St","suburb":"Croydon","state":"nsw","postcode":"2132","lat":-33.8,"lng":151.1,"prices":[],"distance":null}"#
+        let station = try JSONDecoder().decode(Station.self, from: Data(json.utf8))
+        #expect(station.family == BrandFamily.resolve("Metro Fuel"))
+        #expect(Fixture.station("y", brand: "Shell").family == BrandFamily.resolve("Shell"))
     }
 }

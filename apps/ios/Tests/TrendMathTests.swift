@@ -1,3 +1,4 @@
+import Foundation
 import Testing
 @testable import ServoMap
 
@@ -36,5 +37,18 @@ struct TrendMathTests {
         #expect(days.map(\.0) == ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"])
         // 21 and 28 Sep 2026 are both Mondays: (238 + 240) / 2.
         #expect(days[0].1 == 239)
+    }
+
+    @Test func dayParsesLikeAFormatter() {
+        let f = DateFormatter(); f.dateFormat = "yyyy-MM-dd"; f.timeZone = TimeZone(identifier: "UTC")
+        for text in ["1970-01-01", "2024-02-29", "2026-03-01", "2026-09-29", "2000-12-31", "1999-01-01"] {
+            #expect(TrendMath.day(text) == f.date(from: text), "\(text)")
+        }
+    }
+
+    @Test func dayRejectsMalformedDates() {
+        #expect(TrendMath.day("2026-13-01") == .distantPast)
+        #expect(TrendMath.day("2026-09") == .distantPast)
+        #expect(TrendMath.day("yesterday") == .distantPast)
     }
 }

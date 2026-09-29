@@ -11,8 +11,8 @@
 #   ASC_KEY_CONTENT            — the .p8 contents, base64 when ASC_KEY_IS_BASE64=1
 #
 # Versions: MARKETING_VERSION comes from Config/Version.xcconfig, which
-# release-please owns. The build number is the latest TestFlight build + 1 and
-# is set only in the generated, uncommitted project.
+# release-please owns. The build number is the latest TestFlight build + 1,
+# passed to xcodebuild so no file in the repository changes.
 #
 # Signing: manual, against App Store profiles that sigh fetches or creates and
 # the Apple Distribution certificate in the login keychain.
@@ -107,14 +107,13 @@ platform :ios do
       )
     end
 
-    increment_build_number(
-      build_number: latest_testflight_build_number(
-        api_key: api_key,
-        app_identifier: APP_BUNDLE_ID,
-        initial_build_number: 0
-      ) + 1,
-      xcodeproj: "ServoMap.xcodeproj"
-    )
+    # Passed to xcodebuild rather than written with increment_build_number: that runs agvtool,
+    # which rewrites Widgets/Info.plist in the working tree with a literal build number.
+    build_number = latest_testflight_build_number(
+      api_key: api_key,
+      app_identifier: APP_BUNDLE_ID,
+      initial_build_number: 0
+    ) + 1
 
     build_app(
       scheme: "ServoMap",
@@ -130,6 +129,7 @@ platform :ios do
         "CODE_SIGN_STYLE=Manual",
         "CODE_SIGN_IDENTITY=#{'Apple Distribution'.shellescape}",
         "DEVELOPMENT_TEAM=#{TEAM_ID}",
+        "CURRENT_PROJECT_VERSION=#{build_number}",
         "-allowProvisioningUpdates",
         "-authenticationKeyPath", key_path,
         "-authenticationKeyID", ENV.fetch("ASC_KEY_ID"),

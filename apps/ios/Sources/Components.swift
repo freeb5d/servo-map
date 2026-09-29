@@ -27,6 +27,9 @@ struct PriceText: View {
     var body: some View {
         HStack(alignment: .firstTextBaseline, spacing: 2) {
             Text(cents, format: .number.precision(.fractionLength(1))).font(font).monospacedDigit()
+                // A new price cross-fades (the system's opacity motion) rather than jumping.
+                .contentTransition(.opacity)
+                .animation(ServoMapMotion.standard, value: cents)
             Text("¢/L").font(ServoMapFont.label).foregroundStyle(ServoMapColor.ink3)
         }
     }

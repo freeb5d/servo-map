@@ -27,6 +27,41 @@ struct Station: Codable, Identifiable, Hashable, Sendable {
     let lng: Double
     let prices: [FuelPrice]
     let distance: Double?
+    /**
+     * The brand family, resolved once here. Resolving means lowercasing the brand and scanning the
+     * whole brand table, and rows, tags and filters read it for every station on every redraw.
+     */
+    let family: BrandFamily
+
+    enum CodingKeys: String, CodingKey {
+        case id, name, brand, address, suburb, state, postcode, lat, lng, prices, distance
+    }
+
+    init(id: String, name: String, brand: String, address: String, suburb: String, state: String,
+         postcode: String, lat: Double, lng: Double, prices: [FuelPrice], distance: Double?) {
+        self.id = id
+        self.name = name
+        self.brand = brand
+        self.address = address
+        self.suburb = suburb
+        self.state = state
+        self.postcode = postcode
+        self.lat = lat
+        self.lng = lng
+        self.prices = prices
+        self.distance = distance
+        family = BrandFamily.resolve(brand)
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        self.init(id: try c.decode(String.self, forKey: .id), name: try c.decode(String.self, forKey: .name),
+                  brand: try c.decode(String.self, forKey: .brand), address: try c.decode(String.self, forKey: .address),
+                  suburb: try c.decode(String.self, forKey: .suburb), state: try c.decode(String.self, forKey: .state),
+                  postcode: try c.decode(String.self, forKey: .postcode), lat: try c.decode(Double.self, forKey: .lat),
+                  lng: try c.decode(Double.self, forKey: .lng), prices: try c.decode([FuelPrice].self, forKey: .prices),
+                  distance: try c.decodeIfPresent(Double.self, forKey: .distance))
+    }
 
     func price(_ fuel: FuelType) -> FuelPrice? { prices.first { $0.fuel == fuel.rawValue } }
 
@@ -36,7 +71,6 @@ struct Station: Codable, Identifiable, Hashable, Sendable {
                 state: "nsw", postcode: "", lat: 0, lng: 0,
                 prices: [FuelPrice(fuel: "U91", price: 229.9, updatedAt: .now)], distance: 4.2)
     }
-    var family: BrandFamily { BrandFamily.resolve(brand) }
     var coordinate: CLLocationCoordinate2D { CLLocationCoordinate2D(latitude: lat, longitude: lng) }
 }
 

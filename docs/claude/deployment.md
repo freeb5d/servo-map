@@ -41,7 +41,7 @@ Two services, two providers.
 The app in `apps/ios` has its own version, separate from web and worker.
 
 - **Version.** release-please (misoto22-release-bot) treats `apps/ios` as the `ios` component: its own `apps/ios/CHANGELOG.md` and `ios-vX.Y.Z` tags, written into `apps/ios/Config/Version.xcconfig`. It stays `0.x` until the App Store launch; take it to 1.0.0 then with a `Release-As: 1.0.0` commit footer.
-- **Build number.** Set per upload by fastlane as the latest TestFlight build + 1, in the generated project only.
+- **Build number.** Set per upload by fastlane as the latest TestFlight build + 1, passed to xcodebuild as `CURRENT_PROJECT_VERSION`; no file is changed.
 - **Upload.** From `apps/ios`, run `./scripts/beta.sh`. It reads the App Store Connect API key from 1Password and runs `fastlane beta`: register the App IDs if missing, enable Push Notifications on the app's App ID, fetch App Store profiles, archive with the Apple Distribution certificate in the login keychain, check the exported app carries `aps-environment=production`, upload. Bundle ID `com.misoto22.servomap` (widgets `.widgets`), team `BZVKP6884D`, App Store Connect app `6817282501`.
 - **Testers.** The internal TestFlight group "Internal" has automatic distribution, so every upload reaches it without review. Nothing is submitted for App Review by these lanes.
 - **Store listing.** `./scripts/beta.sh metadata` uploads `apps/ios/fastlane/metadata` (text, URLs, categories) and `fastlane/screenshots` (6.9", 1320 × 2868, taken on the iPhone 18 Pro Max simulator). App privacy answers, age rating, price and review contact are set in App Store Connect before the first submission.

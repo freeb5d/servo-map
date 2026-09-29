@@ -156,9 +156,10 @@ private struct SavedRow: View {
     }
 
     private var change: String {
-        guard let delta else { return "\(station.suburb), tracking from now" }
-        if abs(delta) < 0.05 { return "\(station.suburb), no change" }
-        return "\(station.suburb), \(delta < 0 ? "▼" : "▲") \(abs(delta).formatted(.number.precision(.fractionLength(1))))"
+        // Short, so the suburb stays readable; the footer says what the change is measured from.
+        guard let delta else { return "\(station.suburb) · new" }
+        if abs(delta) < 0.05 { return "\(station.suburb) · no change" }
+        return "\(station.suburb) · \(delta < 0 ? "▼" : "▲") \(abs(delta).formatted(.number.precision(.fractionLength(1))))"
     }
 
     private var changeColor: Color {
