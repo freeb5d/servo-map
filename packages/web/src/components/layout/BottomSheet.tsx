@@ -14,17 +14,14 @@ type SheetPosition = "collapsed" | "half" | "full";
 interface BottomSheetProps {
   children: ReactNode;
   className?: string;
-  /**
-   * 当前展示内容的标识键。值变化时把抽屉展开并把焦点移入内容区。
-   * 用于「在地图上选中站点 → 详情打开」时，让键盘/读屏用户的焦点跟进。
-   */
-  activeContentKey?: string | null;
 }
 
+// Offsets are measured from the top of the map region the sheet is positioned in,
+// which already sits between the top bar and the tab bar.
 const POSITIONS = {
-  collapsed: "calc(100% - 80px)",
+  collapsed: "calc(100% - 84px)",
   half: "50%",
-  full: "64px",
+  full: "0px",
 };
 
 // 键盘/点击循环展开的顺序：collapsed → half → full → collapsed
@@ -34,14 +31,9 @@ const NEXT_POSITION: Record<SheetPosition, SheetPosition> = {
   full: "collapsed",
 };
 
-export function BottomSheet({
-  children,
-  className,
-  activeContentKey,
-}: BottomSheetProps) {
+export function BottomSheet({ children, className }: BottomSheetProps) {
   const [position, setPosition] = useState<SheetPosition>("half");
   const sheetRef = useRef<HTMLDivElement>(null);
-  const contentRef = useRef<HTMLDivElement>(null);
   const dragRef = useRef({ startY: 0, startTop: 0, dragging: false });
 
   const handleDragStart = useCallback((clientY: number) => {
@@ -49,7 +41,7 @@ export function BottomSheet({
     if (!sheet) return;
     dragRef.current = {
       startY: clientY,
-      startTop: sheet.getBoundingClientRect().top,
+      startTop: sheet.offsetTop,
       dragging: true,
     };
   }, []);
@@ -57,7 +49,7 @@ export function BottomSheet({
   const handleDragMove = useCallback((clientY: number) => {
     if (!dragRef.current.dragging || !sheetRef.current) return;
     const dy = clientY - dragRef.current.startY;
-    const newTop = Math.max(64, dragRef.current.startTop + dy);
+    const newTop = Math.max(0, dragRef.current.startTop + dy);
     sheetRef.current.style.top = `${newTop}px`;
     sheetRef.current.style.transition = "none";
   }, []);
@@ -67,9 +59,8 @@ export function BottomSheet({
     dragRef.current.dragging = false;
     sheetRef.current.style.transition = "";
 
-    const vh = window.innerHeight;
-    const top = sheetRef.current.getBoundingClientRect().top;
-    const ratio = top / vh;
+    const sheet = sheetRef.current;
+    const ratio = sheet.offsetTop / (sheet.offsetParent?.clientHeight || window.innerHeight);
 
     if (ratio < 0.25) setPosition("full");
     else if (ratio < 0.65) setPosition("half");
@@ -104,18 +95,6 @@ export function BottomSheet({
     };
   }, [handleDragMove, handleDragEnd]);
 
-  // 选中站点（activeContentKey 变化为非空）时展开抽屉并把焦点移入内容，
-  // 让键盘用户从地图操作平滑过渡到详情，而不必再去抓取手柄。
-  // 展开与聚焦都放进异步回调：避免在 effect 体内同步 setState 触发级联渲染。
-  useEffect(() => {
-    if (!activeContentKey) return;
-    const id = window.setTimeout(() => {
-      setPosition((p) => (p === "collapsed" ? "half" : p));
-      contentRef.current?.focus();
-    }, 0);
-    return () => window.clearTimeout(id);
-  }, [activeContentKey]);
-
   // 键盘操作手柄：Enter/Space 循环展开，方向键上下精细调整高度
   const handleHandleKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (e.key === "Enter" || e.key === " ") {
@@ -138,7 +117,7 @@ export function BottomSheet({
       role="dialog"
       aria-label="Station list"
       className={cn(
-        "fixed left-0 right-0 bottom-0 z-30 glass-heavy rounded-t-[var(--radius-panel)] border-t border-border-subtle shadow-panel transition-[top] duration-[var(--duration-slow)] ease-[var(--ease-out-expo)] md:hidden",
+        "absolute inset-x-0 bottom-0 z-20 flex flex-col bg-surface rounded-t-[12px] border-t border-line transition-[top] duration-(--duration-slow) ease-(--ease-standard) md:hidden",
         className,
       )}
       style={{ top: POSITIONS[position] }}
@@ -159,17 +138,10 @@ export function BottomSheet({
         onMouseDown={(e) => handleDragStart(e.clientY)}
         onKeyDown={handleHandleKeyDown}
       >
-        <span className="grab-handle block" />
+        <span className="block w-8 h-[3px] mx-auto bg-line" />
       </button>
 
-      <div
-        ref={contentRef}
-        tabIndex={-1}
-        className="overflow-y-auto outline-none"
-        style={{ maxHeight: `calc(100vh - ${POSITIONS[position]} - 40px)` }}
-      >
-        {children}
-      </div>
+      <div className="min-h-0 flex-1 overflow-y-auto">{children}</div>
     </div>
   );
 }

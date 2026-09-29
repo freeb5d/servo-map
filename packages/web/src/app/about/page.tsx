@@ -4,6 +4,9 @@ import type { AustralianState } from "@servo-map/shared";
 import { getMetadata } from "@/lib/api";
 import { liveStates, STATE_LABELS } from "@/lib/coverage";
 import { SITE_URL } from "@/lib/site";
+import { Crumbs, DocPage, DocTitle } from "@/components/doc/DocPage";
+import { TopBar } from "@/components/shell/TopBar";
+import { Icon } from "@/components/ui/Icon";
 
 // 内容随覆盖范围变化，但变动缓慢 —— 1 小时 ISR 足够。
 export const revalidate = 3600;
@@ -103,41 +106,14 @@ export default async function AboutPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
       />
-      <div className="min-h-screen bg-bg">
-        {/* Header — 面包屑 Map › About */}
-        <header className="border-b border-border-subtle">
-          <nav
-            aria-label="Breadcrumb"
-            className="max-w-3xl mx-auto px-4 py-4 flex items-center gap-2 text-sm text-text-secondary"
-          >
-            <Link
-              href="/"
-              className="flex items-center gap-2 hover:text-text transition-colors"
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                <path d="M19 12H5" />
-                <path d="M12 19l-7-7 7-7" />
-              </svg>
-              <span>Map</span>
-            </Link>
-            <span className="text-text-muted" aria-hidden="true">
-              /
-            </span>
-            <span className="text-text" aria-current="page">
-              About
-            </span>
-          </nav>
-        </header>
+      <DocPage topBar={<TopBar active={null} />}>
+        <Crumbs items={[{ label: "About" }]} />
+        <div className="grid gap-2">
+          <p className="caption">Methodology</p>
+          <DocTitle>How ServoMap works</DocTitle>
+        </div>
 
-        <main className="max-w-3xl mx-auto px-4 py-12">
-          <p className="text-xs font-semibold uppercase tracking-wider text-ochre mb-2">
-            Methodology
-          </p>
-          <h1 className="font-display font-bold text-4xl md:text-5xl text-text">
-            How ServoMap works
-          </h1>
-
-          <section className="mt-8 space-y-4 text-text-secondary leading-relaxed">
+          <section className="grid gap-4 text-ink-2">
             <p>
               ServoMap is a free Australia-wide fuel-price map. We aggregate each
               state&rsquo;s official fuel-price feed into one normalised dataset,
@@ -153,18 +129,15 @@ export default async function AboutPage() {
             </p>
           </section>
 
-          <section className="mt-10">
-            <h2 className="font-display font-bold text-2xl text-text mb-4">
+          <section>
+            <h2 className="font-display text-heading font-semibold text-ink mb-4">
               Where the data comes from
             </h2>
-            <p className="text-sm text-text-secondary mb-6">
+            <p className="text-body text-ink-2 mb-6">
               ServoMap is currently live in{" "}
               {live.map((s, i) => (
                 <span key={s}>
-                  <Link
-                    href={`/fuel/${s}`}
-                    className="text-ochre hover:text-ochre-dim transition-colors"
-                  >
+                  <Link href={`/fuel/${s}`} className="link">
                     {STATE_LABELS[s]}
                   </Link>
                   {i < live.length - 1 ? ", " : ""}
@@ -179,23 +152,23 @@ export default async function AboutPage() {
                 return (
                   <div
                     key={s}
-                    className="rounded-[var(--radius-card)] border border-border-subtle bg-surface px-5 py-4"
+                    className="rounded-3 border border-line-subtle bg-surface px-5 py-4"
                   >
                     <dt className="flex items-center gap-2">
-                      <span className="text-xs font-semibold uppercase tracking-wider text-ochre">
+                      <span className="caption">
                         {STATE_LABELS[s]}
                       </span>
-                      <span className="text-sm font-semibold text-text">
+                      <span className="text-body font-medium text-ink">
                         {p.source}
                       </span>
                     </dt>
-                    <dd className="text-sm text-text-secondary mt-2 leading-relaxed">
+                    <dd className="text-body text-ink-2 mt-2">
                       {p.note}{" "}
                       <a
                         href={p.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-ochre hover:text-ochre-dim transition-colors"
+                        className="link"
                       >
                         Official source
                       </a>
@@ -206,8 +179,8 @@ export default async function AboutPage() {
             </dl>
           </section>
 
-          <section className="mt-10 space-y-4 text-text-secondary leading-relaxed">
-            <h2 className="font-display font-bold text-2xl text-text">
+          <section className="grid gap-4 text-ink-2">
+            <h2 className="font-display text-heading font-semibold text-ink">
               Accuracy &amp; freshness
             </h2>
             <p>
@@ -218,20 +191,13 @@ export default async function AboutPage() {
             </p>
           </section>
 
-          <div className="mt-12">
-            <Link
-              href="/"
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-[var(--radius-button)] bg-ochre text-bg font-semibold text-sm hover:bg-ochre-dim transition-colors"
-            >
+          <div>
+            <Link href="/" className="btn btn-primary">
               Open the live map
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M5 12h14" />
-                <path d="M12 5l7 7-7 7" />
-              </svg>
+              <Icon name="arrow-right" />
             </Link>
           </div>
-        </main>
-      </div>
+      </DocPage>
     </>
   );
 }

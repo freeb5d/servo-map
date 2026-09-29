@@ -11,6 +11,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@servo-map/design-tokens": "workspace:*",
     "@servo-map/shared": "workspace:*",
     "@vercel/analytics": "^2.0.1",
     "mapbox-gl": "^3.10.0",

@@ -1,0 +1,547 @@
+<title>ServoMap Web v2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;600&family=Noto+Serif+SC:wght@500;600&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap">
+<style>
+/* Layout: proposal document — what changes and why, brand and filter systems, then full-size plates of every web screen. */
+:root {
+  --bg: #F2F1ED; --surface: #FAFAF7; --wash: #E9E7E1; --line: #D9D6CE; --line-subtle: #E6E3DC;
+  --ink: #2A2927; --ink-2: #5A5750; --ink-3: #6F6B63;
+  --cheap: #3D6848; --fair: #85601C; --pricey: #9A3B2B;
+  --cheap-soft: #E3EAE3; --fair-soft: #EFE8DA; --pricey-soft: #F1E3DF;
+  --map-land: #EDECE7; --map-water: #D9DFE2; --map-park: #E1E5DB; --map-road: #FBFBF9; --map-minor: #E2E0DA;
+  --shadow-float: 0 1px 2px rgb(42 41 39 / 0.06), 0 4px 16px rgb(42 41 39 / 0.06);
+  --font-display: "Shippori Mincho", "Hiragino Mincho ProN", "Yu Mincho", Georgia, serif;
+  --font-zh: "Noto Serif SC", "Songti SC", serif;
+  --font-body: "Zen Kaku Gothic New", "Hiragino Sans", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #1A1A18; --surface: #21211F; --wash: #2A2927; --line: #3A3935; --line-subtle: #2E2D2A;
+    --ink: #E6E3DB; --ink-2: #ABA69B; --ink-3: #8F8A7F;
+    --cheap: #93B597; --fair: #D2B271; --pricey: #DE9A8A;
+    --cheap-soft: #243028; --fair-soft: #312B1F; --pricey-soft: #34241F;
+    --map-land: #1E1E1C; --map-water: #182025; --map-park: #1F231E; --map-road: #302F2C; --map-minor: #272624;
+    --shadow-float: 0 1px 2px rgb(0 0 0 / 0.3), 0 6px 20px rgb(0 0 0 / 0.25);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #1A1A18; --surface: #21211F; --wash: #2A2927; --line: #3A3935; --line-subtle: #2E2D2A;
+  --ink: #E6E3DB; --ink-2: #ABA69B; --ink-3: #8F8A7F;
+  --cheap: #93B597; --fair: #D2B271; --pricey: #DE9A8A;
+  --cheap-soft: #243028; --fair-soft: #312B1F; --pricey-soft: #34241F;
+  --map-land: #1E1E1C; --map-water: #182025; --map-park: #1F231E; --map-road: #302F2C; --map-minor: #272624;
+  --shadow-float: 0 1px 2px rgb(0 0 0 / 0.3), 0 6px 20px rgb(0 0 0 / 0.25);
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 14px; line-height: 1.7; letter-spacing: 0.02em; -webkit-font-smoothing: antialiased; padding-inline: 16px; padding-block: 0 96px; }
+.wrap { max-width: 1240px; margin-inline: auto; }
+h1, h2, h3 { margin: 0; font-weight: 600; text-wrap: balance; }
+p { margin: 0; }
+code { font-family: ui-monospace, Menlo, monospace; font-size: 12px; letter-spacing: 0; }
+button { font: inherit; color: inherit; letter-spacing: inherit; }
+:focus-visible { outline: 1.5px solid var(--ink); outline-offset: 2px; }
+
+.mast { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; margin-inline: -16px; padding: 12px 16px; background: color-mix(in srgb, var(--bg) 94%, transparent); border-bottom: 1px solid var(--line-subtle); }
+.mast-in { max-width: 1240px; margin-inline: auto; display: flex; flex-wrap: wrap; gap: 10px 20px; align-items: center; justify-content: space-between; }
+.brand { display: flex; align-items: center; gap: 10px; font-family: var(--font-display); font-size: 17px; font-weight: 600; white-space: nowrap; }
+.mark { width: 18px; height: 18px; border: 1.5px solid var(--ink); border-radius: 2px; display: grid; place-items: center; flex: none; }
+.mark::after { content: ""; width: 6px; height: 6px; background: var(--ink); }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 4px; background: var(--surface); padding: 2px; gap: 2px; }
+.seg button, .seg span { border: 0; background: transparent; cursor: pointer; font-size: 12px; font-weight: 500; color: var(--ink-2); padding: 3px 10px; border-radius: 2px; white-space: nowrap; }
+.seg [aria-pressed="true"], .seg .on { background: var(--ink); color: var(--surface); }
+.label { font-size: 11px; font-weight: 500; letter-spacing: 0.02em; color: var(--ink-3); }
+.note { font-size: 13px; color: var(--ink-2); }
+.small { font-size: 11.5px; color: var(--ink-3); }
+
+.intro { padding-block: 56px 40px; display: grid; gap: 18px; max-width: 760px; }
+.intro h1 { font-family: var(--font-zh); font-size: clamp(28px, 5.5vw, 42px); line-height: 1.3; font-weight: 500; }
+.lead { font-size: 16px; color: var(--ink-2); }
+section.part { border-top: 1px solid var(--line); padding-block: 36px 52px; display: grid; gap: 24px; }
+.part-head { display: grid; gap: 4px; max-width: 760px; }
+.part-head h2 { font-family: var(--font-zh); font-size: 22px; }
+.part-head p { color: var(--ink-3); font-size: 13px; }
+
+.changes { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+.change { background: var(--surface); border: 1px solid var(--line-subtle); border-radius: 6px; padding: 18px 20px; display: grid; gap: 8px; align-content: start; }
+.change h3 { font-family: var(--font-zh); font-size: 16px; }
+.change .was { font-size: 12px; color: var(--ink-3); text-decoration: line-through; text-decoration-color: var(--line); }
+.change p, .change li { font-size: 13px; color: var(--ink-2); }
+.change ul { margin: 0; padding-left: 1.1em; display: grid; gap: 3px; }
+.change.new { border-color: var(--ink); }
+
+/* brand seal (判子): the product's brand mark — monogram, never a logo */
+.seal { display: inline-grid; place-items: center; min-width: 26px; height: 18px; padding: 0 4px; border: 1px solid var(--ink-2); border-radius: 2px; font-family: var(--font-body); font-size: 9px; font-weight: 700; letter-spacing: 0.06em; color: var(--ink); background: var(--surface); line-height: 1; flex: none; }
+.seal.lg { min-width: 38px; height: 26px; font-size: 11px; }
+.seal.members { border-style: dashed; }
+
+.table-wrap { overflow-x: auto; border: 1px solid var(--line-subtle); border-radius: 6px; background: var(--surface); }
+table.reg { width: 100%; min-width: 760px; border-collapse: collapse; font-size: 13px; }
+.reg th, .reg td { text-align: left; padding: 9px 14px; border-bottom: 1px solid var(--line-subtle); vertical-align: middle; }
+.reg th { font-size: 10.5px; font-weight: 500; letter-spacing: 0.02em; color: var(--ink-3); }
+.reg tr:last-child td { border-bottom: 0; }
+.reg td.raw { color: var(--ink-3); font-size: 12px; }
+
+.tags-compare { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+.tc { border: 1px solid var(--line-subtle); border-radius: 6px; overflow: hidden; background: var(--surface); }
+.tc .cap { padding: 10px 14px; border-bottom: 1px solid var(--line-subtle); display: flex; justify-content: space-between; }
+.tc .stage { position: relative; height: 210px; background: var(--map-land); overflow: hidden; }
+.bare { position: absolute; font-family: "DIN Alternate", "Arial Narrow", sans-serif; font-weight: 700; font-size: 14px; letter-spacing: 0; text-shadow: 0 0 2px var(--map-land), 0 0 2px var(--map-land); }
+
+/* ---------- plates ---------- */
+.plate { display: grid; gap: 10px; }
+.plate-cap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; align-items: baseline; }
+.plate-cap b { font-size: 14px; }
+.scroller { overflow-x: auto; border: 1px solid var(--line); border-radius: 6px; }
+.desk { position: relative; width: 1200px; height: 720px; background: var(--bg); display: grid; grid-template-rows: 56px 1fr; font-size: 13px; }
+.desk.tall { height: auto; grid-template-rows: 56px auto; }
+.topbar { display: flex; align-items: center; gap: 20px; padding: 0 20px; background: var(--surface); border-bottom: 1px solid var(--line); }
+.topbar nav { display: flex; gap: 4px; }
+.topbar nav span { padding: 6px 12px; font-size: 13px; color: var(--ink-2); border-bottom: 1.5px solid transparent; }
+.topbar nav span.on { color: var(--ink); border-bottom-color: var(--ink); font-weight: 500; }
+.field { display: flex; align-items: center; gap: 10px; height: 36px; padding: 0 12px; border: 1px solid var(--line); border-radius: 4px; background: var(--bg); color: var(--ink-3); flex: 1; max-width: 400px; font-size: 13px; }
+.field kbd { margin-left: auto; font: 11px ui-monospace, Menlo, monospace; border: 1px solid var(--line); border-radius: 2px; padding: 0 5px; }
+.icon-btn { width: 32px; height: 32px; display: inline-grid; place-items: center; border-radius: 4px; color: var(--ink-3); flex: none; }
+svg.i { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: square; }
+.body { display: grid; grid-template-columns: 400px 1fr; min-height: 0; position: relative; }
+.body.withdetail { grid-template-columns: 400px 1fr 380px; }
+
+/* ledger */
+.ledger { background: var(--surface); border-right: 1px solid var(--line); display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
+.verdict { padding: 16px 20px 14px; border-bottom: 1px solid var(--line); display: grid; gap: 9px; }
+.verdict .where { display: flex; justify-content: space-between; align-items: baseline; }
+.verdict .big { display: flex; align-items: baseline; gap: 12px; }
+.verdict h2 { font-family: var(--font-display); font-size: 17px; font-weight: 600; line-height: 1.4; }
+.cycle { display: grid; gap: 5px; }
+.cycle .bar { position: relative; height: 4px; background: var(--line); height: 1px; }
+.cycle .knob { position: absolute; top: -5px; width: 2px; height: 14px; background: var(--ink); }
+.cycle .ends { display: flex; justify-content: space-between; font-size: 11px; color: var(--ink-3); }
+.tools { display: grid; gap: 8px; padding: 10px 20px; border-bottom: 1px solid var(--line-subtle); }
+.tools .line { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.quick { display: flex; gap: 6px; flex-wrap: nowrap; overflow: hidden; }
+.btn { display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 12px; border-radius: 4px; font-size: 12px; font-weight: 500; letter-spacing: 0.04em; border: 1px solid var(--line); background: var(--surface); color: var(--ink); white-space: nowrap; }
+.btn.primary { background: var(--ink); color: var(--surface); border-color: var(--ink); }
+.btn.lg { height: 40px; padding: 0 18px; font-size: 14px; }
+.btn .count { font-size: 10.5px; min-width: 16px; height: 16px; display: inline-grid; place-items: center; background: var(--ink); color: var(--surface); border-radius: 2px; padding: 0 3px; }
+.fchip { display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 8px; border: 1px solid var(--line); border-radius: 2px; font-size: 11.5px; white-space: nowrap; background: var(--surface); color: var(--ink-2); }
+.fchip.on { background: var(--ink); color: var(--surface); border-color: var(--ink); }
+.fchip.off { border-style: dashed; color: var(--ink-3); }
+.rows { list-style: none; margin: 0; padding: 0; overflow: hidden; }
+.row { display: grid; grid-template-columns: 18px 30px 1fr auto; gap: 10px; padding: 11px 20px; border-bottom: 1px solid var(--line-subtle); align-items: center; }
+.row .rank { font-family: var(--font-display); font-size: 13px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.row > div { min-width: 0; }
+.row .nm { font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.row .ad { font-size: 11.5px; color: var(--ink-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.row .rt { display: grid; justify-items: end; }
+.row.sel { background: var(--wash); }
+.row.sep { padding-block: 7px; grid-template-columns: 1fr; background: var(--bg); }
+.price { font-family: var(--font-display); font-weight: 600; font-variant-numeric: tabular-nums lining-nums; letter-spacing: 0; white-space: nowrap; }
+.row .price { font-size: 19px; line-height: 1.2; }
+.price .u { font-family: var(--font-body); font-weight: 400; font-size: 0.45em; color: var(--ink-3); margin-left: 2px; }
+.tier { display: inline-flex; align-items: center; gap: 5px; font-size: 10px; font-weight: 500; letter-spacing: 0.02em; }
+.tier::before { content: ""; width: 5px; height: 5px; background: currentColor; }
+.t-cheap { color: var(--cheap); } .t-fair { color: var(--fair); } .t-pricey { color: var(--pricey); }
+.age { font-size: 10.5px; color: var(--ink-3); }
+.age.old { color: var(--pricey); }
+
+/* map */
+.map { position: relative; overflow: hidden; }
+.map svg.base { position: absolute; inset: 0; width: 100%; height: 100%; }
+.tag { position: absolute; transform: translate(-50%, -100%); display: grid; justify-items: center; z-index: 3; }
+.tag .lab { display: flex; align-items: stretch; background: var(--surface); border: 1px solid var(--line); border-radius: 2px; box-shadow: 0 1px 3px rgb(0 0 0 / 0.1); white-space: nowrap; overflow: hidden; }
+.tag .b { display: grid; place-items: center; padding: 0 4px; font-size: 8.5px; font-weight: 700; letter-spacing: 0.05em; color: var(--ink-2); border-right: 1px solid var(--line-subtle); background: var(--bg); }
+.tag .p { display: flex; align-items: center; gap: 4px; padding: 0 6px 0 5px; font-family: var(--font-display); font-weight: 600; font-size: 12.5px; line-height: 1.6; font-variant-numeric: tabular-nums; }
+.tag .p::after { content: ""; width: 5px; height: 5px; background: var(--tc); }
+.tag .stem { width: 1px; height: 7px; background: var(--ink-3); }
+.tag.on .lab { border-color: var(--ink); }
+.tag.on .b { background: var(--ink); color: var(--surface); border-color: var(--ink); }
+.tag.on .p { background: var(--ink); color: var(--surface); }
+.tag.on .p::after { background: var(--surface); }
+.clu { position: absolute; transform: translate(-50%, -50%); width: 30px; height: 30px; border-radius: 50%; background: var(--ink); color: var(--surface); display: grid; place-items: center; font-size: 11px; font-weight: 700; letter-spacing: 0; z-index: 2; }
+.clu small { position: absolute; top: 34px; white-space: nowrap; font-family: var(--font-display); font-size: 11px; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 2px; padding: 0 4px; }
+.me { position: absolute; width: 12px; height: 12px; border-radius: 50%; background: var(--ink); border: 2px solid var(--surface); box-shadow: 0 0 0 6px color-mix(in srgb, var(--ink) 14%, transparent); transform: translate(-50%, -50%); }
+.floating { background: var(--surface); border: 1px solid var(--line); border-radius: 4px; box-shadow: var(--shadow-float); }
+.legend { position: absolute; left: 14px; bottom: 14px; padding: 8px 12px; display: grid; gap: 4px; }
+.legend div { display: flex; gap: 12px; font-size: 11.5px; color: var(--ink-2); }
+.zoom { position: absolute; right: 14px; bottom: 14px; display: grid; }
+.zoom span { width: 32px; height: 32px; display: grid; place-items: center; color: var(--ink-2); }
+.zoom span + span { border-top: 1px solid var(--line-subtle); }
+
+/* filter panel */
+.fpanel { position: absolute; top: 8px; left: 408px; width: 460px; bottom: 8px; z-index: 10; display: grid; grid-template-rows: auto 1fr auto; overflow: hidden; }
+.fpanel header { display: flex; justify-content: space-between; align-items: center; padding: 14px 18px; border-bottom: 1px solid var(--line-subtle); }
+.fpanel header h3 { font-family: var(--font-display); font-size: 18px; }
+.fbody { padding: 4px 18px; overflow: hidden; display: grid; align-content: start; }
+.fsec { display: grid; gap: 8px; padding: 12px 0; border-bottom: 1px solid var(--line-subtle); }
+.fsec:last-child { border-bottom: 0; }
+.fsec .h { display: flex; justify-content: space-between; align-items: baseline; }
+.fpanel footer { display: flex; justify-content: space-between; align-items: center; padding: 12px 18px; border-top: 1px solid var(--line); background: var(--surface); }
+.hist { display: flex; align-items: flex-end; gap: 2px; height: 46px; position: relative; }
+.hist div { flex: 1; background: var(--line); }
+.hist div.in { background: var(--ink-2); }
+.range { position: relative; height: 4px; background: var(--line); margin: 6px 0 2px; }
+.range .fill { position: absolute; left: 0; height: 100%; background: var(--ink); }
+.range .h { position: absolute; top: -8px; width: 20px; height: 20px; border-radius: 50%; background: var(--surface); border: 1.5px solid var(--ink); transform: translateX(-50%); }
+.brandgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 16px; }
+.bitem { display: grid; grid-template-columns: 14px 34px 1fr auto; gap: 8px; align-items: center; padding: 5px 0; font-size: 12px; }
+.chk { width: 14px; height: 14px; border: 1px solid var(--line); border-radius: 2px; display: grid; place-items: center; font-size: 9px; color: transparent; }
+.chk.on { background: var(--ink); border-color: var(--ink); color: var(--surface); }
+.gh { grid-column: 1 / -1; display: flex; justify-content: space-between; padding: 6px 0 2px; }
+
+/* detail drawer */
+.drawer { background: var(--surface); border-left: 1px solid var(--line); padding: 20px; display: grid; gap: 14px; align-content: start; overflow: hidden; }
+.drawer h3 { font-family: var(--font-display); font-size: 23px; line-height: 1.3; }
+.kv { display: flex; justify-content: space-between; align-items: center; padding: 7px 0; border-bottom: 1px solid var(--line-subtle); font-size: 13px; gap: 8px; }
+.kv:last-child { border-bottom: 0; }
+.kv .price { font-size: 16px; }
+.kv.sel span:first-child { font-weight: 700; }
+.box { border: 1px solid var(--line-subtle); border-radius: 6px; padding: 11px 13px; display: grid; gap: 6px; background: var(--bg); }
+
+/* pages */
+.page { padding: 32px 48px 48px; display: grid; gap: 22px; align-content: start; }
+.page h1 { font-family: var(--font-display); font-weight: 500; font-size: 34px; line-height: 1.3; }
+.g { display: grid; gap: 16px; }
+.g4 { grid-template-columns: repeat(4, 1fr); }
+.g3 { grid-template-columns: repeat(3, 1fr); }
+.g21 { grid-template-columns: 2fr 1fr; }
+.g12 { grid-template-columns: 1fr 1fr; }
+.card { background: var(--surface); border: 1px solid var(--line-subtle); border-radius: 6px; padding: 16px 18px; display: grid; gap: 10px; align-content: start; min-width: 0; }
+.card .head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.card .fig { font-family: var(--font-display); font-weight: 600; font-size: 30px; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.chart { width: 100%; display: block; }
+.bars { display: flex; align-items: flex-end; gap: 8px; height: 90px; }
+.bars div { flex: 1; background: var(--line); }
+.bars div.on { background: var(--ink); }
+.days { display: flex; gap: 8px; font-size: 11px; color: var(--ink-3); }
+.days span { flex: 1; text-align: center; }
+table.t { width: 100%; border-collapse: collapse; font-size: 13px; }
+.t th, .t td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line-subtle); vertical-align: middle; }
+.t th { font-size: 10.5px; font-weight: 500; letter-spacing: 0.02em; color: var(--ink-3); }
+.t td.n, .t th.n { text-align: right; }
+.t tr:last-child td { border-bottom: 0; }
+.t tr.best td { background: var(--cheap-soft); }
+.league { display: grid; gap: 6px; }
+.lg-row { display: grid; grid-template-columns: 38px 110px 1fr 56px 44px; gap: 10px; align-items: center; font-size: 12.5px; }
+.lg-row .track { height: 8px; background: var(--wash); position: relative; }
+.lg-row .track div { position: absolute; left: 0; top: 0; bottom: 0; background: var(--ink-2); }
+.lg-row .track .avg { position: absolute; top: -3px; bottom: -3px; width: 1px; background: var(--pricey); left: 72%; }
+.calc { display: grid; grid-template-columns: repeat(2, auto) 1fr; gap: 10px 16px; align-items: center; font-size: 13px; }
+.num { display: inline-flex; align-items: center; height: 30px; padding: 0 10px; border: 1px solid var(--line); border-radius: 4px; font-family: var(--font-display); font-weight: 600; background: var(--bg); min-width: 64px; }
+.crumbs { font-size: 12px; color: var(--ink-3); display: flex; gap: 8px; }
+
+/* mobile */
+.phones { display: flex; flex-wrap: wrap; gap: 28px; }
+.phone { width: 320px; max-width: 100%; height: 680px; border: 1px solid var(--line); border-radius: 26px; overflow: hidden; position: relative; background: var(--bg); flex: none; font-size: 12.5px; }
+.m-top { position: absolute; top: 0; left: 0; right: 0; z-index: 5; background: var(--surface); border-bottom: 1px solid var(--line); padding: 30px 12px 10px; display: grid; gap: 8px; }
+.m-top .field { max-width: none; height: 34px; }
+.m-tabs { position: absolute; left: 0; right: 0; bottom: 0; height: 58px; z-index: 6; background: var(--surface); border-top: 1px solid var(--line); display: flex; justify-content: space-around; align-items: center; padding-bottom: 6px; }
+.m-tabs span { display: grid; justify-items: center; gap: 2px; font-size: 10px; color: var(--ink-3); }
+.m-tabs span.on { color: var(--ink); font-weight: 700; }
+.m-tabs svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.5; }
+.m-sheet { position: absolute; left: 0; right: 0; bottom: 58px; z-index: 7; background: var(--surface); border-top: 1px solid var(--line); border-radius: 12px 12px 0 0; box-shadow: 0 -4px 20px rgb(0 0 0 / 0.06); overflow: hidden; }
+.m-sheet.full { bottom: 0; z-index: 8; }
+.grab { width: 32px; height: 3px; background: var(--line); margin: 8px auto 4px; }
+.m-sheet .verdict { padding: 6px 16px 12px; }
+.m-sheet .row { padding: 10px 16px; }
+.m-scroll { position: absolute; left: 0; right: 0; bottom: 58px; padding: 12px; display: grid; gap: 10px; align-content: start; overflow: hidden; }
+
+@media (max-width: 560px) { .intro { padding-block: 40px 28px; } }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<header class="mast">
+  <div class="mast-in">
+    <div class="brand"><span class="mark" aria-hidden="true"></span>ServoMap <span class="label" style="margin-left:6px">Web v2 · 页面重构提案</span></div>
+    <div class="seg" role="group" aria-label="主题">
+      <button type="button" id="t-system" data-theme-set="system" aria-pressed="true">跟随系统</button>
+      <button type="button" id="t-light" data-theme-set="light" aria-pressed="false">紙 Light</button>
+      <button type="button" id="t-dark" data-theme-set="dark" aria-pressed="false">墨 Dark</button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="intro">
+    <span class="label">ServoMap Web · v2 提案 · 第二版</span>
+    <h1>先给结论，再给清单，地图只负责「在哪」。</h1>
+    <p class="lead">风格不变，页面逻辑重做。这一版按你的反馈补了三块：每个站点都显示品牌，筛选面板做全，趋势页从一张图扩展成九个模块。所有数字来自现有 API 的真实结构；截至 9 月 29 日，NSW 的 U91 均价约 240，是 90 天内的最高点。</p>
+  </div>
+
+  <section class="part" aria-labelledby="h-change">
+    <div class="part-head"><h2 id="h-change">改了什么</h2><p>加黑框的是这一版新增的内容。</p></div>
+    <div class="changes">
+      <div class="change new"><h3>处处显示品牌</h3><span class="was">旧：品牌只在列表里是一行小字，地图上完全没有</span><p>每个站点带一枚品牌印章（三字母缩写），地图价签、账本、详情、收藏里都一样。89 个原始品牌名先归并成品牌族，再显示。</p></div>
+      <div class="change new"><h3>完整筛选</h3><span class="was">旧：只有品牌多选</span><ul><li>快捷筛选条：5 km 内、只看便宜、6 小时内更新、大品牌、隐藏会员站</li><li>面板：价格分布直方图加上限、距离、新鲜度、按品牌族多选（带站数和均价）、包含/排除模式、「同时有柴油」</li><li>筛选写进网址，可以分享；可以存成预设</li></ul></div>
+      <div class="change new"><h3>趋势九个模块</h3><span class="was">旧：一张 30 天折线图</span><ul><li>结论、周期位置、今日均价、今日价差</li><li>90 天走势（诚实标出数据缺口）</li><li>五种燃油对比、品牌排行、郊区排行</li><li>星期规律、「选对时间和站点一年能省多少」计算器</li></ul></div>
+      <div class="change"><h3>固定顶栏取代浮层</h3><span class="was">旧：Logo、燃油、搜索、主题、新鲜度、定位提示各自浮在地图上</span><p>一条纸面顶栏装下全部控件，地图上只留缩放和图例。</p></div>
+      <div class="change"><h3>结论先行、账本式列表</h3><span class="was">旧：「Nearby Stations · Showing 335」</span><p>先回答「附近最低多少、现在该不该加」，再按价格编号列出。超过 24 小时的价格沉到分隔线下。</p></div>
+      <div class="change"><h3>详情抽屉、纸质价签</h3><span class="was">旧：详情替换列表；地图上是彩色裸字</span><p>详情从右侧滑出，列表不动。地图价签是 品牌｜价格 ■ 的纸签。</p></div>
+    </div>
+  </section>
+
+  <section class="part" aria-labelledby="h-brand">
+    <div class="part-head"><h2 id="h-brand">品牌：怎么显示、怎么归并</h2><p>用自己的品牌印章，不直接用各家 logo：风格统一，小尺寸下更好认，也避开商标授权问题。以后要换成官方 logo，只需要换掉印章组件。</p></div>
+    <div class="tags-compare">
+      <div class="tc"><div class="cap"><span class="label">旧 · 彩色裸字，无品牌</span></div><div class="stage" id="stage-old"></div></div>
+      <div class="tc"><div class="cap"><span class="label">新 · 品牌｜价格 ■ 纸签</span><span class="small">选中时整签反转为墨底</span></div><div class="stage" id="stage-new"></div></div>
+    </div>
+    <div class="table-wrap">
+      <table class="reg">
+        <thead><tr><th>印章</th><th>品牌族</th><th>分组</th><th>归并的原始名称（来自 /brands）</th></tr></thead>
+        <tbody id="reg"></tbody>
+      </table>
+    </div>
+    <p class="note">品牌族映射表放在 <code>@servo-map/shared</code>，Web、iOS 和 ingest 共用同一份。没匹配到的名称统一归入「独立站」，并在 ingest 日志里列出，方便补充。</p>
+  </section>
+
+  <section class="part" aria-labelledby="h-desk">
+    <div class="part-head"><h2 id="h-desk">桌面</h2><p>1200 宽。窄屏时横向滚动查看。</p></div>
+    <div class="plate"><div class="plate-cap"><b>地图 · 默认</b><span class="note">结论 → 快捷筛选 → 账本 → 地图</span></div><div class="scroller" id="d-map"></div></div>
+    <div class="plate"><div class="plate-cap"><b>地图 · 筛选面板</b><span class="note">直方图显示当前价格分布，拖动上限时底部计数实时变化</span></div><div class="scroller" id="d-filter"></div></div>
+    <div class="plate"><div class="plate-cap"><b>地图 · 选中站点</b><span class="note">右侧抽屉，列表保留选中态</span></div><div class="scroller" id="d-detail"></div></div>
+    <div class="plate"><div class="plate-cap"><b>趋势</b><span class="note">九个模块，全部来自 /trends 和 /stations</span></div><div class="scroller" id="d-trends"></div></div>
+    <div class="plate"><div class="plate-cap"><b>郊区页（SEO）</b><span class="note">文档式排版，可被索引</span></div><div class="scroller" id="d-suburb"></div></div>
+  </section>
+
+  <section class="part" aria-labelledby="h-mob">
+    <div class="part-head"><h2 id="h-mob">手机</h2><p>顶部固定搜索和燃油，底部标签栏与 iOS 一致；筛选和详情用全高抽屉。</p></div>
+    <div class="phones" id="m-all"></div>
+  </section>
+
+  <section class="part" aria-labelledby="h-scope">
+    <div class="part-head"><h2 id="h-scope">实现范围</h2><p>不需要新后端；有两项计算建议之后移到 worker 预先算好。</p></div>
+    <div class="changes">
+      <div class="change"><h3>路由</h3><p><code>/</code> 地图，<code>/trends</code> 趋势，<code>/saved</code> 收藏。筛选状态写进查询参数（<code>?fuel=U91&amp;max=230&amp;brands=metro,costco</code>），可以直接分享。SEO 页地址不变。</p></div>
+      <div class="change"><h3>数据</h3><ul><li>周期、走势、星期规律、燃油对比：<code>/trends</code></li><li>品牌排行、郊区排行、价差、直方图：由 <code>/stations</code> 当前结果在前端聚合</li><li>整州范围的品牌和郊区排行数据量大，建议下一步由 ingest cron 预先算好写入 KV</li></ul></div>
+      <div class="change"><h3>不做</h3><p>营业时间、24 小时、洗车、折扣券这几项 API 里没有数据，筛选里不放。加油记录只在 iOS 做。到价提醒和顺路加油需要新后端，另开决策。</p></div>
+    </div>
+  </section>
+</main>
+
+<script>
+(function () {
+  var root = document.documentElement;
+  function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } }
+  function setTheme(t) {
+    if (t === "light" || t === "dark") root.setAttribute("data-theme", t); else root.removeAttribute("data-theme");
+    ["system", "light", "dark"].forEach(function (k) { document.getElementById("t-" + k).setAttribute("aria-pressed", String(k === (t === "light" || t === "dark" ? t : "system"))); });
+    store("web2-theme", t);
+  }
+  document.querySelectorAll("[data-theme-set]").forEach(function (b) { b.addEventListener("click", function () { setTheme(b.dataset.themeSet); }); });
+  setTheme(store("web2-theme") || "system");
+
+  var I = {
+    search: '<circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/>',
+    locate: '<circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/>',
+    moon: '<path d="M20 14A8 8 0 1 1 10 4a6 6 0 0 0 10 10z"/>',
+    close: '<path d="M6 6l12 12M18 6L6 18"/>',
+    save: '<path d="M6 3h12v18l-6-4-6 4z"/>',
+    dir: '<path d="M3 11l18-8-8 18-2-8z"/>',
+    share: '<path d="M12 3v12M7 8l5-5 5 5M5 13v8h14v-8"/>',
+    filter: '<path d="M4 6h16M7 12h10M10 18h4"/>',
+    map: '<path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2zM9 4v14M15 6v14"/>',
+    trend: '<path d="M3 17l6-6 4 4 8-8M15 7h6v6"/>'
+  };
+  function ic(n, s) { return '<svg class="i" viewBox="0 0 24 24"' + (s ? ' style="width:' + s + 'px;height:' + s + 'px"' : "") + '>' + I[n] + '</svg>'; }
+  function seal(code, lg) { return '<span class="seal' + (lg ? " lg" : "") + (code === "CST" ? " members" : "") + '">' + code + '</span>'; }
+
+  // Brand registry (proposal): family, seal, group, raw names seen in /brands today.
+  var REG = [
+    ["AMP", "Ampol", "Majors", "Ampol · Ampol Foodary · Ampol Breeze · EG Ampol · EBM Ampol"],
+    ["BP", "BP", "Majors", "BP"],
+    ["SHL", "Shell", "Majors", "Shell · Reddy Express"],
+    ["7E", "7-Eleven", "Majors", "7-Eleven"],
+    ["CTX", "Caltex", "Majors", "Caltex"],
+    ["MOB", "Mobil", "Majors", "Mobil · Mobil 1 Carlingford Car Care"],
+    ["MET", "Metro", "Value chains", "Metro Fuel · Metro Petroleum · OMG Metro"],
+    ["UTD", "United", "Value chains", "United"],
+    ["SPD", "Speedway", "Value chains", "Speedway"],
+    ["LIB", "Liberty", "Value chains", "Liberty"],
+    ["PUM", "Puma", "Value chains", "Puma"],
+    ["AST", "Astron", "Value chains", "Astron · ASTRON"],
+    ["UGO", "U-Go", "Value chains", "U-Go · UGO"],
+    ["CST", "Costco", "Members only", "Costco（虚线印章表示需要会员）"],
+    ["IND", "Independent", "Independent", "Independent · Pearl Energy · TEMCO Petroleum · Budget · 各地杂货店等其余名称"]
+  ];
+  document.getElementById("reg").innerHTML = REG.map(function (r) { return '<tr><td>' + seal(r[0], true) + '</td><td>' + r[1] + '</td><td>' + r[2] + '</td><td class="raw">' + r[3] + '</td></tr>'; }).join("");
+
+  function mapSvg(w, h) {
+    return '<svg class="base" viewBox="0 0 ' + w + ' ' + h + '" preserveAspectRatio="xMidYMid slice" aria-hidden="true">' +
+      '<rect width="' + w + '" height="' + h + '" fill="var(--map-land)"/>' +
+      '<path d="M' + w * 0.35 + ' 0 C' + w * 0.45 + ' ' + h * 0.2 + ' ' + w * 0.7 + ' ' + h * 0.25 + ' ' + w + ' ' + h * 0.18 + ' V' + h * 0.34 + ' C' + w * 0.72 + ' ' + h * 0.4 + ' ' + w * 0.5 + ' ' + h * 0.33 + ' ' + w * 0.3 + ' ' + h * 0.12 + 'z" fill="var(--map-water)"/>' +
+      '<path d="M' + w * 0.6 + ' ' + h * 0.55 + 'h' + w * 0.12 + 'v' + h * 0.12 + 'h-' + w * 0.12 + 'z" fill="var(--map-park)"/>' +
+      '<g stroke="var(--map-minor)" stroke-width="2">' + [0.12, 0.28, 0.45, 0.6, 0.78, 0.9].map(function (f) { return '<path d="M0 ' + h * f + 'H' + w + '"/><path d="M' + w * f + ' 0V' + h + '"/>'; }).join("") + '</g>' +
+      '<g stroke="var(--map-road)" stroke-width="8" fill="none" stroke-linecap="round"><path d="M-10 ' + h * 0.8 + ' L' + w * 0.4 + ' ' + h * 0.5 + ' L' + (w + 10) + ' ' + h * 0.42 + '"/><path d="M' + w * 0.38 + ' -10 L' + w * 0.4 + ' ' + h * 0.5 + ' L' + w * 0.48 + ' ' + (h + 10) + '"/></g></svg>';
+  }
+  function tag(x, y, b, p, t, on) { return '<div class="tag' + (on ? " on" : "") + '" style="left:' + x + '%;top:' + y + '%;--tc:var(--' + t + ')"><span class="lab"><span class="b">' + b + '</span><span class="p">' + p + '</span></span><span class="stem"></span></div>'; }
+
+  var P = [[30, 30, "BP", "243.7", "pricey"], [48, 55, "7E", "239.9", "fair"], [64, 84, "IND", "236.9", "fair"], [78, 38, "MET", "225.9", "cheap"]];
+  var road = '<svg class="base" viewBox="0 0 300 200" preserveAspectRatio="none" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%"><rect width="300" height="200" fill="var(--map-land)"/><g stroke="var(--map-minor)" stroke-width="2"><path d="M0 40H300M0 110H300M0 170H300M60 0V200M150 0V200M240 0V200"/></g><path d="M40 -10 L170 210" stroke="var(--map-road)" stroke-width="9"/></svg>';
+  document.getElementById("stage-old").innerHTML = road + P.map(function (p) { return '<span class="bare" style="left:' + p[0] + '%;top:' + p[1] + '%;transform:translate(-50%,-50%);color:var(--' + p[4] + ')">' + p[3] + '</span>'; }).join("");
+  document.getElementById("stage-new").innerHTML = road + P.map(function (p, i) { return tag(p[0], p[1] + 6, p[2], p[3], p[4], i === 3); }).join("");
+
+  var S = [
+    ["MET", "Metro Petroleum Croydon", "Croydon · 8.6 km", "225.9", "cheap"],
+    ["IND", "Pearl Energy Enfield", "Enfield · 10.5 km", "225.9", "cheap"],
+    ["SHL", "Shell Urbanista Croydon", "Croydon · 9.0 km", "226.5", "cheap"],
+    ["AMP", "Ampol Foodary Croydon", "Croydon · 8.9 km", "227.5", "cheap"],
+    ["IND", "Budget Petrol Ashfield", "Ashfield · 8.0 km", "227.9", "cheap"],
+    ["IND", "ARKO Earlwood", "Earlwood · 9.1 km", "236.9", "fair"],
+    ["7E", "7-Eleven Newtown", "Newtown · 3.2 km", "239.9", "fair"],
+    ["BP", "BP Camperdown", "Camperdown · 2.4 km", "243.7", "pricey"]
+  ];
+  var TL = { cheap: "Cheap", fair: "Fair", pricey: "Pricey" };
+  function ledgerRows(n, sel, noSep) {
+    var out = S.slice(0, n).map(function (s, i) {
+      return '<li class="row' + (i === sel ? " sel" : "") + '"><span class="rank">' + (i + 1) + '</span>' + seal(s[0]) + '<div><div class="nm">' + s[1] + '</div><div class="ad">' + s[2] + '</div></div><div class="rt"><span class="price">' + s[3] + '<span class="u">¢/L</span></span><span class="tier t-' + s[4] + '">' + TL[s[4]] + '</span></div></li>';
+    }).join("");
+    if (noSep) return out;
+    return out + '<li class="row sep"><span class="label">Older than 24 h · 3 stations</span></li>' +
+      '<li class="row"><span class="rank">–</span>' + seal("MET") + '<div><div class="nm">Metro Chullora</div><div class="ad">Greenacre · 14.3 km</div></div><div class="rt"><span class="price">225.9<span class="u">¢/L</span></span><span class="age old">8 d ago</span></div></li>';
+  }
+  function verdict(compact) {
+    return '<div class="verdict"><div class="where"><span class="label">U91 near Sydney CBD</span><span class="age">Updated 4 min ago</span></div>' +
+      '<div class="big"><span class="price" style="font-size:' + (compact ? 34 : 40) + 'px;line-height:1">225.9<span class="u">¢/L</span></span><span class="note">cheapest of 335 · ' + seal("MET") + ' Croydon</span></div>' +
+      (compact ? '<h2 style="font-size:15px">At the 90-day high.</h2>' : '<h2>At the 90-day high. The cheapest nearby is 14.4¢ below the average.</h2>') +
+      '<div class="cycle"><div class="bar"><div class="knob" style="left:99%"></div></div><div class="ends"><span>90-day low 160.6</span><span>Now 240.3 avg</span></div></div></div>';
+  }
+  function topbar(active) {
+    var nav = [["map", "Map"], ["trends", "Trends"], ["saved", "Saved"]];
+    return '<div class="topbar"><div class="brand"><span class="mark"></span>ServoMap</div>' +
+      '<div class="field">' + ic("search") + 'Suburb or postcode<kbd>/</kbd></div>' +
+      '<div class="seg"><span class="on">U91</span><span>E10</span><span>U95</span><span>U98</span><span>Diesel</span></div>' +
+      '<nav>' + nav.map(function (n) { return '<span class="' + (n[0] === active ? "on" : "") + '">' + n[1] + '</span>'; }).join("") + '</nav>' +
+      '<span class="icon-btn" style="margin-left:auto">' + ic("locate") + '</span><span class="icon-btn">' + ic("moon") + '</span></div>';
+  }
+  function mapPane(sel) {
+    return '<div class="map">' + mapSvg(800, 664) +
+      tag(22, 58, "MET", "225.9", "cheap", sel) + tag(31, 70, "SHL", "226.5", "cheap") + tag(15, 42, "IND", "225.9", "cheap") + tag(27, 50, "AMP", "227.5", "cheap") + tag(44, 44, "7E", "239.9", "fair") + tag(53, 30, "BP", "243.7", "pricey") + tag(63, 62, "IND", "236.9", "fair") + tag(72, 50, "AMP", "241.9", "pricey") +
+      '<div class="clu" style="left:82%;top:80%">12<small>from 229.9</small></div><div class="clu" style="left:9%;top:84%">24<small>from 225.9</small></div>' +
+      '<div class="me" style="left:48%;top:48%"></div>' +
+      '<div class="legend floating"><span class="label">Relative to nearby</span><div><span class="tier t-cheap">Cheap</span><span class="tier t-fair">Fair</span><span class="tier t-pricey">Pricey</span></div></div>' +
+      '<div class="zoom floating"><span>+</span><span>−</span></div></div>';
+  }
+  function tools(active) {
+    return '<div class="tools"><div class="line"><span class="seg"><span class="on">Cheapest</span><span>Nearest</span></span><span class="btn' + (active ? " primary" : "") + '">' + ic("filter", 14) + 'Filters<span class="count" style="' + (active ? "background:var(--surface);color:var(--ink)" : "") + '">2</span></span></div>' +
+      '<div class="quick"><span class="fchip on">≤ 5 km</span><span class="fchip">Cheap only</span><span class="fchip on">Updated &lt; 6 h</span><span class="fchip">Majors</span><span class="fchip">No members-only</span></div></div>';
+  }
+  function ledger(sel, filterActive) { return '<aside class="ledger">' + verdict() + tools(filterActive) + '<ul class="rows">' + ledgerRows(7, sel) + '</ul></aside>'; }
+  var W = function (inner, tall) { return '<div class="desk' + (tall ? " tall" : "") + '">' + inner + '</div>'; };
+
+  document.getElementById("d-map").innerHTML = W(topbar("map") + '<div class="body">' + ledger(-1) + mapPane(false) + '</div>');
+
+  // Filter panel
+  var H = [2, 3, 6, 9, 14, 12, 9, 7, 10, 16, 22, 28, 31, 26, 19, 12, 8, 5, 3, 2];
+  var hist = '<div class="hist">' + H.map(function (v, i) { return '<div class="' + (i < 9 ? "in" : "") + '" style="height:' + (v / 31 * 100) + '%"></div>'; }).join("") + '</div>';
+  var groups = [["Majors", [["AMP", "Ampol", 41, "238.6", 1], ["SHL", "Shell", 22, "241.8", 1], ["BP", "BP", 18, "242.5", 0], ["7E", "7-Eleven", 26, "239.2", 1]]],
+    ["Value chains", [["MET", "Metro", 34, "229.4", 1], ["UTD", "United", 12, "231.5", 1], ["SPD", "Speedway", 9, "230.1", 1], ["LIB", "Liberty", 7, "233.8", 0]]],
+    ["Members only", [["CST", "Costco", 2, "219.7", 0]]],
+    ["Independent", [["IND", "Independent", 64, "234.2", 1]]]];
+  var brandList = '<div class="brandgrid">' + groups.map(function (g) {
+    return '<div class="gh"><span class="label">' + g[0] + '</span><span class="small">Select all</span></div>' + g[1].map(function (b) {
+      return '<div class="bitem"><span class="chk' + (b[4] ? " on" : "") + '">✓</span>' + seal(b[0]) + '<span>' + b[1] + ' <span class="small">' + b[2] + '</span></span><span class="price" style="font-size:12px">' + b[3] + '</span></div>';
+    }).join("");
+  }).join("") + '</div>';
+  var fpanel = '<div class="fpanel floating"><header><h3>Filters</h3><span class="icon-btn">' + ic("close") + '</span></header><div class="fbody">' +
+    '<div class="fsec"><div class="h"><span class="label">Max price · U91</span><span class="price" style="font-size:15px">≤ 232.0</span></div>' + hist + '<div class="range"><div class="fill" style="width:45%"></div><span class="h" style="left:45%"></span></div><div class="cycle"><div class="ends"><span>219.7</span><span>Area avg 240.3</span><span>259.9</span></div></div></div>' +
+    '<div class="fsec"><div class="h"><span class="label">Distance</span><span class="small">from your location</span></div><div class="seg" style="width:max-content"><span>2 km</span><span class="on">5 km</span><span>10 km</span><span>25 km</span><span>Any</span></div></div>' +
+    '<div class="fsec"><div class="h"><span class="label">Price updated</span></div><div class="seg" style="width:max-content"><span>1 h</span><span class="on">6 h</span><span>24 h</span><span>Any</span></div></div>' +
+    '<div class="fsec"><div class="h"><span class="label">Brands · avg U91 today</span><span class="seg"><span class="on">Only these</span><span>Hide these</span></span></div>' + brandList + '</div>' +
+    '<div class="fsec"><div class="h"><span class="label">Also sells</span><span class="small">station must stock every fuel ticked</span></div><div style="display:flex;gap:6px"><span class="fchip">E10</span><span class="fchip">U98</span><span class="fchip on">Diesel</span></div></div>' +
+    '</div><footer><div style="display:flex;gap:8px;align-items:center"><span class="btn">Reset</span><span class="btn">Save as preset</span></div><span class="btn primary lg">Show 128 stations</span></footer></div>';
+  document.getElementById("d-filter").innerHTML = W(topbar("map") + '<div class="body">' + ledger(-1, true) + mapPane(false) + fpanel + '</div>');
+
+  document.getElementById("d-detail").innerHTML = W(topbar("map") + '<div class="body withdetail">' + ledger(0) + mapPane(true) +
+    '<aside class="drawer"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px"><div style="display:grid;gap:6px">' + '<div style="display:flex;gap:8px;align-items:center">' + seal("MET", true) + '<span class="label">Metro · Value chain</span></div><h3>Metro Petroleum Croydon</h3><span class="age" style="font-size:12px">221–229 Elizabeth St, Croydon NSW 2132 · 8.6 km</span></div><span class="icon-btn">' + ic("close") + '</span></div>' +
+    '<div style="display:flex;justify-content:space-between;align-items:flex-end"><span class="price" style="font-size:48px;line-height:1">225.9<span class="u">¢/L U91</span></span><span class="tier t-cheap">Cheap</span></div>' +
+    '<div class="box"><span class="note">A 50 L fill here costs <b>$112.95</b>, <b>$7.20</b> less than the area average of 240.3.</span></div>' +
+    '<div><div class="kv sel"><span>U91</span><span class="price">225.9</span></div><div class="kv"><span>E10</span><span class="price">223.9</span></div><div class="kv"><span>U98</span><span class="price">249.9</span></div><div class="kv"><span>Diesel</span><span class="price">244.9</span></div></div>' +
+    '<div style="display:grid;grid-template-columns:1fr auto auto;gap:8px"><span class="btn primary lg" style="justify-content:center">' + ic("dir") + 'Directions</span><span class="btn lg">' + ic("save") + '</span><span class="btn lg">' + ic("share") + '</span></div>' +
+    '<div><span class="label">Also nearby</span><div class="kv"><span style="display:flex;gap:8px;align-items:center">' + seal("IND") + 'Pearl Energy Enfield · 1.9 km</span><span class="price" style="font-size:14px">225.9</span></div><div class="kv"><span style="display:flex;gap:8px;align-items:center">' + seal("SHL") + 'Shell Urbanista · 0.4 km</span><span class="price" style="font-size:14px">226.5</span></div></div>' +
+    '<span class="age">Price reported 2 h ago via NSW FuelCheck</span></aside></div>');
+
+  // Trends — nine modules
+  var avg = [181.8, 178.2, 174.6, 172.4, 171.0, 168.0, 165.9, 163.1, 160.6, 166.4, 171.8, 172.2, 172.6, 176.1, 179.3, 186.2, 192.0];
+  var tail = [236.1, 237.2, 238.0, 239.1, 240.3];
+  function trendChart() {
+    var W2 = 700, H2 = 200, lo = 150, hi = 250;
+    var y = function (v) { return H2 - 20 - (v - lo) / (hi - lo) * (H2 - 40); };
+    var n = 120, x = function (d) { return 40 + d / (n - 1) * (W2 - 60); };
+    var d1 = avg.map(function (v, i) { return x(i * 3.5) + "," + y(v); });
+    var t0 = 110;
+    var d2 = tail.map(function (v, i) { return x(t0 + i * 2.2) + "," + y(v); });
+    var grid = [160, 180, 200, 220, 240].map(function (v) { return '<path d="M40 ' + y(v) + 'H' + (W2 - 20) + '" stroke="var(--line-subtle)"/><text x="34" y="' + (y(v) + 4) + '" text-anchor="end" font-size="10" fill="var(--ink-3)">' + v + '</text>'; }).join("");
+    var gapX1 = x(16 * 3.5), gapX2 = x(t0);
+    return '<svg class="chart" viewBox="0 0 ' + W2 + ' ' + H2 + '" role="img" aria-label="NSW U91 daily average: low 160.6 on 29 June, no data 28 July to 18 September, now 240.3">' + grid +
+      '<defs><pattern id="hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><path d="M0 0V6" stroke="var(--line)" stroke-width="2"/></pattern></defs>' +
+      '<rect x="' + gapX1 + '" y="14" width="' + (gapX2 - gapX1) + '" height="' + (H2 - 34) + '" fill="url(#hatch)"/>' +
+      '<text x="' + ((gapX1 + gapX2) / 2) + '" y="' + (H2 / 2) + '" text-anchor="middle" font-size="11" fill="var(--ink-2)">No data 28 Jul – 18 Sep</text>' +
+      '<polyline points="' + d1.join(" ") + '" fill="none" stroke="var(--ink)" stroke-width="1.5"/>' +
+      '<polyline points="' + d2.join(" ") + '" fill="none" stroke="var(--ink)" stroke-width="1.5"/>' +
+      '<rect x="' + (x(8 * 3.5) - 3) + '" y="' + (y(160.6) - 3) + '" width="6" height="6" fill="var(--cheap)"/><text x="' + x(8 * 3.5) + '" y="' + (y(160.6) + 16) + '" text-anchor="middle" font-size="10.5" fill="var(--ink-2)">Low 160.6 · 29 Jun</text>' +
+      '<rect x="' + (x(t0 + 4 * 2.2) - 3) + '" y="' + (y(240.3) - 3) + '" width="6" height="6" fill="var(--pricey)"/><text x="' + (x(t0 + 4 * 2.2) - 6) + '" y="' + (y(240.3) - 8) + '" text-anchor="end" font-size="10.5" fill="var(--ink-2)">Now 240.3</text>' +
+      '<text x="40" y="' + (H2 - 4) + '" font-size="10" fill="var(--ink-3)">1 Jun</text><text x="' + (W2 - 20) + '" y="' + (H2 - 4) + '" text-anchor="end" font-size="10" fill="var(--ink-3)">29 Sep</text></svg>';
+  }
+  function spark(pts) { var mx = Math.max.apply(null, pts), mn = Math.min.apply(null, pts); return '<svg viewBox="0 0 80 20" width="80" height="20" aria-hidden="true"><polyline points="' + pts.map(function (v, i) { return (i * 80 / (pts.length - 1)) + "," + (18 - (v - mn) / (mx - mn || 1) * 16); }).join(" ") + '" fill="none" stroke="var(--ink-2)" stroke-width="1.2"/></svg>'; }
+  var fuels = [["U91", "240.3", "—", "+4.8", [230, 233, 236, 238, 240]], ["E10", "237.9", "−2.4", "+4.6", [228, 231, 234, 236, 238]], ["U95", "255.1", "+14.8", "+5.1", [245, 248, 251, 253, 255]], ["U98", "263.4", "+23.1", "+5.3", [253, 256, 259, 261, 263]], ["Diesel", "252.8", "+12.5", "+2.9", [248, 249, 251, 252, 253]]];
+  var league = [["CST", "Costco", "219.7", 2], ["MET", "Metro", "229.4", 34], ["SPD", "Speedway", "230.1", 9], ["UTD", "United", "231.5", 12], ["IND", "Independent", "234.2", 64], ["AMP", "Ampol", "238.6", 41], ["7E", "7-Eleven", "239.2", 26], ["SHL", "Shell", "241.8", 22], ["BP", "BP", "242.5", 18]];
+  var leagueHtml = '<div class="league">' + league.map(function (l) { var w = (parseFloat(l[2]) - 210) / (250 - 210) * 100; return '<div class="lg-row">' + seal(l[0]) + '<span>' + l[1] + '</span><span class="track"><div style="width:' + w + '%"></div><span class="avg"></span></span><span class="price" style="text-align:right">' + l[2] + '</span><span class="small">' + l[3] + ' st.</span></div>'; }).join("") + '<span class="small">Vertical rule marks the area average 240.3. Costco requires membership.</span></div>';
+  var suburbs = '<table class="t"><thead><tr><th>Cheapest suburbs</th><th class="n">Low</th><th class="n">St.</th></tr></thead><tbody><tr class="best"><td>Croydon</td><td class="n"><span class="price">225.9</span></td><td class="n">6</td></tr><tr><td>Enfield</td><td class="n"><span class="price">225.9</span></td><td class="n">3</td></tr><tr><td>Greenacre</td><td class="n"><span class="price">226.7</span></td><td class="n">5</td></tr><tr><td>Auburn</td><td class="n"><span class="price">227.5</span></td><td class="n">7</td></tr></tbody></table>' +
+    '<table class="t"><thead><tr><th>Dearest suburbs</th><th class="n">Low</th><th class="n">St.</th></tr></thead><tbody><tr><td>Mosman</td><td class="n"><span class="price">252.9</span></td><td class="n">2</td></tr><tr><td>Double Bay</td><td class="n"><span class="price">251.9</span></td><td class="n">1</td></tr><tr><td>Neutral Bay</td><td class="n"><span class="price">249.5</span></td><td class="n">3</td></tr></tbody></table>';
+  var trendsPage = '<div class="page">' +
+    '<div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px"><div style="display:grid;gap:4px"><span class="label">NSW · U91 · updated daily</span><h1>At the 90-day high.</h1></div><div style="display:grid;gap:6px;justify-items:end"><span class="seg"><span class="on">NSW</span><span>QLD</span><span>WA</span></span><span class="seg"><span class="on">30 d</span><span>90 d</span></span></div></div>' +
+    '<div class="g g4"><div class="card"><span class="label">Cycle position</span><div class="cycle"><div class="bar"><div class="knob" style="left:99%"></div></div><div class="ends"><span>160.6</span><span>240.8</span></div></div><span class="note">At the top of the 90-day range.</span></div>' +
+    '<div class="card"><span class="label">State average today</span><span class="fig">240.3</span><span class="note" style="color:var(--pricey)">+4.8 on last week</span></div>' +
+    '<div class="card"><span class="label">Spread near you</span><span class="fig">17.8¢</span><span class="note">225.9 to 243.7 within 10 km</span></div>' +
+    '<div class="card"><span class="label">Cheapest day</span><span class="fig">Tuesday</span><span class="note">7.9¢ under Friday</span></div></div>' +
+    '<div class="card"><div class="head"><span class="label">Daily average, 1 Jun – 29 Sep</span><span class="small">Gaps are shown, never filled in</span></div>' + trendChart() + '</div>' +
+    '<div class="g g12"><div class="card"><div class="head"><span class="label">All fuels today</span><span class="small">NSW average</span></div><table class="t"><thead><tr><th>Fuel</th><th class="n">Avg</th><th class="n">vs U91</th><th class="n">7 days</th><th>Trend</th></tr></thead><tbody>' + fuels.map(function (f) { return '<tr><td>' + f[0] + '</td><td class="n"><span class="price">' + f[1] + '</span></td><td class="n">' + f[2] + '</td><td class="n" style="color:var(--pricey)">' + f[3] + '</td><td>' + spark(f[4]) + '</td></tr>'; }).join("") + '</tbody></table></div>' +
+    '<div class="card"><div class="head"><span class="label">Brands near you · avg U91</span><span class="small">within 10 km</span></div>' + leagueHtml + '</div></div>' +
+    '<div class="g g3"><div class="card" style="grid-column:span 2"><div class="head"><span class="label">Suburbs today</span><span class="small">lowest U91 per suburb</span></div><div class="g g12">' + suburbs + '</div></div>' +
+    '<div class="card"><span class="label">By weekday · last 90 days</span><div class="bars"><div style="height:60%"></div><div class="on" style="height:36%"></div><div style="height:44%"></div><div style="height:68%"></div><div style="height:90%"></div><div style="height:82%"></div><div style="height:72%"></div></div><div class="days"><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span></div></div></div>' +
+    '<div class="card"><div class="head"><span class="label">What choosing well is worth</span><span class="small">your numbers, kept on this device</span></div>' +
+    '<div class="calc"><span>Tank fill</span><span class="num">50 L</span><span></span><span>Fills a month</span><span class="num">3</span><span></span></div>' +
+    '<div class="g g3"><div><span class="small">Cheapest nearby vs average</span><div class="fig" style="font-family:var(--font-display);font-size:26px;font-weight:600">$259 / yr</div><span class="note">14.4¢/L × 50 L × 36 fills</span></div><div><span class="small">Tuesday vs Friday</span><div style="font-family:var(--font-display);font-size:26px;font-weight:600">$142 / yr</div><span class="note">7.9¢/L × 50 L × 36 fills</span></div><div><span class="small">E10 instead of U91</span><div style="font-family:var(--font-display);font-size:26px;font-weight:600">$43 / yr</div><span class="note">2.4¢/L × 50 L × 36 fills, if your car takes E10</span></div></div></div>' +
+    '</div>';
+  document.getElementById("d-trends").innerHTML = W(topbar("trends") + trendsPage, true);
+
+  document.getElementById("d-suburb").innerHTML = W(topbar("") + '<div class="page" style="grid-template-columns:1fr 320px;column-gap:48px"><div style="display:grid;gap:22px;align-content:start"><div class="crumbs"><span>NSW</span><span>/</span><span>Croydon</span></div><h1>Fuel prices in Croydon, NSW</h1><p class="note" style="max-width:36em">6 stations report U91 in Croydon. The cheapest is Metro Petroleum at 225.9¢/L, 14.4¢ under the NSW average. Updated 4 minutes ago from NSW FuelCheck.</p>' +
+    '<table class="t"><thead><tr><th></th><th>Station</th><th>Distance</th><th class="n">U91</th><th class="n">Updated</th></tr></thead><tbody>' +
+    '<tr class="best"><td>' + seal("MET") + '</td><td>Metro Petroleum Croydon <span class="tier t-cheap" style="margin-left:6px">Cheapest</span></td><td>0.3 km</td><td class="n"><span class="price">225.9</span></td><td class="n">2 h</td></tr>' +
+    '<tr><td>' + seal("SHL") + '</td><td>Shell Urbanista Croydon</td><td>0.6 km</td><td class="n"><span class="price">226.5</span></td><td class="n">9 h</td></tr><tr><td>' + seal("AMP") + '</td><td>Ampol Foodary Croydon</td><td>0.5 km</td><td class="n"><span class="price">227.5</span></td><td class="n">22 h</td></tr><tr><td>' + seal("7E") + '</td><td>7-Eleven Croydon</td><td>0.8 km</td><td class="n"><span class="price">239.9</span></td><td class="n">1 h</td></tr></tbody></table></div>' +
+    '<aside style="display:grid;gap:14px;align-content:start"><div class="card"><span class="label">NSW cycle</span><div class="cycle"><div class="bar"><div class="knob" style="left:99%"></div></div></div><span class="note">At the 90-day high.</span></div><div class="card"><span class="label">Nearby suburbs</span><div class="kv"><span>Ashfield</span><span class="price" style="font-size:14px">227.9</span></div><div class="kv"><span>Enfield</span><span class="price" style="font-size:14px">225.9</span></div><div class="kv"><span>Burwood</span><span class="price" style="font-size:14px">229.5</span></div></div><span class="btn primary lg" style="justify-content:center">Open Croydon on the map</span></aside></div>');
+
+  // Mobile
+  function mtabs(a) { return '<div class="m-tabs">' + [["map", "Map"], ["trend", "Trends"], ["save", "Saved"]].map(function (t) { return '<span class="' + (t[0] === a ? "on" : "") + '"><svg viewBox="0 0 24 24">' + I[t[0]] + '</svg>' + t[1] + '</span>'; }).join("") + '</div>'; }
+  function mtop() { return '<div class="m-top"><div class="field">' + ic("search") + 'Suburb or postcode<span class="icon-btn" style="margin-left:auto;width:24px;height:24px">' + ic("filter", 14) + '</span></div><div class="seg" style="justify-content:space-between"><span class="on">U91</span><span>E10</span><span>U95</span><span>U98</span><span>Diesel</span></div></div>'; }
+  var mmap = '<div class="map" style="position:absolute;inset:0">' + mapSvg(320, 680) + tag(30, 36, "MET", "225.9", "cheap") + tag(62, 30, "7E", "239.9", "fair") + tag(70, 44, "BP", "243.7", "pricey") + '<div class="me" style="left:50%;top:40%"></div></div>';
+  var m1 = mmap + mtop() + '<div class="m-sheet" style="height:340px"><div class="grab"></div>' + verdict(true) + '<div class="quick" style="padding:0 16px 8px"><span class="fchip on">≤ 5 km</span><span class="fchip">Cheap only</span><span class="fchip">Majors</span></div><ul class="rows">' + ledgerRows(2, -1, true) + '</ul></div>' + mtabs("map");
+  var m2 = mmap + '<div class="m-sheet full" style="height:600px"><div class="grab"></div><div style="display:flex;justify-content:space-between;align-items:center;padding:4px 16px 8px;border-bottom:1px solid var(--line-subtle)"><span style="font-family:var(--font-display);font-size:18px;font-weight:600">Filters</span><span class="small">Reset</span></div>' +
+    '<div style="padding:4px 16px;display:grid">' +
+    '<div class="fsec"><div class="h"><span class="label">Max price</span><span class="price" style="font-size:14px">≤ 232.0</span></div>' + hist.replace('height: 46px', '') + '<div class="range"><div class="fill" style="width:45%"></div><span class="h" style="left:45%"></span></div></div>' +
+    '<div class="fsec"><span class="label">Distance</span><div class="seg" style="justify-content:space-between"><span>2</span><span class="on">5 km</span><span>10</span><span>25</span><span>Any</span></div></div>' +
+    '<div class="fsec"><span class="label">Brands</span><div style="display:flex;flex-wrap:wrap;gap:6px">' + [["MET", 1], ["AMP", 1], ["SHL", 1], ["7E", 1], ["UTD", 1], ["BP", 0], ["CST", 0], ["IND", 1]].map(function (b) { return '<span class="fchip' + (b[1] ? " on" : "") + '" style="gap:5px">' + b[0] + '</span>'; }).join("") + '</div></div>' +
+    '<div class="fsec"><span class="label">Updated within</span><div class="seg" style="justify-content:space-between"><span>1 h</span><span class="on">6 h</span><span>24 h</span><span>Any</span></div></div>' +
+    '</div><div style="position:absolute;left:16px;right:16px;bottom:24px"><span class="btn primary lg" style="width:100%;justify-content:center">Show 128 stations</span></div></div>';
+  var m3 = mmap + mtop() + '<div class="m-sheet" style="height:500px"><div class="grab"></div><div class="drawer" style="border:0;padding:6px 18px 18px;gap:12px"><div style="display:grid;gap:4px"><div style="display:flex;gap:8px;align-items:center">' + seal("MET", true) + '<span class="label">Metro · Value chain</span></div><h3 style="font-size:20px">Metro Petroleum Croydon</h3><span class="age">Croydon · 8.6 km · updated 2 h ago</span></div>' +
+    '<div style="display:flex;justify-content:space-between;align-items:flex-end"><span class="price" style="font-size:40px;line-height:1">225.9<span class="u">¢/L U91</span></span><span class="tier t-cheap">Cheap</span></div>' +
+    '<div class="box"><span class="note">50 L costs <b>$112.95</b>, <b>$7.20</b> under the area average.</span></div>' +
+    '<div><div class="kv sel"><span>U91</span><span class="price">225.9</span></div><div class="kv"><span>E10</span><span class="price">223.9</span></div></div>' +
+    '<div style="display:grid;grid-template-columns:1fr auto;gap:8px"><span class="btn primary lg" style="justify-content:center">' + ic("dir") + 'Directions</span><span class="btn lg">' + ic("save") + '</span></div></div></div>' + mtabs("map");
+  var m4 = '<div class="m-top" style="padding-bottom:12px"><span class="label">NSW · U91</span><span style="font-family:var(--font-display);font-size:21px;font-weight:600;line-height:1.3">At the 90-day high.</span></div>' +
+    '<div class="m-scroll" style="top:118px">' +
+    '<div class="g" style="grid-template-columns:1fr 1fr;gap:10px"><div class="card" style="padding:12px"><span class="label">Average</span><span class="fig" style="font-size:24px">240.3</span></div><div class="card" style="padding:12px"><span class="label">Spread</span><span class="fig" style="font-size:24px">17.8¢</span></div></div>' +
+    '<div class="card" style="padding:12px"><span class="label">1 Jun – 29 Sep</span>' + trendChart() + '</div>' +
+    '<div class="card" style="padding:12px"><span class="label">Brands near you</span>' + '<div class="league">' + league.slice(0, 5).map(function (l) { var w = (parseFloat(l[2]) - 210) / 40 * 100; return '<div class="lg-row" style="grid-template-columns:32px 1fr 70px 44px">' + seal(l[0]) + '<span class="track"><div style="width:' + w + '%"></div></span><span class="price" style="text-align:right">' + l[2] + '</span><span class="small">' + l[3] + '</span></div>'; }).join("") + '</div></div>' +
+    '</div>' + mtabs("trend");
+  var m5 = '<div class="m-top" style="padding-bottom:12px"><span style="font-family:var(--font-display);font-size:24px;font-weight:600;line-height:1.2">Saved</span></div>' +
+    '<div style="position:absolute;top:72px;left:0;right:0;bottom:58px;overflow:hidden;background:var(--surface)"><ul class="rows">' +
+    [["MET", "Metro Petroleum Croydon", "▼ 3.0 since Monday", "225.9", "cheap"], ["7E", "7-Eleven Newtown", "▲ 6.0 since Monday", "239.9", "fair"], ["CST", "Costco Casula", "Members only · 28 km", "219.7", "cheap"]].map(function (s, i) {
+      return '<li class="row" style="padding:11px 16px"><span class="rank">' + (i + 1) + '</span>' + seal(s[0]) + '<div><div class="nm">' + s[1] + '</div><div class="ad" style="color:' + (s[2].charAt(0) === "▲" ? "var(--pricey)" : s[2].charAt(0) === "▼" ? "var(--cheap)" : "var(--ink-3)") + '">' + s[2] + '</div></div><div class="rt"><span class="price">' + s[3] + '</span><span class="tier t-' + s[4] + '">' + TL[s[4]] + '</span></div></li>';
+    }).join("") + '</ul><p class="note" style="padding:16px">Saved stations stay on this device.</p></div>' + mtabs("save");
+  function phone(title, inner) { return '<figure style="margin:0;display:grid;gap:8px"><div class="phone">' + inner + '</div><figcaption class="note"><b style="color:var(--ink)">' + title + '</b></figcaption></figure>'; }
+  document.getElementById("m-all").innerHTML = phone("地图 + 账本抽屉", m1) + phone("筛选", m2) + phone("站点详情", m3) + phone("趋势", m4) + phone("收藏", m5);
+})();
+</script>

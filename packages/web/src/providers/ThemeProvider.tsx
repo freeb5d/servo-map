@@ -3,13 +3,12 @@
 import {
   createContext,
   useContext,
-  useEffect,
-  useState,
   useCallback,
+  useSyncExternalStore,
   type ReactNode,
 } from "react";
-
-type Theme = "dark" | "light";
+import { defaultTheme } from "@servo-map/design-tokens";
+import { THEME_STORAGE_KEY, type Theme } from "@/lib/theme";
 
 interface ThemeContextValue {
   theme: Theme;
@@ -17,7 +16,7 @@ interface ThemeContextValue {
 }
 
 const ThemeContext = createContext<ThemeContextValue>({
-  theme: "dark",
+  theme: defaultTheme,
   toggle: () => {},
 });
 
@@ -25,21 +24,36 @@ export function useTheme() {
   return useContext(ThemeContext);
 }
 
-function getInitialTheme(): Theme {
-  if (typeof window === "undefined") return "dark";
-  return (localStorage.getItem("servo-theme") as Theme) ?? "dark";
+// The `data-theme` attribute on <html> is the store: THEME_BOOT_SCRIPT sets it before
+// paint, toggle() rewrites it, and components subscribe through useSyncExternalStore.
+// Hydration uses the server snapshot, so a stored dark choice never causes a mismatch.
+function readTheme(): Theme {
+  return document.documentElement.getAttribute("data-theme") === "dark"
+    ? "dark"
+    : "light";
+}
+
+function subscribe(onChange: () => void): () => void {
+  const observer = new MutationObserver(onChange);
+  observer.observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ["data-theme"],
+  });
+  return () => observer.disconnect();
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setTheme] = useState<Theme>(getInitialTheme);
+  const theme = useSyncExternalStore(subscribe, readTheme, () => defaultTheme);
 
-  useEffect(() => {
-    document.documentElement.setAttribute("data-theme", theme);
-    localStorage.setItem("servo-theme", theme);
-  }, [theme]);
-
+  // Only an explicit toggle is persisted, so viewers without a choice keep following the system.
   const toggle = useCallback(() => {
-    setTheme((t) => (t === "dark" ? "light" : "dark"));
+    const next: Theme = readTheme() === "dark" ? "light" : "dark";
+    document.documentElement.setAttribute("data-theme", next);
+    try {
+      localStorage.setItem(THEME_STORAGE_KEY, next);
+    } catch {
+      // Storage blocked (private mode): the choice lasts for this page view only.
+    }
   }, []);
 
   return (

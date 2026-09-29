@@ -1,102 +1,39 @@
 @import "tailwindcss";
+/* Every colour, font, radius, type step and motion value comes from the token package. */
+@import "@servo-map/design-tokens/tokens.css";
 
-@theme {
-  /* === Typography === */
-  --font-display: "Syne", ui-sans-serif, system-ui, sans-serif;
-  --font-body: "DM Sans", ui-sans-serif, system-ui, sans-serif;
-
-  /* === Dark palette (default) === */
-  --color-bg: #0C0B09;
-  --color-surface: #151412;
-  --color-surface-elevated: #1E1C19;
-  --color-surface-hover: #252320;
-  --color-border: #2A2723;
-  --color-border-subtle: #1E1C19;
-  --color-text: #F5F0EB;
-  --color-text-secondary: #9B9489;
-  --color-text-muted: #5C5750;
-
-  /* === Accent colors === */
-  --color-ochre: #D4A853;
-  --color-ochre-dim: #B8923F;
-  --color-terracotta: #E8734A;
-  --color-terracotta-dim: #C25E3A;
-
-  /* === Price spectrum === */
-  --color-price-cheap: #4ADE80;
-  --color-price-mid: #FBBF24;
-  --color-price-expensive: #F87171;
-
-  /* === Shadows === */
-  --shadow-float: 0 8px 32px rgba(0, 0, 0, 0.5), 0 2px 8px rgba(0, 0, 0, 0.3);
-  --shadow-panel: 0 4px 24px rgba(0, 0, 0, 0.4);
-  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.2);
-
-  /* === Radii === */
-  --radius-panel: 16px;
-  --radius-card: 12px;
-  --radius-pill: 999px;
-  --radius-button: 10px;
-
-  /* === Transitions === */
-  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
-  --duration-fast: 150ms;
-  --duration-normal: 250ms;
-  --duration-slow: 400ms;
-}
-
-/* === Light theme overrides === */
-[data-theme="light"] {
-  --color-bg: #FAF7F2;
-  --color-surface: #FFFFFF;
-  --color-surface-elevated: #F5F2ED;
-  --color-surface-hover: #EDE9E3;
-  --color-border: #DDD8D0;
-  --color-border-subtle: #EDE9E3;
-  --color-text: #1A1714;
-  --color-text-secondary: #6B6560;
-  --color-text-muted: #A39E97;
-  --shadow-float: 0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.06);
-  --shadow-panel: 0 4px 24px rgba(0, 0, 0, 0.08);
-  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.05);
-
-  /* 浅色面板上原始价格色对比度不足（绿 1.6:1 等），换成达到 WCAG AA ≥4.5:1 的同色系深色 */
-  --color-price-cheap: #15803D;
-  --color-price-mid: #B45309;
-  --color-price-expensive: #DC2626;
-}
-
-/* === Base styles === */
+/* === Base === */
 * {
   scrollbar-width: thin;
-  scrollbar-color: var(--color-border) transparent;
+  scrollbar-color: var(--color-line) transparent;
 }
 
 html {
-  color-scheme: dark;
+  color-scheme: light;
 }
 
-[data-theme="light"] {
-  color-scheme: light;
+html[data-theme="dark"] {
+  color-scheme: dark;
 }
 
 body {
   background-color: var(--color-bg);
-  color: var(--color-text);
+  color: var(--color-ink);
   font-family: var(--font-body);
+  font-size: var(--text-body);
+  line-height: var(--text-body--line-height);
+  letter-spacing: var(--text-body--letter-spacing);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 /* === Accessibility === */
-/* 全局键盘焦点环：任何可聚焦元素在键盘导航时都有可见焦点（含被清掉 outline 的输入框） */
+/* Every focusable element gets a visible ring when reached by keyboard. */
 :focus-visible {
-  outline: 2px solid var(--color-ochre);
+  outline: 1.5px solid var(--color-accent);
   outline-offset: 2px;
-  border-radius: var(--radius-button);
 }
 
-/* 视觉隐藏但对屏幕阅读器可见（h1、aria-live 区域、跳转链接默认态） */
 .sr-only {
   position: absolute;
   width: 1px;
@@ -109,7 +46,7 @@ body {
   border: 0;
 }
 
-/* 跳转到主内容：聚焦时从屏幕外滑入，给键盘用户一个绕过浮层的入口 */
+/* Slides in on focus so keyboard users can bypass the floating map chrome. */
 .skip-link {
   position: fixed;
   top: 8px;
@@ -117,15 +54,165 @@ body {
   z-index: 100;
   transform: translateY(-200%);
   padding: 8px 16px;
-  border-radius: var(--radius-button);
-  background: var(--color-ochre);
-  color: var(--color-bg);
-  font-weight: 600;
-  font-size: 0.875rem;
-  transition: transform var(--duration-fast) var(--ease-out-expo);
+  border-radius: var(--radius-2);
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+  font-weight: 500;
+  font-size: var(--text-small);
+  transition: transform var(--duration-fast) var(--ease-standard);
 }
 .skip-link:focus {
   transform: translateY(0);
+}
+
+/* === Component utilities (素: hairlines, small radii, one shadow) === */
+
+/* Chrome that floats over the map — the only place the shadow is used. */
+@utility floating {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-2);
+  box-shadow: var(--shadow-float);
+}
+
+/* Small caption for section names, units and metadata. Sentence case on purpose:
+   rows of letter-spaced capitals read as generated dashboards, not as 素. */
+@utility caption {
+  font-size: var(--text-small);
+  line-height: var(--text-small--line-height);
+  letter-spacing: var(--text-small--letter-spacing);
+  font-weight: 400;
+  color: var(--color-ink-3);
+}
+
+@utility btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 40px;
+  padding-inline: 18px;
+  border-radius: var(--radius-2);
+  border: 1px solid transparent;
+  font-size: var(--text-body);
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color var(--duration-normal) var(--ease-standard),
+    border-color var(--duration-normal) var(--ease-standard),
+    color var(--duration-normal) var(--ease-standard);
+  &:disabled {
+    opacity: 0.55;
+    cursor: default;
+  }
+}
+
+@utility btn-sm {
+  height: 30px;
+  padding-inline: 12px;
+  font-size: var(--text-small);
+}
+
+@utility btn-primary {
+  background-color: var(--color-accent);
+  color: var(--color-on-accent);
+  &:hover:not(:disabled) {
+    background-color: color-mix(in srgb, var(--color-accent) 86%, var(--color-bg));
+  }
+}
+
+@utility btn-secondary {
+  background-color: var(--color-surface);
+  color: var(--color-ink);
+  border-color: var(--color-line);
+  &:hover:not(:disabled) {
+    background-color: var(--color-wash);
+  }
+}
+
+@utility btn-quiet {
+  background-color: transparent;
+  color: var(--color-ink-2);
+  padding-inline: 6px;
+  &:hover:not(:disabled) {
+    color: var(--color-ink);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 4px;
+  }
+}
+
+@utility icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  border-radius: var(--radius-2);
+  color: var(--color-ink-3);
+  cursor: pointer;
+  transition:
+    background-color var(--duration-fast) var(--ease-standard),
+    color var(--duration-fast) var(--ease-standard);
+  &:hover:not(:disabled) {
+    background-color: var(--color-wash);
+    color: var(--color-ink);
+  }
+}
+
+/* Segmented control container and its items (fuel switch, sort). */
+@utility seg {
+  display: inline-flex;
+  gap: 2px;
+  padding: 2px;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-2);
+  background-color: var(--color-surface);
+}
+
+@utility seg-item {
+  padding: 4px 10px;
+  border-radius: var(--radius-1);
+  font-size: var(--text-small);
+  font-weight: 500;
+  color: var(--color-ink-2);
+  cursor: pointer;
+  transition:
+    background-color var(--duration-normal) var(--ease-standard),
+    color var(--duration-normal) var(--ease-standard);
+  &:hover {
+    background-color: var(--color-wash);
+    color: var(--color-ink);
+  }
+  &[aria-pressed="true"] {
+    background-color: var(--color-accent);
+    color: var(--color-on-accent);
+  }
+}
+
+/* Inline text link in body copy. */
+@utility link {
+  color: var(--color-ink);
+  text-decoration: underline;
+  text-decoration-color: var(--color-line);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+  transition: text-decoration-color var(--duration-fast) var(--ease-standard);
+  &:hover {
+    text-decoration-color: var(--color-ink);
+  }
+}
+
+/* Small square mark (■) used for tiers, freshness and legends. */
+@utility mark-square {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  flex-shrink: 0;
+  background-color: currentColor;
 }
 
 /* === Mapbox overrides === */
@@ -138,106 +225,49 @@ body {
   opacity: 0.5;
 }
 
-/* === Animations === */
+.mapboxgl-ctrl-group {
+  background-color: var(--color-surface) !important;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-2) !important;
+  box-shadow: var(--shadow-float) !important;
+}
+
+.mapboxgl-ctrl-group button + button {
+  border-top-color: var(--color-line-subtle) !important;
+}
+
+html[data-theme="dark"] .mapboxgl-ctrl-group button .mapboxgl-ctrl-icon {
+  filter: invert(0.9);
+}
+
+/* === Motion (静): fade plus a small rise, never scale or bounce === */
 @keyframes fade-in {
   from { opacity: 0; }
   to { opacity: 1; }
 }
 
-@keyframes slide-up {
-  from { opacity: 0; transform: translateY(12px); }
+@keyframes rise-in {
+  from { opacity: 0; transform: translateY(var(--rise-distance)); }
   to { opacity: 1; transform: translateY(0); }
 }
 
-@keyframes slide-in-right {
-  from { opacity: 0; transform: translateX(24px); }
-  to { opacity: 1; transform: translateX(0); }
-}
-
-@keyframes scale-in {
-  from { opacity: 0; transform: scale(0.95); }
-  to { opacity: 1; transform: scale(1); }
-}
-
-@keyframes pulse-soft {
+@keyframes breathe {
   0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
-}
-
-@keyframes bottom-sheet-up {
-  from { transform: translateY(100%); }
-  to { transform: translateY(0); }
-}
-
-@keyframes skeleton-shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+  50% { opacity: 0.55; }
 }
 
 .animate-fade-in {
-  animation: fade-in var(--duration-normal) var(--ease-out-expo) both;
+  animation: fade-in var(--duration-slow) var(--ease-standard) both;
 }
 
-.animate-slide-up {
-  animation: slide-up var(--duration-slow) var(--ease-out-expo) both;
+.animate-rise-in {
+  animation: rise-in var(--duration-slow) var(--ease-standard) both;
 }
 
-.animate-slide-in-right {
-  animation: slide-in-right var(--duration-slow) var(--ease-out-expo) both;
+.animate-breathe {
+  animation: breathe 1.6s var(--ease-standard) infinite;
 }
 
-.animate-scale-in {
-  animation: scale-in var(--duration-normal) var(--ease-out-expo) both;
-}
-
-.animate-pulse-soft {
-  animation: pulse-soft 2s ease-in-out infinite;
-}
-
-/* === Stagger delays === */
-.delay-1 { animation-delay: 50ms; }
-.delay-2 { animation-delay: 100ms; }
-.delay-3 { animation-delay: 150ms; }
-.delay-4 { animation-delay: 200ms; }
-.delay-5 { animation-delay: 250ms; }
-
-/* === Glassmorphism utility === */
-.glass {
-  background: color-mix(in srgb, var(--color-surface) 80%, transparent);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-}
-
-.glass-heavy {
-  background: color-mix(in srgb, var(--color-surface) 92%, transparent);
-  backdrop-filter: blur(32px) saturate(180%);
-  -webkit-backdrop-filter: blur(32px) saturate(180%);
-}
-
-/* === Skeleton loading shimmer === */
-.skeleton-shimmer {
-  background: linear-gradient(
-    90deg,
-    var(--color-surface-elevated) 25%,
-    var(--color-surface-hover) 50%,
-    var(--color-surface-elevated) 75%
-  );
-  background-size: 200% 100%;
-  animation: skeleton-shimmer 1.4s ease-in-out infinite;
-}
-
-/* === Bottom sheet grab handle === */
-.grab-handle {
-  width: 36px;
-  height: 4px;
-  border-radius: 2px;
-  background: var(--color-text-muted);
-  margin: 8px auto;
-}
-
-/* === Reduced motion === */
-/* 用户请求减少动效时，关闭入场/循环动画与过渡，仅保留瞬时状态切换。
-   保留焦点环过渡之外的功能性变换不靠动画呈现，故整体置为近乎瞬时。 */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

@@ -1,0 +1,661 @@
+<title>ServoMap 素 Design System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;600;700&family=Noto+Serif+SC:wght@500;600&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap">
+<style>
+/* Layout: a quiet specimen book. One reading column for rules; wide "plates" for real screens. */
+:root {
+  /* 和紙 paper neutrals, a touch cool so it never reads as cream */
+  --bg: #F2F1ED;
+  --surface: #FAFAF7;
+  --wash: #E9E7E1;
+  --line: #D9D6CE;
+  --line-subtle: #E6E3DC;
+  /* 墨 ink */
+  --ink: #2A2927;
+  --ink-2: #5A5750;
+  --ink-3: #6F6B63;
+  /* 藍 indigo — the only chromatic accent (variant A) */
+  --accent: #2F4F6B;
+  --accent-soft: #E2E7EB;
+  --on-accent: #FAFAF7;
+  /* price tiers: 千歳緑 / 黄土 / 弁柄 */
+  --cheap: #3D6848;
+  --fair: #85601C;
+  --pricey: #9A3B2B;
+  --cheap-soft: #E3EAE3;
+  --fair-soft: #EFE8DA;
+  --pricey-soft: #F1E3DF;
+  /* map base */
+  --map-land: #EDECE7;
+  --map-water: #D9DFE2;
+  --map-park: #E1E5DB;
+  --map-road: #FBFBF9;
+  --map-road-minor: #E2E0DA;
+
+  --shadow-float: 0 1px 2px rgb(42 41 39 / 0.06), 0 4px 16px rgb(42 41 39 / 0.06);
+
+  --font-display: "Shippori Mincho", "Hiragino Mincho ProN", "Yu Mincho", Georgia, serif;
+  --font-body: "Zen Kaku Gothic New", "Hiragino Sans", "Yu Gothic", system-ui, sans-serif;
+  /* specimen-only: the page commentary is Simplified Chinese, which Shippori does not cover */
+  --font-display-zh: "Noto Serif SC", "Songti SC", var(--font-display);
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  --r-1: 2px;
+  --r-2: 4px;
+  --r-3: 6px;
+
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --dur: 200ms;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #1A1A18; --surface: #21211F; --wash: #2A2927; --line: #3A3935; --line-subtle: #2E2D2A;
+    --ink: #E6E3DB; --ink-2: #ABA69B; --ink-3: #8F8A7F;
+    --accent: #9DB4C8; --accent-soft: #263039; --on-accent: #1A1A18;
+    --cheap: #93B597; --fair: #D2B271; --pricey: #DE9A8A;
+    --cheap-soft: #243028; --fair-soft: #312B1F; --pricey-soft: #34241F;
+    --map-land: #1E1E1C; --map-water: #182025; --map-park: #1F231E; --map-road: #302F2C; --map-road-minor: #272624;
+    --shadow-float: 0 1px 2px rgb(0 0 0 / 0.3), 0 6px 20px rgb(0 0 0 / 0.25);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #1A1A18; --surface: #21211F; --wash: #2A2927; --line: #3A3935; --line-subtle: #2E2D2A;
+  --ink: #E6E3DB; --ink-2: #ABA69B; --ink-3: #8F8A7F;
+  --accent: #9DB4C8; --accent-soft: #263039; --on-accent: #1A1A18;
+  --cheap: #93B597; --fair: #D2B271; --pricey: #DE9A8A;
+  --cheap-soft: #243028; --fair-soft: #312B1F; --pricey-soft: #34241F;
+  --map-land: #1E1E1C; --map-water: #182025; --map-park: #1F231E; --map-road: #302F2C; --map-road-minor: #272624;
+  --shadow-float: 0 1px 2px rgb(0 0 0 / 0.3), 0 6px 20px rgb(0 0 0 / 0.25);
+  color-scheme: dark;
+}
+/* Variant B 墨: no chromatic accent at all; ink carries emphasis, price tiers are the only color. */
+:root[data-variant="sumi"] {
+  --accent: var(--ink);
+  --accent-soft: var(--wash);
+  --on-accent: var(--surface);
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.7;
+  letter-spacing: 0.02em;
+  -webkit-font-smoothing: antialiased;
+  padding-inline: 16px;
+  padding-block: 0 96px;
+}
+.book { max-width: 1040px; margin-inline: auto; }
+.col { max-width: 640px; }
+h1, h2, h3 { font-family: var(--font-display); font-weight: 600; text-wrap: balance; margin: 0; letter-spacing: 0.01em; }
+p { margin: 0; }
+:focus-visible { outline: 1.5px solid var(--accent); outline-offset: 2px; }
+button { font: inherit; color: inherit; letter-spacing: inherit; }
+
+/* ---------- masthead ---------- */
+.mast {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 10;
+  background: color-mix(in srgb, var(--bg) 94%, transparent);
+  border-bottom: 1px solid var(--line-subtle);
+  margin-inline: -16px; padding: 12px 16px;
+}
+.mast-in { max-width: 1040px; margin-inline: auto; display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: center; justify-content: space-between; }
+.brand { display: flex; align-items: center; gap: 10px; font-family: var(--font-display); font-size: 17px; font-weight: 600; }
+.mark { width: 18px; height: 18px; border: 1.5px solid var(--ink); border-radius: var(--r-1); display: grid; place-items: center; }
+.mark::after { content: ""; width: 6px; height: 6px; background: var(--accent); }
+.controls { display: flex; flex-wrap: wrap; gap: 8px 20px; align-items: center; }
+.ctl { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--ink-3); }
+
+/* ---------- segmented control (also the product's fuel switch) ---------- */
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: var(--r-2); background: var(--surface); padding: 2px; gap: 2px; }
+.seg button {
+  border: 0; background: transparent; cursor: pointer;
+  font-size: 12px; font-weight: 500; color: var(--ink-2);
+  padding: 4px 10px; border-radius: var(--r-1);
+  transition: background var(--dur) var(--ease), color var(--dur) var(--ease);
+}
+.seg button:hover { color: var(--ink); background: var(--wash); }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); }
+
+/* ---------- sections ---------- */
+.intro { padding-block: 64px 48px; display: grid; gap: 20px; }
+.intro h1, .part-head h2 { font-family: var(--font-display-zh); }
+.intro h1 { font-size: clamp(30px, 6vw, 44px); line-height: 1.3; font-weight: 500; }
+.intro h1 em { font-style: normal; color: var(--accent); }
+.lead { font-size: 16px; color: var(--ink-2); max-width: 36em; }
+section.part { border-top: 1px solid var(--line); padding-block: 40px 56px; display: grid; gap: 28px; }
+.part-head { display: grid; grid-template-columns: auto 1fr; gap: 4px 20px; align-items: baseline; }
+.kanji { font-family: var(--font-display); font-size: 30px; line-height: 1; color: var(--ink); grid-row: span 2; }
+.part-head h2 { font-size: 20px; }
+.part-head p { color: var(--ink-3); font-size: 13px; }
+.label { font-size: 11px; font-weight: 500; letter-spacing: 0.14em; color: var(--ink-3); }
+.note { font-size: 13px; color: var(--ink-2); }
+code, .mono { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0; }
+
+/* principles */
+.principles { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 28px 32px; }
+.principle { display: grid; gap: 6px; align-content: start; }
+.principle .k { font-family: var(--font-display); font-size: 40px; line-height: 1.1; }
+.principle h3 { font-family: var(--font-body); font-size: 13px; font-weight: 700; letter-spacing: 0.08em; }
+.principle p { font-size: 13px; color: var(--ink-2); }
+
+/* color */
+.swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 20px 16px; }
+.sw { display: grid; gap: 8px; }
+.chip-color { height: 64px; border-radius: var(--r-2); border: 1px solid var(--line-subtle); }
+.sw b { font-weight: 500; font-size: 13px; }
+.sw span { font-size: 12px; color: var(--ink-3); display: block; line-height: 1.5; }
+.tiers { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
+.tier-card { background: var(--surface); border: 1px solid var(--line-subtle); border-radius: var(--r-3); padding: 20px; display: grid; gap: 10px; }
+
+/* type */
+.type-row { display: grid; grid-template-columns: 120px 1fr; gap: 8px 24px; padding-block: 16px; border-bottom: 1px solid var(--line-subtle); align-items: baseline; }
+.type-row:last-child { border-bottom: 0; }
+.type-row .spec { font-size: 12px; color: var(--ink-3); line-height: 1.5; }
+.type-row > div:last-child { min-width: 0; overflow-wrap: anywhere; }
+
+/* scale strips */
+.scale { display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-end; }
+.scale .unit { display: grid; gap: 6px; justify-items: start; font-size: 12px; color: var(--ink-3); }
+.scale .bar { background: var(--accent); opacity: 0.85; height: 8px; }
+.shapes { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 16px; }
+.shape { background: var(--surface); border: 1px solid var(--line); height: 72px; display: grid; place-items: center; font-size: 12px; color: var(--ink-2); }
+
+/* ---------- product components ---------- */
+.price { font-family: var(--font-display); font-weight: 600; font-variant-numeric: tabular-nums lining-nums; letter-spacing: 0; white-space: nowrap; }
+.price .u { font-family: var(--font-body); font-weight: 400; font-size: 0.42em; color: var(--ink-3); margin-left: 3px; letter-spacing: 0.02em; }
+.tier { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 500; letter-spacing: 0.08em; }
+.tier::before { content: ""; width: 6px; height: 6px; background: currentColor; }
+.t-cheap { color: var(--cheap); } .t-fair { color: var(--fair); } .t-pricey { color: var(--pricey); }
+
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 40px; padding: 0 18px; border-radius: var(--r-2); font-size: 14px; font-weight: 500; letter-spacing: 0.04em; cursor: pointer; border: 1px solid transparent; transition: background var(--dur) var(--ease), border-color var(--dur) var(--ease); text-decoration: none; }
+.btn-primary { background: var(--accent); color: var(--on-accent); }
+.btn-primary:hover { background: color-mix(in srgb, var(--accent) 88%, var(--ink)); }
+.btn-secondary { background: var(--surface); color: var(--ink); border-color: var(--line); }
+.btn-secondary:hover { background: var(--wash); }
+.btn-quiet { background: transparent; color: var(--ink-2); padding: 0 6px; }
+.btn-quiet:hover { color: var(--ink); text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1px; }
+.btn-sm { height: 30px; padding: 0 12px; font-size: 12px; }
+.icon-btn { width: 32px; height: 32px; display: inline-grid; place-items: center; border: 0; background: transparent; border-radius: var(--r-2); color: var(--ink-3); cursor: pointer; }
+.icon-btn:hover { background: var(--wash); color: var(--ink); }
+svg.i { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: square; stroke-linejoin: miter; }
+
+.field { display: flex; align-items: center; gap: 10px; height: 40px; padding: 0 12px; border: 1px solid var(--line); border-radius: var(--r-2); background: var(--surface); color: var(--ink-3); }
+.field input { border: 0; outline: 0; background: transparent; font: inherit; color: var(--ink); flex: 1; min-width: 0; }
+.field:focus-within { border-color: var(--accent); }
+
+.fchip { display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 4px 0 10px; border: 1px solid var(--line); border-radius: var(--r-1); font-size: 12px; background: var(--surface); }
+.fchip button { border: 0; background: none; width: 18px; height: 18px; display: grid; place-items: center; color: var(--ink-3); cursor: pointer; }
+
+.fresh { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; color: var(--ink-2); background: var(--surface); border: 1px solid var(--line-subtle); padding: 3px 10px; border-radius: var(--r-1); }
+.fresh::before { content: ""; width: 6px; height: 6px; background: var(--cheap); }
+.fresh.stale::before { background: var(--pricey); }
+
+.banner { display: flex; gap: 12px; align-items: flex-start; background: var(--fair-soft); color: var(--ink); padding: 12px 14px; border-radius: var(--r-2); font-size: 13px; line-height: 1.6; }
+.banner svg { color: var(--fair); flex: none; margin-top: 3px; }
+
+.brandtag { font-size: 11px; font-weight: 500; letter-spacing: 0.02em; color: var(--ink-3); }
+
+/* station list — hairline rows, no cards */
+.list { list-style: none; margin: 0; padding: 0; }
+.row { display: grid; grid-template-columns: 1fr auto; gap: 12px; padding: 14px 16px; border-bottom: 1px solid var(--line-subtle); cursor: pointer; transition: background var(--dur) var(--ease); }
+.row:hover { background: color-mix(in srgb, var(--wash) 55%, transparent); }
+.row[aria-current="true"] { background: var(--accent-soft); }
+.row .meta { display: flex; gap: 10px; align-items: baseline; }
+.row .name { font-size: 14px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.row .addr { font-size: 12px; color: var(--ink-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.row .right { text-align: right; display: grid; justify-items: end; gap: 2px; }
+.row .price { font-size: 20px; line-height: 1.2; }
+.row > div { min-width: 0; }
+
+/* ---------- plates (screen mocks) ---------- */
+.plate-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--r-3); background: var(--map-land); }
+.plate-cap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; }
+.desk { position: relative; width: 980px; height: 620px; display: grid; grid-template-columns: 340px 1fr; }
+.panel { background: var(--surface); border-right: 1px solid var(--line); display: flex; flex-direction: column; min-height: 0; position: relative; z-index: 2; }
+.panel-top { padding: 16px; display: grid; gap: 12px; border-bottom: 1px solid var(--line-subtle); }
+.panel-bar { display: flex; justify-content: space-between; align-items: center; }
+.sortbar { display: flex; justify-content: space-between; align-items: center; padding: 10px 16px; border-bottom: 1px solid var(--line-subtle); font-size: 12px; color: var(--ink-3); }
+.sortbar .seg button { padding: 2px 8px; font-size: 11px; }
+.panel .list { overflow: hidden; }
+
+.map { position: relative; overflow: hidden; }
+.map svg.base { position: absolute; inset: 0; width: 100%; height: 100%; }
+.map-top { position: absolute; top: 16px; left: 0; right: 0; display: flex; justify-content: center; }
+.pin { position: absolute; transform: translate(-50%, -100%); display: grid; justify-items: center; }
+.pin .lab { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-1); padding: 1px 7px; font-family: var(--font-display); font-weight: 600; font-size: 13px; font-variant-numeric: tabular-nums; display: flex; align-items: center; gap: 5px; box-shadow: var(--shadow-float); white-space: nowrap; }
+.pin .lab::before { content: ""; width: 5px; height: 5px; background: var(--tc); }
+.pin .stem { width: 1px; height: 8px; background: var(--ink-3); }
+.pin.on .lab { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+.pin.on .lab::before { background: var(--on-accent); }
+.cluster { position: absolute; width: 30px; height: 30px; border-radius: 50%; background: var(--ink); color: var(--surface); display: grid; place-items: center; font-size: 11px; font-weight: 700; transform: translate(-50%, -50%); outline: 3px solid color-mix(in srgb, var(--ink) 18%, transparent); }
+.me { position: absolute; width: 12px; height: 12px; border-radius: 50%; background: var(--accent); outline: 4px solid color-mix(in srgb, var(--accent) 22%, transparent); transform: translate(-50%, -50%); }
+.map-ctl { position: absolute; right: 16px; bottom: 16px; display: grid; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-2); box-shadow: var(--shadow-float); }
+.map-ctl .icon-btn + .icon-btn { border-top: 1px solid var(--line-subtle); border-radius: 0; }
+
+.phones { display: flex; flex-wrap: wrap; gap: 32px; }
+.phone { width: 340px; max-width: 100%; height: 700px; border: 1px solid var(--line); border-radius: 22px; overflow: hidden; position: relative; background: var(--map-land); flex: none; }
+.phone .map { position: absolute; inset: 0; }
+.phone-head { position: absolute; top: 0; left: 0; right: 0; padding: 14px 12px; display: grid; gap: 10px; z-index: 3; }
+.phone-head .bar { display: flex; justify-content: space-between; align-items: center; }
+.floaty { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-2); box-shadow: var(--shadow-float); }
+.sheet { position: absolute; left: 0; right: 0; bottom: 0; background: var(--surface); border-top: 1px solid var(--line); border-radius: 12px 12px 0 0; z-index: 4; box-shadow: 0 -4px 20px rgb(0 0 0 / 0.04); }
+.grab { width: 32px; height: 3px; background: var(--line); margin: 8px auto 4px; }
+.detail { padding: 8px 20px 20px; display: grid; gap: 18px; }
+.detail h3 { font-size: 22px; line-height: 1.35; }
+.ptable { width: 100%; border-collapse: collapse; }
+.ptable td { padding: 9px 0; border-bottom: 1px solid var(--line-subtle); font-size: 13px; }
+.ptable tr:last-child td { border-bottom: 0; }
+.ptable td:last-child { text-align: right; }
+.ptable .price { font-size: 17px; }
+.ptable tr.sel td:first-child { font-weight: 700; color: var(--accent); }
+.spark { width: 100%; height: 64px; display: block; }
+.detail .actions { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
+
+.choices { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+.choice { background: var(--surface); border: 1px solid var(--line-subtle); border-radius: var(--r-3); padding: 20px; display: grid; gap: 10px; align-content: start; }
+.choice h3 { font-size: 18px; }
+.choice ul { margin: 0; padding-left: 1.1em; color: var(--ink-2); font-size: 13px; display: grid; gap: 4px; }
+.rec { font-size: 11px; letter-spacing: 0.02em; color: var(--accent); font-weight: 700; }
+
+@media (max-width: 560px) {
+  .type-row { grid-template-columns: 1fr; }
+  .intro { padding-block: 40px 32px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+}
+</style>
+
+<header class="mast">
+  <div class="mast-in">
+    <div class="brand"><span class="mark" aria-hidden="true"></span>ServoMap <span class="label" style="margin-left:6px">Design System · 素</span></div>
+    <div class="controls">
+      <div class="ctl"><span id="lbl-variant">方案</span>
+        <div class="seg" role="group" aria-labelledby="lbl-variant">
+          <button type="button" id="v-ai" data-variant="ai" aria-pressed="true">A 藍 Ai</button>
+          <button type="button" id="v-sumi" data-variant="sumi" aria-pressed="false">B 墨 Sumi</button>
+        </div>
+      </div>
+      <div class="ctl"><span id="lbl-theme">主题</span>
+        <div class="seg" role="group" aria-labelledby="lbl-theme">
+          <button type="button" id="t-system" data-theme-set="system" aria-pressed="true">跟随系统</button>
+          <button type="button" id="t-light" data-theme-set="light" aria-pressed="false">紙 Light</button>
+          <button type="button" id="t-dark" data-theme-set="dark" aria-pressed="false">墨 Dark</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="book">
+  <div class="intro col">
+    <span class="label">ServoMap · 设计系统 v1 草案</span>
+    <h1>像一张安静的地图，<em>价格</em>是纸上唯一的颜色。</h1>
+    <p class="lead">日系、简约、素雅。去掉玻璃拟态、胶囊按钮和高饱和的绿黄红，改用和纸底色、墨色文字、一处藍色强调，以及压低饱和度的三档价格色。右上角可切换两套方案和明暗主题，下方所有组件与屏幕样张都会随之变化。</p>
+  </div>
+
+  <!-- 原则 -->
+  <section class="part" aria-labelledby="h-principles">
+    <div class="part-head"><span class="kanji" aria-hidden="true">理</span><h2 id="h-principles">五条原则</h2><p>每一个组件决定都能回溯到这里。</p></div>
+    <div class="principles">
+      <div class="principle"><span class="k">余白</span><h3>MA · 留白</h3><p>用空间而不是边框分组。间距只取 4 的倍数，面板内边距从 16 起步。</p></div>
+      <div class="principle"><span class="k">素材</span><h3>MATERIAL · 材质</h3><p>纸面是平的：发丝线 1px 分隔，不用毛玻璃，只有浮在地图上的元素才带一层极浅阴影。</p></div>
+      <div class="principle"><span class="k">抑制</span><h3>RESTRAINT · 克制</h3><p>只有一个强调色。颜色必须承载含义：价格档位、新鲜度、当前选中。</p></div>
+      <div class="principle"><span class="k">直線</span><h3>LINE · 直线</h3><p>圆角 2 / 4 / 6px，告别胶囊。标记用小方块 ■，图标 1.5px 直角线端。</p></div>
+      <div class="principle"><span class="k">静</span><h3>STILLNESS · 静</h3><p>动效只做淡入和 4px 位移，200ms。不缩放、不弹跳、不闪光骨架。</p></div>
+    </div>
+  </section>
+
+  <!-- 色彩 -->
+  <section class="part" aria-labelledby="h-color">
+    <div class="part-head"><span class="kanji" aria-hidden="true">色</span><h2 id="h-color">色彩</h2><p>所有颜色都是 token，浅色与深色各一套数值；文字色在 bg 与 surface 上全部 ≥ 4.5:1。</p></div>
+    <div>
+      <p class="label" style="margin-bottom:12px">中性 · 紙と墨</p>
+      <div class="swatches" id="sw-neutral"></div>
+    </div>
+    <div>
+      <p class="label" style="margin-bottom:12px">强调 · 藍（方案 B 中由墨代替）</p>
+      <div class="swatches" id="sw-accent"></div>
+    </div>
+    <div>
+      <p class="label" style="margin-bottom:12px">价格档位 · 千歳緑 / 黄土 / 弁柄</p>
+      <div class="tiers">
+        <div class="tier-card"><span class="tier t-cheap">Cheap</span><span class="price" style="font-size:40px;line-height:1.1">171.9<span class="u">¢/L</span></span><span class="note">--color-price-cheap · 周边最低三分之一</span></div>
+        <div class="tier-card"><span class="tier t-fair">Fair</span><span class="price" style="font-size:40px;line-height:1.1">184.5<span class="u">¢/L</span></span><span class="note">--color-price-mid · 中间三分之一</span></div>
+        <div class="tier-card"><span class="tier t-pricey">Pricey</span><span class="price" style="font-size:40px;line-height:1.1">199.9<span class="u">¢/L</span></span><span class="note">--color-price-expensive · 最高三分之一</span></div>
+      </div>
+    </div>
+    <p class="note col">档位永远配文字标签和 ■ 标记，不只靠颜色（WCAG 1.4.1）。<code>--ink-3</code> 不放在 <code>--wash</code> 上做小字，那里对比度只有 4.2–4.3。</p>
+  </section>
+
+  <!-- 字体 -->
+  <section class="part" aria-labelledby="h-type">
+    <div class="part-head"><span class="kanji" aria-hidden="true">字</span><h2 id="h-type">字体</h2><p>明朝体负责标题与价格数字，黑体负责界面文字。两者都自带拉丁字形。</p></div>
+    <div>
+      <div class="type-row"><div class="spec">Price XL<br>Shippori Mincho 600 · 48/1.1</div><div class="price" style="font-size:48px;line-height:1.1">174.9<span class="u">¢/L</span></div></div>
+      <div class="type-row"><div class="spec">Display<br>Shippori Mincho 500 · 34/1.3</div><div style="font-family:var(--font-display);font-size:34px;line-height:1.3;font-weight:500">Fuel prices in Newtown</div></div>
+      <div class="type-row"><div class="spec">Heading<br>Shippori Mincho 600 · 22/1.35</div><div style="font-family:var(--font-display);font-size:22px;font-weight:600;line-height:1.35">Metro Petroleum St Peters</div></div>
+      <div class="type-row"><div class="spec">Body<br>Zen Kaku Gothic New 400 · 14/1.7</div><div>Cheapest E10 within 5 km, updated 12 minutes ago from the NSW FuelCheck feed.</div></div>
+      <div class="type-row"><div class="spec">Small<br>Zen Kaku Gothic New 400 · 12/1.6</div><div style="font-size:12px;color:var(--ink-3)">191 King St, Newtown NSW 2042 · 1.2 km</div></div>
+      <div class="type-row"><div class="spec">Label<br>Gothic 500 · 11 · +0.14em · 大写</div><div class="label">Fuel prices · Last 30 days</div></div>
+    </div>
+  </section>
+
+  <!-- 间距与形状 -->
+  <section class="part" aria-labelledby="h-space">
+    <div class="part-head"><span class="kanji" aria-hidden="true">間</span><h2 id="h-space">间距、圆角、层级</h2><p>4px 基准；圆角三档；阴影只有一档。</p></div>
+    <div class="scale" aria-label="Spacing scale">
+      <div class="unit"><span class="bar" style="width:4px"></span>4</div>
+      <div class="unit"><span class="bar" style="width:8px"></span>8</div>
+      <div class="unit"><span class="bar" style="width:12px"></span>12</div>
+      <div class="unit"><span class="bar" style="width:16px"></span>16</div>
+      <div class="unit"><span class="bar" style="width:24px"></span>24</div>
+      <div class="unit"><span class="bar" style="width:32px"></span>32</div>
+      <div class="unit"><span class="bar" style="width:48px"></span>48</div>
+      <div class="unit"><span class="bar" style="width:64px"></span>64</div>
+    </div>
+    <div class="shapes">
+      <div class="shape" style="border-radius:var(--r-1)">r-1 · 2px · 标签、筛选</div>
+      <div class="shape" style="border-radius:var(--r-2)">r-2 · 4px · 按钮、输入</div>
+      <div class="shape" style="border-radius:var(--r-3)">r-3 · 6px · 面板、卡片</div>
+      <div class="shape" style="border-radius:var(--r-2);box-shadow:var(--shadow-float);border-color:var(--line)">float · 仅地图浮层</div>
+    </div>
+  </section>
+
+  <!-- 组件 -->
+  <section class="part" aria-labelledby="h-comp">
+    <div class="part-head"><span class="kanji" aria-hidden="true">具</span><h2 id="h-comp">组件</h2><p>用真实数据呈现，全部可以点。</p></div>
+
+    <div style="display:grid;gap:10px">
+      <p class="label">燃油切换 · FuelSwitch</p>
+      <div class="seg" role="group" aria-label="Fuel type" id="fuel-demo">
+        <button type="button" aria-pressed="false">U91</button>
+        <button type="button" aria-pressed="false">U95</button>
+        <button type="button" aria-pressed="false">U98</button>
+        <button type="button" aria-pressed="true">E10</button>
+        <button type="button" aria-pressed="false">Diesel</button>
+      </div>
+    </div>
+
+    <div style="display:grid;gap:10px">
+      <p class="label">按钮 · Button</p>
+      <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center">
+        <a class="btn btn-primary" href="#h-comp"><svg class="i" viewBox="0 0 24 24"><path d="M3 11l18-8-8 18-2-8z"/></svg>Get directions</a>
+        <button type="button" class="btn btn-secondary">Share</button>
+        <button type="button" class="btn btn-quiet">Clear all</button>
+        <button type="button" class="btn btn-primary btn-sm">Retry</button>
+      </div>
+    </div>
+
+    <div style="display:grid;gap:10px;max-width:420px">
+      <p class="label">搜索 · SearchField</p>
+      <label class="field" for="demo-search">
+        <svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></svg>
+        <input id="demo-search" type="text" value="Newtown" aria-label="Search suburb or postcode">
+        <button type="button" class="icon-btn" aria-label="Use my location" style="margin-right:-8px"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg></button>
+      </label>
+    </div>
+
+    <div style="display:grid;gap:10px">
+      <p class="label">筛选标签 · FilterChip / 新鲜度 · Freshness</p>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">
+        <span class="fchip">Ampol<button type="button" aria-label="Remove Ampol filter"><svg class="i" viewBox="0 0 24 24" style="width:12px;height:12px"><path d="M6 6l12 12M18 6L6 18"/></svg></button></span>
+        <span class="fchip">7-Eleven<button type="button" aria-label="Remove 7-Eleven filter"><svg class="i" viewBox="0 0 24 24" style="width:12px;height:12px"><path d="M6 6l12 12M18 6L6 18"/></svg></button></span>
+        <span class="fresh">Live · 12 min ago</span>
+        <span class="fresh stale">Stale · 14 h ago</span>
+      </div>
+    </div>
+
+    <div style="display:grid;gap:10px;max-width:460px">
+      <p class="label">提示条 · StaleBanner</p>
+      <div class="banner" role="status"><svg class="i" viewBox="0 0 24 24"><path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18v0.5"/></svg><p>QLD prices haven’t updated for 14 hours. Check the pump before you fill up.</p></div>
+    </div>
+
+    <div style="display:grid;gap:10px;max-width:420px">
+      <p class="label">站点行 · StationRow（取代卡片）</p>
+      <ul class="list" style="background:var(--surface);border:1px solid var(--line-subtle);border-radius:var(--r-3);overflow:hidden" id="demo-list"></ul>
+    </div>
+  </section>
+
+  <!-- 屏幕 -->
+  <section class="part" aria-labelledby="h-screens">
+    <div class="part-head"><span class="kanji" aria-hidden="true">景</span><h2 id="h-screens">屏幕样张</h2><p>地图底图压成单色（Mapbox Standard 的 monochrome 主题），价格标签成为画面里唯一的彩色。</p></div>
+
+    <div style="display:grid;gap:12px">
+      <div class="plate-cap"><span class="label">桌面 · 地图 + 左侧列表</span><span class="note">980 × 620</span></div>
+      <div class="plate-wrap">
+        <div class="desk">
+          <aside class="panel">
+            <div class="panel-top">
+              <div class="panel-bar">
+                <div class="brand" style="font-size:16px"><span class="mark" aria-hidden="true"></span>ServoMap</div>
+                <button type="button" class="icon-btn" aria-label="Switch theme"><svg class="i" viewBox="0 0 24 24"><path d="M20 14A8 8 0 1 1 10 4a6 6 0 0 0 10 10z"/></svg></button>
+              </div>
+              <div class="seg fuel-mini" role="group" aria-label="Fuel type" style="width:100%;justify-content:space-between">
+                <button type="button" aria-pressed="false">U91</button><button type="button" aria-pressed="false">U95</button><button type="button" aria-pressed="false">U98</button><button type="button" aria-pressed="true">E10</button><button type="button" aria-pressed="false">Diesel</button>
+              </div>
+              <label class="field" for="desk-search"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></svg><input id="desk-search" type="text" value="Newtown" aria-label="Search suburb or postcode"></label>
+              <div style="display:flex;gap:6px;flex-wrap:wrap"><span class="fchip">Ampol<button type="button" aria-label="Remove Ampol filter"><svg class="i" viewBox="0 0 24 24" style="width:12px;height:12px"><path d="M6 6l12 12M18 6L6 18"/></svg></button></span><button type="button" class="btn btn-quiet btn-sm">+ Brands</button></div>
+            </div>
+            <div class="sortbar"><span>38 stations · E10</span><div class="seg" role="group" aria-label="Sort"><button type="button" aria-pressed="true">Price</button><button type="button" aria-pressed="false">Distance</button></div></div>
+            <ul class="list desk-list"></ul>
+          </aside>
+          <div class="map">
+            <svg class="base" viewBox="0 0 640 620" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+              <rect width="640" height="620" fill="var(--map-land)"/>
+              <path d="M0 470 C120 440 180 520 300 500 S520 430 640 470 V620 H0z" fill="var(--map-water)"/>
+              <path d="M380 90 h120 v90 h-120z" fill="var(--map-park)"/>
+              <path d="M60 280 h70 v60 h-70z" fill="var(--map-park)"/>
+              <g stroke="var(--map-road-minor)" stroke-width="2" fill="none">
+                <path d="M0 60 H640 M0 150 H640 M0 230 H640 M0 330 H640 M0 400 H640"/>
+                <path d="M90 0 V620 M190 0 V620 M280 0 V620 M360 0 V620 M460 0 V620 M560 0 V620"/>
+              </g>
+              <g stroke="var(--map-road)" stroke-width="7" fill="none" stroke-linecap="round">
+                <path d="M-10 380 L240 250 L640 200"/>
+                <path d="M230 -10 L250 250 L300 640"/>
+                <path d="M420 -10 C430 200 520 300 650 330"/>
+              </g>
+            </svg>
+            <div class="map-top"><span class="fresh" style="box-shadow:var(--shadow-float)">Live · 12 min ago</span></div>
+            <div class="pin on" style="left:252px;top:238px;--tc:var(--cheap)"><span class="lab">171.9</span><span class="stem"></span></div>
+            <div class="pin" style="left:150px;top:180px;--tc:var(--cheap)"><span class="lab">173.5</span><span class="stem"></span></div>
+            <div class="pin" style="left:380px;top:300px;--tc:var(--fair)"><span class="lab">184.5</span><span class="stem"></span></div>
+            <div class="pin" style="left:470px;top:150px;--tc:var(--fair)"><span class="lab">186.9</span><span class="stem"></span></div>
+            <div class="pin" style="left:120px;top:380px;--tc:var(--pricey)"><span class="lab">199.9</span><span class="stem"></span></div>
+            <div class="pin" style="left:560px;top:360px;--tc:var(--pricey)"><span class="lab">197.5</span><span class="stem"></span></div>
+            <div class="cluster" style="left:520px;top:80px">12</div>
+            <div class="me" style="left:300px;top:320px"></div>
+            <div class="map-ctl"><button type="button" class="icon-btn" aria-label="Zoom in"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button><button type="button" class="icon-btn" aria-label="Zoom out"><svg class="i" viewBox="0 0 24 24"><path d="M5 12h14"/></svg></button></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:grid;gap:12px">
+      <div class="plate-cap"><span class="label">手机 · 列表抽屉 / 站点详情</span><span class="note">340 × 700</span></div>
+      <div class="phones">
+        <div class="phone">
+          <div class="map"><svg class="base" viewBox="0 0 340 700" preserveAspectRatio="xMidYMid slice" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%"><rect width="340" height="700" fill="var(--map-land)"/><path d="M0 330 C80 300 160 360 340 320 V420 C200 440 90 400 0 420z" fill="var(--map-water)"/><g stroke="var(--map-road-minor)" stroke-width="2"><path d="M0 120 H340 M0 220 H340 M70 0 V700 M170 0 V700 M260 0 V700"/></g><g stroke="var(--map-road)" stroke-width="6" fill="none" stroke-linecap="round"><path d="M-10 260 L180 170 L350 150"/><path d="M150 -10 L180 170 L200 330"/></g></svg>
+            <div class="pin on" style="left:180px;top:165px;--tc:var(--cheap)"><span class="lab">171.9</span><span class="stem"></span></div>
+            <div class="pin" style="left:90px;top:250px;--tc:var(--fair)"><span class="lab">184.5</span><span class="stem"></span></div>
+            <div class="pin" style="left:270px;top:240px;--tc:var(--pricey)"><span class="lab">199.9</span><span class="stem"></span></div>
+          </div>
+          <div class="phone-head">
+            <div class="bar"><div class="brand floaty" style="font-size:15px;padding:6px 10px"><span class="mark" aria-hidden="true"></span>ServoMap</div><div class="seg" role="group" aria-label="Fuel type" style="box-shadow:var(--shadow-float)"><button type="button" aria-pressed="false">U91</button><button type="button" aria-pressed="true">E10</button><button type="button" aria-pressed="false">Diesel</button></div></div>
+            <label class="field" for="ph-search" style="box-shadow:var(--shadow-float)"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></svg><input id="ph-search" type="text" placeholder="Suburb or postcode" aria-label="Search suburb or postcode"></label>
+          </div>
+          <div class="sheet" style="height:330px">
+            <div class="grab" aria-hidden="true"></div>
+            <div class="sortbar" style="padding-top:4px"><span>38 stations · E10</span><span class="fresh" style="border:0;padding:0;background:none">Live · 12 min</span></div>
+            <ul class="list phone-list"></ul>
+          </div>
+        </div>
+
+        <div class="phone">
+          <div class="map"><svg class="base" viewBox="0 0 340 700" preserveAspectRatio="xMidYMid slice" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%"><rect width="340" height="700" fill="var(--map-land)"/><g stroke="var(--map-road-minor)" stroke-width="2"><path d="M0 60 H340 M0 140 H340 M90 0 V700 M230 0 V700"/></g><g stroke="var(--map-road)" stroke-width="6" fill="none"><path d="M-10 110 L350 80"/></g></svg>
+            <div class="pin on" style="left:170px;top:92px;--tc:var(--cheap)"><span class="lab">171.9</span><span class="stem"></span></div>
+          </div>
+          <div class="sheet" style="height:560px">
+            <div class="grab" aria-hidden="true"></div>
+            <div class="detail">
+              <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start">
+                <div style="display:grid;gap:4px;min-width:0">
+                  <span class="brandtag">Metro Petroleum</span>
+                  <h3>St Peters</h3>
+                  <p style="font-size:12px;color:var(--ink-3)">702 Princes Hwy, St Peters NSW 2044 · 1.4 km</p>
+                </div>
+                <div style="display:flex;gap:2px;flex:none">
+                  <button type="button" class="icon-btn" aria-label="Save station"><svg class="i" viewBox="0 0 24 24"><path d="M6 3h12v18l-6-4-6 4z"/></svg></button>
+                  <button type="button" class="icon-btn" aria-label="Close"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+                </div>
+              </div>
+              <div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px;padding-block:4px">
+                <span class="price" style="font-size:44px;line-height:1">171.9<span class="u">¢/L E10</span></span>
+                <span class="tier t-cheap">Cheap</span>
+              </div>
+              <table class="ptable" aria-label="All fuel prices">
+                <tbody>
+                  <tr><td>U91</td><td><span class="price">174.9</span></td></tr>
+                  <tr class="sel"><td>E10</td><td><span class="price">171.9</span></td></tr>
+                  <tr><td>U98</td><td><span class="price">196.9</span></td></tr>
+                  <tr><td>Diesel</td><td><span class="price">189.9</span></td></tr>
+                </tbody>
+              </table>
+              <div style="display:grid;gap:6px">
+                <div style="display:flex;justify-content:space-between"><span class="label">Last 30 days</span><span style="font-size:12px;color:var(--ink-3)">Cheapest on Tuesday</span></div>
+                <svg class="spark" viewBox="0 0 300 64" preserveAspectRatio="none" aria-hidden="true">
+                  <path d="M0 16 H300 M0 40 H300" stroke="var(--line-subtle)" stroke-width="1" fill="none"/>
+                  <path d="M0 44 L20 40 L40 30 L60 22 L80 18 L100 24 L120 34 L140 44 L160 50 L180 46 L200 36 L220 26 L240 20 L260 28 L280 38 L300 44 V64 H0z" fill="var(--accent-soft)"/>
+                  <path d="M0 44 L20 40 L40 30 L60 22 L80 18 L100 24 L120 34 L140 44 L160 50 L180 46 L200 36 L220 26 L240 20 L260 28 L280 38 L300 44" stroke="var(--accent)" stroke-width="1.5" fill="none" vector-effect="non-scaling-stroke"/>
+                  <rect x="296" y="40" width="6" height="6" fill="var(--accent)"/>
+                </svg>
+              </div>
+              <div class="actions">
+                <a class="btn btn-primary" href="#h-screens"><svg class="i" viewBox="0 0 24 24"><path d="M3 11l18-8-8 18-2-8z"/></svg>Get directions</a>
+                <button type="button" class="btn btn-secondary">Share</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 选择 -->
+  <section class="part" aria-labelledby="h-choice">
+    <div class="part-head"><span class="kanji" aria-hidden="true">択</span><h2 id="h-choice">方案选择</h2><p>两套方案共享全部中性色、字体、间距和价格色，只差强调色。</p></div>
+    <div class="choices">
+      <div class="choice">
+        <h3>A · 藍 Ai</h3>
+        <ul>
+          <li>选中态、主按钮、我的位置、趋势线用藍色</li>
+          <li>当前选中的站在地图上一眼可辨，不会和价格色混淆</li>
+          <li>冷藍配暖纸，素雅但不冷淡</li>
+        </ul>
+      </div>
+      <div class="choice">
+        <span class="rec">已选定</span>
+        <h3>B · 墨 Sumi</h3>
+        <ul>
+          <li>强调全部用墨色，整页只有价格三色</li>
+          <li>更极致的素，更像印刷品</li>
+          <li>代价：选中态与主按钮靠明度区分，深色模式里略弱</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+(function () {
+  var root = document.documentElement;
+  var store = {
+    get: function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+    set: function (k, v) { try { localStorage.setItem(k, v); } catch (e) { /* storage unavailable: the choice just won't persist */ } }
+  };
+
+  function press(group, btn) {
+    group.querySelectorAll("button").forEach(function (b) { b.setAttribute("aria-pressed", String(b === btn)); });
+  }
+
+  function setVariant(v) {
+    if (v === "sumi") root.setAttribute("data-variant", "sumi"); else root.removeAttribute("data-variant");
+    press(document.getElementById("v-ai").parentNode, document.getElementById(v === "sumi" ? "v-sumi" : "v-ai"));
+    store.set("ds-variant", v);
+    renderSwatches();
+  }
+  function setTheme(t) {
+    if (t === "light" || t === "dark") root.setAttribute("data-theme", t); else root.removeAttribute("data-theme");
+    press(document.getElementById("t-system").parentNode, document.getElementById("t-" + (t === "light" || t === "dark" ? t : "system")));
+    store.set("ds-theme", t);
+    renderSwatches();
+  }
+  document.querySelectorAll("[data-variant]").forEach(function (b) { b.addEventListener("click", function () { setVariant(b.dataset.variant); }); });
+  document.querySelectorAll("[data-theme-set]").forEach(function (b) { b.addEventListener("click", function () { setTheme(b.dataset.themeSet); }); });
+
+  // Every segmented control in the mocks behaves like a real single-select.
+  document.querySelectorAll(".seg").forEach(function (g) {
+    if (g.parentNode.classList.contains("ctl")) return;
+    g.addEventListener("click", function (e) { var b = e.target.closest("button"); if (b) press(g, b); });
+  });
+
+  var NEUTRAL = [
+    ["--bg", "bg", "地图外框、页面底"],
+    ["--surface", "surface", "面板、卡片、输入"],
+    ["--wash", "wash", "悬停、选中底、骨架"],
+    ["--line", "line", "边框、分隔"],
+    ["--ink", "ink", "主文字"],
+    ["--ink-2", "ink-2", "次要文字"],
+    ["--ink-3", "ink-3", "辅助文字、单位"]
+  ];
+  var ACCENT = [
+    ["--accent", "accent", "主按钮、选中、我的位置"],
+    ["--accent-soft", "accent-soft", "选中行底色、趋势面积"],
+    ["--on-accent", "on-accent", "强调色上的文字"]
+  ];
+  function renderSet(id, list) {
+    var el = document.getElementById(id);
+    var cs = getComputedStyle(root);
+    el.innerHTML = list.map(function (s) {
+      var val = cs.getPropertyValue(s[0]).trim();
+      return '<div class="sw"><div class="chip-color" style="background:var(' + s[0] + ')"></div><div><b>' + s[1] + '</b><span class="mono">' + val + '</span><span>' + s[2] + '</span></div></div>';
+    }).join("");
+  }
+  function renderSwatches() { renderSet("sw-neutral", NEUTRAL); renderSet("sw-accent", ACCENT); }
+  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", renderSwatches);
+
+  var STATIONS = [
+    ["Metro Petroleum", "St Peters", "702 Princes Hwy, St Peters", "1.4 km", "171.9", "cheap", "12 min"],
+    ["Ampol Foodary", "Newtown", "360 King St, Newtown", "0.6 km", "173.5", "cheap", "8 min"],
+    ["7-Eleven", "Enmore", "118 Enmore Rd, Enmore", "0.9 km", "184.5", "fair", "25 min"],
+    ["Shell Reddy Express", "Marrickville", "283 Illawarra Rd, Marrickville", "2.1 km", "186.9", "fair", "40 min"],
+    ["BP", "Camperdown", "2 Parramatta Rd, Camperdown", "1.8 km", "197.5", "pricey", "1 h"],
+    ["EG Ampol", "Sydenham", "46 Railway Pde, Sydenham", "2.6 km", "199.9", "pricey", "2 h"]
+  ];
+  var TIER = { cheap: "Cheap", fair: "Fair", pricey: "Pricey" };
+  function rows(n, active) {
+    return STATIONS.slice(0, n).map(function (s, i) {
+      return '<li class="row"' + (i === active ? ' aria-current="true"' : "") + ' tabindex="0"><div><div class="meta"><span class="brandtag">' + s[0] + '</span><span style="font-size:11px;color:var(--ink-3)">' + s[3] + '</span></div><div class="name">' + s[1] + '</div><div class="addr">' + s[2] + '</div></div><div class="right"><span class="price">' + s[4] + '<span class="u">¢/L</span></span><span class="tier t-' + s[5] + '">' + TIER[s[5]] + '</span></div></li>';
+    }).join("");
+  }
+  document.getElementById("demo-list").innerHTML = rows(3, 0);
+  document.querySelector(".desk-list").innerHTML = rows(6, 0);
+  document.querySelector(".phone-list").innerHTML = rows(3, -1);
+  document.querySelectorAll(".list").forEach(function (l) {
+    l.addEventListener("click", function (e) {
+      var r = e.target.closest(".row"); if (!r) return;
+      l.querySelectorAll(".row").forEach(function (x) { x.removeAttribute("aria-current"); });
+      r.setAttribute("aria-current", "true");
+    });
+  });
+
+  setVariant(store.get("ds-variant") === "ai" ? "ai" : "sumi");
+  setTheme(store.get("ds-theme") || "system");
+})();
+</script>

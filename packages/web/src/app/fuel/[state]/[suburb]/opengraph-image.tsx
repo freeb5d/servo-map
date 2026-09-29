@@ -1,4 +1,5 @@
 import { ImageResponse } from "next/og";
+import { color } from "@servo-map/design-tokens";
 import { BrandMark } from "@/components/brand/BrandMark";
 import { MARK_COLORS } from "@/components/brand/mark";
 
@@ -26,39 +27,31 @@ export default async function Image({ params }: Props) {
           flexDirection: "column",
           alignItems: "flex-start",
           justifyContent: "center",
-          background: "#0C0B09",
+          background: color.bg.light,
           padding: "80px",
-          color: "#FAF7F2",
+          color: color.ink.light,
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
-          <BrandMark size={72} {...MARK_COLORS.dark} />
-          <div
-            style={{
-              display: "flex",
-              fontSize: 32,
-              color: MARK_COLORS.dark.ink,
-              fontWeight: 700,
-              letterSpacing: 2,
-              textTransform: "uppercase",
-            }}
-          >
-            ServoMap · Cheapest Fuel
+          {/* The generated mark carries its own colours; the page is paper, so the light set. */}
+          <BrandMark size={72} {...MARK_COLORS.light} />
+          <div style={{ display: "flex", fontSize: 32, color: color.ink.light, fontWeight: 700 }}>
+            ServoMap
           </div>
         </div>
         <div
           style={{
             display: "flex",
             fontSize: 92,
-            fontWeight: 800,
+            fontWeight: 500,
             marginTop: 20,
             lineHeight: 1.05,
           }}
         >
           {suburbName}
         </div>
-        <div style={{ display: "flex", fontSize: 44, color: "#B8B2A8", marginTop: 16 }}>
-          {state.toUpperCase()} · petrol &amp; diesel prices
+        <div style={{ display: "flex", fontSize: 44, color: color.ink3.light, marginTop: 16 }}>
+          {state.toUpperCase()} petrol and diesel prices
         </div>
       </div>
     ),

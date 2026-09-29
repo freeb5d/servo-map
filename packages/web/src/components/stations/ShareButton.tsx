@@ -2,12 +2,15 @@
 
 import { useState, useCallback } from "react";
 import { cn } from "@/lib/utils";
+import { Icon } from "@/components/ui/Icon";
 
 interface ShareButtonProps {
   /** 要分享的标题（站名 + 品牌） */
   title: string;
   /** 分享的相对路径，如 /station/nsw-123 */
   path: string;
+  /** Icon only, for tight action rows; the accessible name stays "Share this station". */
+  iconOnly?: boolean;
   className?: string;
 }
 
@@ -15,7 +18,7 @@ interface ShareButtonProps {
  * 分享按钮：优先用 Web Share API（移动端原生分享），
  * 不支持时回退到复制链接到剪贴板并给出短暂的 "Copied" 反馈。
  */
-export function ShareButton({ title, path, className }: ShareButtonProps) {
+export function ShareButton({ title, path, iconOnly = false, className }: ShareButtonProps) {
   const [copied, setCopied] = useState(false);
 
   const handleShare = useCallback(async () => {
@@ -46,29 +49,18 @@ export function ShareButton({ title, path, className }: ShareButtonProps) {
     <button
       type="button"
       onClick={handleShare}
-      className={cn(
-        "inline-flex items-center justify-center gap-2 rounded-[var(--radius-button)] font-semibold text-sm transition-colors",
-        className,
-      )}
+      className={cn("btn btn-secondary", className)}
       aria-label="Share this station"
     >
       {copied ? (
         <>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M20 6L9 17l-5-5" />
-          </svg>
-          Link copied
+          <Icon name="check" />
+          {!iconOnly && "Link copied"}
         </>
       ) : (
         <>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="18" cy="5" r="3" />
-            <circle cx="6" cy="12" r="3" />
-            <circle cx="18" cy="19" r="3" />
-            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
-            <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
-          </svg>
-          Share
+          <Icon name="share" />
+          {!iconOnly && "Share"}
         </>
       )}
     </button>

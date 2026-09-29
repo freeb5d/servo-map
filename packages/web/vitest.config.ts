@@ -11,6 +11,10 @@ export default defineConfig({
       "@servo-map/shared": fileURLToPath(
         new URL("../shared/src/index.ts", import.meta.url),
       ),
+      // Tokens ship as TS source, so tests read them without a build step.
+      "@servo-map/design-tokens": fileURLToPath(
+        new URL("../design-tokens/src/index.ts", import.meta.url),
+      ),
     },
   },
   test: {

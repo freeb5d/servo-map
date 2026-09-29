@@ -1,0 +1,85 @@
+# Generate the Xcode project with `xcodegen generate` (the .xcodeproj is not committed).
+name: ServoMap
+options:
+  bundleIdPrefix: com.servomap
+  deploymentTarget:
+    iOS: "27.0"
+  createIntermediateGroups: true
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    MARKETING_VERSION: "0.0.1"
+    CURRENT_PROJECT_VERSION: "1"
+    GENERATE_INFOPLIST_FILE: YES
+    INFOPLIST_KEY_UILaunchScreen_Generation: YES
+    INFOPLIST_KEY_CFBundleDisplayName: ServoMap
+    INFOPLIST_KEY_NSLocationWhenInUseUsageDescription: "ServoMap uses your location to list fuel prices near you. It is not stored or shared."
+    INFOPLIST_KEY_UISupportedInterfaceOrientations: UIInterfaceOrientationPortrait
+    TARGETED_DEVICE_FAMILY: "1"
+targets:
+  ServoMap:
+    type: application
+    platform: iOS
+    sources:
+      - path: Sources
+      - path: Resources
+      - path: Widgets/PriceWidgetViews.swift
+      # Generated from the TypeScript sources of truth; never edit or copy them here.
+      - path: ../../packages/design-tokens/generated/swift/ServoMapTokens.swift
+      - path: ../../packages/shared/generated/swift/ServoMapBrands.swift
+    dependencies:
+      - target: ServoMapWidgets
+        embed: true
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.servomap.app
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+  ServoMapWidgets:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: Widgets
+      # The widget reuses the app's model, API and components rather than copying them.
+      - path: Sources/Model.swift
+      - path: Sources/API.swift
+      - path: Sources/PlaceNames.swift
+      - path: Sources/Trend.swift
+      - path: Sources/Components.swift
+      - path: Sources/Store.swift
+      - path: Sources/FuelType+AppEnum.swift
+      - path: Resources/Fonts
+      - path: ../../packages/design-tokens/generated/swift/ServoMapTokens.swift
+      - path: ../../packages/shared/generated/swift/ServoMapBrands.swift
+    info:
+      path: Widgets/Info.plist
+      properties:
+        CFBundleDisplayName: ServoMap
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
+        UIAppFonts:
+          - ShipporiMincho-Medium.ttf
+          - ShipporiMincho-SemiBold.ttf
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.servomap.app.widgets
+        GENERATE_INFOPLIST_FILE: NO
+        SKIP_INSTALL: YES
+  ServoMapTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: Tests
+    dependencies:
+      - target: ServoMap
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.servomap.app.tests
+        GENERATE_INFOPLIST_FILE: YES
+schemes:
+  ServoMap:
+    build:
+      targets:
+        ServoMap: all
+    test:
+      targets:
+        - ServoMapTests

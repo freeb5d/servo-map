@@ -1,16 +1,17 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
-import type { StationWithDistance, FuelType } from "@servo-map/shared";
-import { PriceTag } from "@/components/stations/PriceTag";
+import { brandFamily, type StationWithDistance } from "@servo-map/shared";
+import { Crumbs, DocFooter, DocPage, DocTitle } from "@/components/doc/DocPage";
+import { TopBar } from "@/components/shell/TopBar";
 import { FreshnessBadge } from "@/components/stations/FreshnessBadge";
-import { StaleBanner } from "@/components/stations/StaleBanner";
-import { FavouriteButton } from "@/components/stations/FavouriteButton";
 import { ShareButton } from "@/components/stations/ShareButton";
-import { PriceRangeProvider } from "@/providers/PriceRangeProvider";
+import { StaleBanner } from "@/components/stations/StaleBanner";
+import { BrandSeal } from "@/components/ui/BrandSeal";
+import { Icon } from "@/components/ui/Icon";
 import { useFavourites } from "@/hooks/useFavourites";
-import { timeAgo } from "@/lib/utils";
+import { formatPriceCents, timeAgo } from "@/lib/utils";
+import { formatAddress } from "@/lib/place-names";
 
 interface Props {
   station: StationWithDistance;
@@ -21,154 +22,83 @@ interface Props {
 }
 
 export function StationPageClient({ station, lastUpdated, suburbHref }: Props) {
-  const [selectedFuel, setSelectedFuel] = useState<FuelType>("U91");
   const { isFavourite, toggle } = useFavourites();
+  const saved = isFavourite(station.id);
+  const family = brandFamily(station.brand);
   const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${station.lat},${station.lng}`;
 
   return (
-    <PriceRangeProvider stations={[station]} selectedFuel={selectedFuel}>
-    <div className="min-h-screen bg-bg">
-      {/* Header — 面包屑 Map › 州 › 郊区（让站点页可向上回到郊区，而非只有 Map） */}
-      <header className="border-b border-border-subtle">
-        <nav
-          aria-label="Breadcrumb"
-          className="max-w-3xl mx-auto px-4 py-4 flex items-center gap-2 text-sm text-text-secondary"
-        >
-          <Link
-            href="/"
-            className="flex items-center gap-2 hover:text-text transition-colors"
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-              <path d="M19 12H5" />
-              <path d="M12 19l-7-7 7-7" />
-            </svg>
-            <span>Map</span>
-          </Link>
-          <span className="text-text-muted" aria-hidden="true">
-            /
+    <DocPage topBar={<TopBar active={null} />}>
+      <Crumbs
+        items={[
+          { label: station.state.toUpperCase(), href: `/fuel/${station.state.toLowerCase()}` },
+          { label: station.suburb, href: suburbHref },
+          { label: station.name },
+        ]}
+      />
+
+      <header className="grid gap-2 animate-rise-in">
+        <div className="flex items-center gap-2">
+          <BrandSeal brand={station.brand} size="lg" />
+          <span className="caption">
+            {family.name}
           </span>
-          <Link
-            href={`/fuel/${station.state.toLowerCase()}`}
-            className="hover:text-text transition-colors"
-          >
-            {station.state.toUpperCase()}
-          </Link>
-          <span className="text-text-muted" aria-hidden="true">
-            /
-          </span>
-          <Link
-            href={suburbHref}
-            className="hover:text-text transition-colors truncate"
-          >
-            {station.suburb}
-          </Link>
-        </nav>
+        </div>
+        <DocTitle>{station.name}</DocTitle>
+        <p className="text-body text-ink-2">
+          {formatAddress(station)}
+        </p>
+        {lastUpdated && (
+          <div>
+            <FreshnessBadge lastUpdated={lastUpdated} />
+          </div>
+        )}
+        {lastUpdated && <StaleBanner lastUpdated={lastUpdated} className="max-w-md" />}
       </header>
 
-      <main className="max-w-3xl mx-auto px-4 py-8">
-        {/* 站点信息 */}
-        <div className="animate-slide-up">
-          <div className="flex items-start justify-between gap-3">
-            <span className="text-xs font-semibold uppercase tracking-wider text-ochre bg-ochre/10 px-2 py-1 rounded">
-              {station.brand}
-            </span>
-            <FavouriteButton
-              active={isFavourite(station.id)}
-              onToggle={() => toggle(station.id)}
-              size="md"
-              className="-mt-1"
-            />
-          </div>
-          <h1 className="font-display font-bold text-3xl mt-3 text-text">
-            {station.name}
-          </h1>
-          <p className="text-text-secondary mt-2">
-            {station.address}, {station.suburb} {station.state.toUpperCase()}{" "}
-            {station.postcode}
-          </p>
-          <Link
-            href={suburbHref}
-            className="inline-flex items-center gap-1 mt-3 text-sm text-ochre hover:text-ochre-dim transition-colors"
-          >
-            Compare all fuel in {station.suburb}
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M5 12h14" />
-              <path d="M12 5l7 7-7 7" />
-            </svg>
-          </Link>
-          {lastUpdated && (
-            <div className="mt-3">
-              <FreshnessBadge lastUpdated={lastUpdated} />
-            </div>
-          )}
-          {lastUpdated && (
-            <StaleBanner lastUpdated={lastUpdated} className="mt-4 max-w-md" />
-          )}
-        </div>
-
-        {/* 价格卡片 */}
-        <section className="mt-8 animate-slide-up delay-1">
-          <h2 className="text-xs font-semibold uppercase tracking-wider text-text-muted mb-4">
-            Current Prices
-          </h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+      <section className="grid gap-3 animate-rise-in">
+        <h2 className="caption">Current prices</h2>
+        {station.prices.length === 0 ? (
+          <p className="text-body text-ink-2">This station has not reported a price yet.</p>
+        ) : (
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
             {station.prices.map((fp) => (
-              <button
-                key={fp.fuel}
-                onClick={() => setSelectedFuel(fp.fuel as FuelType)}
-                className={`p-4 rounded-[var(--radius-card)] border transition-all ${
-                  fp.fuel === selectedFuel
-                    ? "bg-surface-elevated border-ochre/30"
-                    : "bg-surface border-border-subtle hover:border-border"
-                }`}
-              >
-                <span className="text-xs font-semibold text-text-secondary block mb-1">
-                  {fp.fuel}
+              <div key={fp.fuel} className="grid gap-1 rounded-3 border border-line-subtle bg-surface p-4">
+                <span className="text-small font-medium text-ink-2">{fp.fuel}</span>
+                <span className="font-display text-[30px] font-semibold leading-[1.1] tabular-nums">
+                  {formatPriceCents(fp.price)}
+                  <span className="ml-0.5 font-body text-small font-normal text-ink-3">&cent;/L</span>
                 </span>
-                <PriceTag cents={fp.price} size="lg" showUnit />
-                <span className="text-[10px] text-text-muted block mt-1">
-                  {timeAgo(fp.updated_at)}
-                </span>
-              </button>
+                <span className="text-small text-ink-3">{timeAgo(fp.updated_at)}</span>
+              </div>
             ))}
           </div>
-        </section>
+        )}
+      </section>
 
-        {/* Actions */}
-        <div className="mt-8 flex flex-wrap items-center gap-3 animate-slide-up delay-2">
-          <a
-            href={directionsUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-[var(--radius-button)] bg-ochre text-bg font-semibold text-sm hover:bg-ochre-dim transition-colors"
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M3 11l19-9-9 19-2-8-8-2z" />
-            </svg>
-            Get Directions
-          </a>
-          <ShareButton
-            title={`${station.brand} ${station.name} — ServoMap`}
-            path={`/station/${station.id}`}
-            className="px-6 py-3 bg-surface-elevated text-text border border-border-subtle hover:bg-surface-hover"
-          />
-        </div>
-      </main>
+      <div className="flex flex-wrap items-center gap-3 animate-rise-in">
+        <a href={directionsUrl} target="_blank" rel="noopener noreferrer" className="btn btn-primary">
+          <Icon name="directions" />
+          Get Directions
+        </a>
+        <button
+          type="button"
+          aria-pressed={saved}
+          onClick={() => toggle(station.id)}
+          className="btn btn-secondary"
+        >
+          <Icon name="bookmark" filled={saved} />
+          {saved ? "Saved" : "Save"}
+        </button>
+        <ShareButton title={`${station.brand} ${station.name} — ServoMap`} path={`/station/${station.id}`} />
+      </div>
 
-      {/* Footer */}
-      <footer className="border-t border-border-subtle mt-16">
-        <div className="max-w-3xl mx-auto px-4 py-6 text-center text-xs text-text-muted">
-          Prices sourced from state government fuel-price feeds.
-          {lastUpdated ? ` Last updated ${timeAgo(lastUpdated)}.` : ""}{" "}
-          <Link
-            href="/about"
-            className="text-ochre hover:text-ochre-dim transition-colors"
-          >
-            How it works
-          </Link>
-        </div>
-      </footer>
-    </div>
-    </PriceRangeProvider>
+      <Link href={suburbHref} className="link inline-flex items-center gap-1.5 justify-self-start text-body">
+        Compare all fuel in {station.suburb}
+        <Icon name="arrow-right" size={14} />
+      </Link>
+
+      <DocFooter lastUpdated={lastUpdated} />
+    </DocPage>
   );
 }

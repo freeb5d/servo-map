@@ -1,19 +1,23 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import type { ReactNode } from "react";
 import Link from "next/link";
-import type { StationWithDistance, FuelType } from "@servo-map/shared";
-import { FUEL_TYPES } from "@servo-map/shared";
-import { PriceTag } from "@/components/stations/PriceTag";
-import { FreshnessBadge } from "@/components/stations/FreshnessBadge";
+import type { StationWithDistance } from "@servo-map/shared";
+import { Crumbs, DocFooter, DocPage, DocTitle } from "@/components/doc/DocPage";
+import { TierLabel } from "@/components/ui/TierLabel";
+import { TopBar } from "@/components/shell/TopBar";
 import { StaleBanner } from "@/components/stations/StaleBanner";
-import { PriceRangeProvider } from "@/providers/PriceRangeProvider";
-import { cn, getFuelPrice, timeAgo } from "@/lib/utils";
+import { BrandSeal } from "@/components/ui/BrandSeal";
+import { Card } from "@/components/trends/Card";
+import { useFuelPreference } from "@/hooks/useFuelPreference";
+import { cn, formatPriceCents, getFuelPrice, timeAgo } from "@/lib/utils";
 
 interface NearbySuburb {
   slug: string;
   name: string;
   stationCount: number;
+  /** Lowest U91 in that suburb, cents; null when none of its stations sells U91. */
+  minU91: number | null;
 }
 
 interface Props {
@@ -22,9 +26,10 @@ interface Props {
   /** 小写州码，用于内链（/fuel/<state> 与 /fuel/<state>/<suburb>） */
   stateSlug: string;
   stations: StationWithDistance[];
-  cheapestU91: number | null;
   /** 该州数据最后更新时间（ISO 串），来自 metadata 端点 */
   lastUpdated: string | null;
+  /** One-paragraph summary of the page's real numbers, shown under the title. */
+  lede: string;
   /** 模板化正文段落（由真实数据驱动） */
   prose: string[];
   /** FAQ 问答（同时驱动 FAQPage 结构化数据） */
@@ -33,255 +38,147 @@ interface Props {
   nearby: NearbySuburb[];
   /** 预渲染的州级价格趋势区块（服务端组件），无数据时为 null */
   priceTrend?: ReactNode;
+  /** Pre-rendered state cycle card for the side column; null without history. */
+  cycleCard?: ReactNode;
 }
+
+const TH = "px-3.5 py-2.5 text-left text-small font-normal text-ink-3";
 
 export function SuburbPageClient({
   suburbName,
   stateName,
   stateSlug,
   stations,
-  cheapestU91,
   lastUpdated,
+  lede,
   prose,
   faqs,
   nearby,
   priceTrend,
+  cycleCard,
 }: Props) {
-  const [selectedFuel, setSelectedFuel] = useState<FuelType>("U91");
+  const [fuel, setFuel] = useFuelPreference();
 
-  // 按选中燃油类型排序
+  // Stations without a price for the chosen fuel go last, in their original order.
   const sorted = [...stations].sort((a, b) => {
-    const pa = getFuelPrice(a.prices, selectedFuel)?.price ?? Infinity;
-    const pb = getFuelPrice(b.prices, selectedFuel)?.price ?? Infinity;
+    const pa = getFuelPrice(a.prices, fuel)?.price ?? Infinity;
+    const pb = getFuelPrice(b.prices, fuel)?.price ?? Infinity;
     return pa - pb;
   });
+  const cheapestId = sorted[0] && getFuelPrice(sorted[0].prices, fuel) ? sorted[0].id : null;
 
   return (
-    <PriceRangeProvider stations={stations} selectedFuel={selectedFuel}>
-    <div className="min-h-screen bg-bg">
-      {/* Header — 面包屑式导航：Map › 州 hub › 当前郊区 */}
-      <header className="border-b border-border-subtle">
-        <nav
-          aria-label="Breadcrumb"
-          className="max-w-4xl mx-auto px-4 py-4 flex items-center gap-2 text-sm text-text-secondary"
-        >
-          <Link
-            href="/"
-            className="flex items-center gap-2 hover:text-text transition-colors"
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-              <path d="M19 12H5" />
-              <path d="M12 19l-7-7 7-7" />
-            </svg>
-            <span>Map</span>
-          </Link>
-          <span className="text-text-muted" aria-hidden="true">
-            /
-          </span>
-          <Link
-            href={`/fuel/${stateSlug}`}
-            className="hover:text-text transition-colors"
-          >
-            {stateName}
-          </Link>
-          <span className="text-text-muted" aria-hidden="true">
-            /
-          </span>
-          <span className="text-text" aria-current="page">
-            {suburbName}
-          </span>
-        </nav>
-      </header>
-
-      {/* Hero */}
-      <section className="border-b border-border-subtle">
-        <div className="max-w-4xl mx-auto px-4 py-12 animate-slide-up">
-          <p className="text-xs font-semibold uppercase tracking-wider text-ochre mb-2">
-            Fuel Prices
-          </p>
-          <h1 className="font-display font-bold text-4xl md:text-5xl text-text">
-            {suburbName}
-          </h1>
-          <div className="flex flex-wrap items-center gap-3 mt-2">
-            <p className="text-text-secondary text-lg">
-              {stateName} &middot; {stations.length} station
-              {stations.length !== 1 ? "s" : ""}
-            </p>
-            {lastUpdated && <FreshnessBadge lastUpdated={lastUpdated} />}
-          </div>
-          {lastUpdated && <StaleBanner lastUpdated={lastUpdated} className="mt-4 max-w-md" />}
-          {cheapestU91 != null && (
-            <div className="mt-6 inline-flex items-baseline gap-2 bg-surface-elevated rounded-[var(--radius-card)] px-5 py-3 border border-border-subtle">
-              <span className="text-xs text-text-muted uppercase tracking-wider">
-                Cheapest U91
-              </span>
-              <PriceTag cents={cheapestU91} size="xl" />
-            </div>
-          )}
-        </div>
-      </section>
-
-      <main className="max-w-4xl mx-auto px-4 py-8">
-        {/* 模板化正文：可索引、由真实数据驱动，清除 thin-content */}
-        {prose.length > 0 && (
-          <section className="mb-8 max-w-2xl space-y-3 animate-slide-up">
-            {prose.map((para, i) => (
-              <p key={i} className="text-sm text-text-secondary leading-relaxed">
-                {para}
-              </p>
-            ))}
-          </section>
-        )}
-
-        {/* 燃油类型选择 */}
-        <div className="flex gap-1 bg-surface rounded-[var(--radius-pill)] p-1 mb-6 w-fit animate-slide-up delay-1">
-          {FUEL_TYPES.map((fuel) => (
-            <button
-              key={fuel}
-              onClick={() => setSelectedFuel(fuel)}
-              className={cn(
-                "px-3 py-1.5 rounded-[var(--radius-pill)] text-xs font-semibold transition-all",
-                selectedFuel === fuel
-                  ? "bg-ochre text-bg"
-                  : "text-text-secondary hover:text-text",
-              )}
-            >
-              {fuel}
-            </button>
-          ))}
-        </div>
-
-        {/* 价格表 */}
-        <div className="rounded-[var(--radius-card)] border border-border-subtle overflow-hidden animate-slide-up delay-2">
-          {/* 表头 */}
-          <div className="grid grid-cols-[1fr_auto_auto] gap-4 px-4 py-3 bg-surface-elevated text-xs font-semibold uppercase tracking-wider text-text-muted border-b border-border-subtle">
-            <span>Station</span>
-            <span className="text-right">Price</span>
-            <span className="text-right hidden sm:block">Updated</span>
-          </div>
-
-          {/* 行 */}
-          {sorted.map((station, i) => {
-            const fp = getFuelPrice(station.prices, selectedFuel);
-            return (
-              <a
-                key={station.id}
-                href={`/station/${station.id}`}
-                className={cn(
-                  "grid grid-cols-[1fr_auto_auto] gap-4 px-4 py-3.5 items-center hover:bg-surface-hover transition-colors border-b border-border-subtle last:border-b-0",
-                  i === 0 && "bg-price-cheap/5",
-                )}
-              >
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-semibold uppercase tracking-wider text-ochre">
-                      {station.brand}
-                    </span>
-                    {i === 0 && (
-                      <span className="text-[10px] font-semibold text-price-cheap bg-price-cheap/10 px-1.5 py-0.5 rounded">
-                        CHEAPEST
-                      </span>
+    <DocPage
+      topBar={<TopBar active={null} fuel={fuel} onFuelChange={setFuel} />}
+      aside={
+        <>
+          {cycleCard}
+          {nearby.length > 0 && (
+            <Card label="Nearby suburbs" aside="lowest U91">
+              <ul>
+                {nearby.map((n) => (
+                  <li key={n.slug} className="flex items-center justify-between gap-2 border-b border-line-subtle py-[7px] last:border-b-0">
+                    <Link href={`/fuel/${stateSlug}/${n.slug}`} className="link">
+                      {n.name}
+                    </Link>
+                    {n.minU91 !== null ? (
+                      <span className="font-display text-body font-semibold tabular-nums">{formatPriceCents(n.minU91)}</span>
+                    ) : (
+                      <span className="text-small text-ink-3">{n.stationCount} st.</span>
                     )}
-                  </div>
-                  <p className="text-sm font-medium text-text truncate">
-                    {station.name}
-                  </p>
-                  <p className="text-xs text-text-muted truncate">
-                    {station.address}
-                  </p>
-                </div>
-                <div className="text-right">
-                  {fp ? (
-                    <PriceTag cents={fp.price} size="md" />
-                  ) : (
-                    <span className="text-sm text-text-muted">—</span>
-                  )}
-                </div>
-                <div className="text-right hidden sm:block">
-                  {fp && (
-                    <span className="text-xs text-text-muted">
-                      {timeAgo(fp.updated_at)}
-                    </span>
-                  )}
-                </div>
-              </a>
-            );
-          })}
-        </div>
+                  </li>
+                ))}
+              </ul>
+            </Card>
+          )}
+          <Link href={`/?q=${encodeURIComponent(suburbName)}`} className="btn btn-primary">
+            Open {suburbName} on the map
+          </Link>
+        </>
+      }
+    >
+      <Crumbs items={[{ label: stateName, href: `/fuel/${stateSlug}` }, { label: suburbName }]} />
+      <DocTitle>
+        Fuel prices in {suburbName}, {stateName}
+      </DocTitle>
+      <p className="max-w-[36em] text-body text-ink-2">{lede}</p>
+      {lastUpdated && <StaleBanner lastUpdated={lastUpdated} className="max-w-md" />}
 
-        {/* 州级价格趋势 — 数据按州采集，标注为全州走势而非本郊区 */}
-        {priceTrend}
+      <div className="overflow-x-auto rounded-3 border border-line-subtle bg-surface animate-rise-in">
+        <table className="w-full min-w-[420px] border-collapse text-body">
+          <caption className="sr-only">
+            {fuel} prices at {suburbName} stations, cheapest first
+          </caption>
+          <thead>
+            <tr>
+              <th className={cn(TH, "w-12")} aria-label="Brand" />
+              <th className={TH}>Station</th>
+              <th className={cn(TH, "text-right")}>{fuel}</th>
+              <th className={cn(TH, "text-right max-sm:hidden")}>Updated</th>
+            </tr>
+          </thead>
+          <tbody>
+            {sorted.map((station) => {
+              const fp = getFuelPrice(station.prices, fuel);
+              const isCheapest = station.id === cheapestId;
+              return (
+                <tr key={station.id} className={cn("border-t border-line-subtle", isCheapest && "bg-price-cheap-soft")}>
+                  <td className="px-3.5 py-3">
+                    <BrandSeal brand={station.brand} />
+                  </td>
+                  <td className="px-3.5 py-3">
+                    <Link href={`/station/${station.id}`} className="font-medium hover:underline">
+                      {station.name}
+                    </Link>
+                    {isCheapest && <TierLabel tier="cheap" className="ml-2.5">Cheapest</TierLabel>}
+                    <div className="text-small text-ink-3">{station.address}</div>
+                  </td>
+                  <td className="px-3.5 py-3 text-right">
+                    {fp ? (
+                      <span className="font-display text-[19px] font-semibold tabular-nums">{formatPriceCents(fp.price)}</span>
+                    ) : (
+                      <span className="text-ink-3">&mdash;</span>
+                    )}
+                  </td>
+                  <td className="px-3.5 py-3 text-right text-small text-ink-3 max-sm:hidden">{fp ? timeAgo(fp.updated_at) : ""}</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
 
-        {/* 邻近郊区交叉链接 — 内链密度 + 让爬虫沿郊区图谱深入 */}
-        {nearby.length > 0 && (
-          <section className="mt-12 animate-slide-up">
-            <h2 className="font-display font-bold text-xl text-text mb-4">
-              Nearby suburbs in {stateName}
-            </h2>
-            <div className="flex flex-wrap gap-2">
-              {nearby.map((n) => (
-                <Link
-                  key={n.slug}
-                  href={`/fuel/${stateSlug}/${n.slug}`}
-                  className="inline-flex items-baseline gap-2 px-4 py-2 rounded-[var(--radius-pill)] bg-surface-elevated border border-border-subtle text-sm text-text hover:border-ochre/40 hover:bg-surface-hover transition-colors"
-                >
-                  <span className="font-medium">{n.name}</span>
-                  <span className="text-xs text-text-muted">
-                    {n.stationCount}
-                  </span>
-                </Link>
-              ))}
-            </div>
-          </section>
-        )}
+      {/* 州级价格趋势 — 数据按州采集，标注为全州走势而非本郊区 */}
+      {priceTrend}
 
-        {/* FAQ — 可见问答，同时镜像 FAQPage 结构化数据 */}
-        {faqs.length > 0 && (
-          <section className="mt-12 animate-slide-up">
-            <h2 className="font-display font-bold text-xl text-text mb-4">
-              {suburbName} fuel price FAQ
-            </h2>
-            <dl className="space-y-4">
-              {faqs.map((f, i) => (
-                <div
-                  key={i}
-                  className="rounded-[var(--radius-card)] border border-border-subtle bg-surface px-5 py-4"
-                >
-                  <dt className="text-sm font-semibold text-text">{f.q}</dt>
-                  <dd className="text-sm text-text-secondary mt-2 leading-relaxed">
-                    {f.a}
-                  </dd>
-                </div>
-              ))}
-            </dl>
-          </section>
-        )}
-      </main>
-
-      {/* Footer */}
-      <footer className="border-t border-border-subtle mt-16">
-        <div className="max-w-4xl mx-auto px-4 py-8">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-text-muted">
-            <p>
-              Prices sourced from state government fuel-price feeds.
-              {lastUpdated ? ` Last updated ${timeAgo(lastUpdated)}.` : ""}{" "}
-              <Link
-                href="/about"
-                className="text-ochre hover:text-ochre-dim transition-colors"
-              >
-                How it works
-              </Link>
+      {/* 模板化正文：可索引、由真实数据驱动，清除 thin-content */}
+      {prose.length > 0 && (
+        <section className="grid max-w-[40em] gap-3">
+          <h2 className="caption">About fuel prices in {suburbName}</h2>
+          {prose.map((para, i) => (
+            <p key={i} className="text-body text-ink-2">
+              {para}
             </p>
-            <Link
-              href={`/fuel/${stateSlug}`}
-              className="text-ochre hover:text-ochre-dim transition-colors"
-            >
-              All {stateName} suburbs &rarr;
-            </Link>
-          </div>
-        </div>
-      </footer>
-    </div>
-    </PriceRangeProvider>
+          ))}
+        </section>
+      )}
+
+      {/* FAQ — 可见问答，同时镜像 FAQPage 结构化数据 */}
+      {faqs.length > 0 && (
+        <section className="grid gap-3">
+          <h2 className="caption">{suburbName} fuel price FAQ</h2>
+          <dl className="grid gap-3">
+            {faqs.map((f, i) => (
+              <div key={i} className="rounded-3 border border-line-subtle bg-surface px-5 py-4">
+                <dt className="text-body font-medium text-ink">{f.q}</dt>
+                <dd className="mt-2 text-body text-ink-2">{f.a}</dd>
+              </div>
+            ))}
+          </dl>
+        </section>
+      )}
+
+      <DocFooter lastUpdated={lastUpdated} />
+    </DocPage>
   );
 }

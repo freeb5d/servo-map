@@ -38,7 +38,8 @@ Cloudflare Worker, and renders it in a Next.js + Mapbox frontend.
 ```
 servo-map/
 ├── packages/
-│   ├── shared/      # Pure TS types + enums. No runtime code.
+│   ├── design-tokens/ # Design system tokens (素). Generates web CSS + iOS Swift. See docs/design/system.md.
+│   ├── shared/      # Pure TS types, enums and reference tables (fuel types, brand families). No I/O.
 │   ├── worker/      # Read-only Hono API + KV readers. Ingest runs from GH Actions (scripts/fetch-data.ts).
 │   └── web/         # Next.js App Router. Map, hooks, station pages.
 ├── scripts/
@@ -72,16 +73,17 @@ pnpm -r build                                   # repo-wide build
 
 ## 5. Golden rules (non-negotiable)
 
-1. **`@servo-map/shared` is the single source of truth for types.** Never redefine `Station`, `FuelPrice`, `AustralianState`, `FuelType`, `ApiResponse` in web or worker.
-2. **`docs/openapi.yaml` is the source of truth for the HTTP contract.** Update it in the same PR as any route change.
-3. **Adapters follow one contract** (`packages/worker/src/adapters/types.ts` → `StateAdapter`). Add new states by copying an existing adapter — never by inventing a new pattern. See `docs/claude/adapters.md`.
-4. **KV keys are namespaced in `packages/worker/src/kv/keys.ts`.** Never string-concatenate keys at call sites.
-5. **No state APIs called from the browser.** The worker (or the ingest script) is the only upstream caller.
-6. **Ingest is a scheduled side effect, not a request path.** A failed adapter must not fail the whole cron — use `Promise.allSettled` and preserve prior KV data.
-7. **Secrets never enter the repo.** `.dev.vars`, `.env.local`, and GH secrets only. See `docs/claude/security.md`.
-8. **Strict TS only.** `tsconfig.base.json` has `strict: true`; do not disable it per package.
-9. **Match existing style before inventing new patterns.** Worker routes use Hono patterns; web uses App Router + hooks; types live in `shared`.
-10. **Merge via squash on PR green.** Never force-push `main`. See `docs/claude/workflows.md`.
+1. **`@servo-map/design-tokens` is the single source of truth for visual values.** Never hardcode a colour, font, radius or motion value in web or iOS; edit `src/tokens.ts` and run its `generate` script.
+2. **`@servo-map/shared` is the single source of truth for types.** Never redefine `Station`, `FuelPrice`, `AustralianState`, `FuelType`, `ApiResponse` in web or worker.
+3. **`docs/openapi.yaml` is the source of truth for the HTTP contract.** Update it in the same PR as any route change.
+4. **Adapters follow one contract** (`packages/worker/src/adapters/types.ts` → `StateAdapter`). Add new states by copying an existing adapter — never by inventing a new pattern. See `docs/claude/adapters.md`.
+5. **KV keys are namespaced in `packages/worker/src/kv/keys.ts`.** Never string-concatenate keys at call sites.
+6. **No state APIs called from the browser.** The worker (or the ingest script) is the only upstream caller.
+7. **Ingest is a scheduled side effect, not a request path.** A failed adapter must not fail the whole cron — use `Promise.allSettled` and preserve prior KV data.
+8. **Secrets never enter the repo.** `.dev.vars`, `.env.local`, and GH secrets only. See `docs/claude/security.md`.
+9. **Strict TS only.** `tsconfig.base.json` has `strict: true`; do not disable it per package.
+10. **Match existing style before inventing new patterns.** Worker routes use Hono patterns; web uses App Router + hooks; types live in `shared`.
+11. **Merge via squash on PR green.** Never force-push `main`. See `docs/claude/workflows.md`.
 
 ---
 

@@ -9,6 +9,8 @@ import { getStations, getMetadata, getTrends } from "@/lib/api";
 import { latestUpdatedAt } from "@/lib/coverage";
 import { SITE_URL } from "@/lib/site";
 import { PriceTrendSection } from "@/components/stations/PriceTrendSection";
+import { StateCycleCard } from "@/components/trends/StateCycleCard";
+import { suburbStats } from "@/lib/aggregate";
 import {
   slugToSuburb,
   suburbToSlug,
@@ -17,7 +19,7 @@ import {
   avgU91,
   nearbySuburbs,
 } from "@/lib/seo";
-import { formatPrice } from "@/lib/utils";
+import { formatPriceCents, getFuelPrice, timeAgo } from "@/lib/utils";
 import { SuburbPageClient } from "./client";
 
 // ISR: regenerate at most every 15 minutes, generate unknown suburbs on demand.
@@ -127,8 +129,20 @@ export default async function SuburbPage({ params }: Props) {
   const stateAvgU91 = avgU91(stateStations);
   const nearby = nearbySuburbs(stateStations, suburb.toLowerCase(), state, 6);
 
-  // Cheapest U91 across the suburb — null if no station sells U91.
-  const cheapestU91 = stats.cheapest?.price ?? null;
+  // Lowest U91 per suburb, so the side column can show real prices next to each neighbour.
+  const minBySlug = new Map(
+    suburbStats(stateStations, "U91").map((s) => [suburbToSlug(s.suburb), s.min]),
+  );
+  const nearbyWithPrice = nearby.map((n) => ({ ...n, minU91: minBySlug.get(n.slug) ?? null }));
+
+  const lede = buildLede({
+    suburbName,
+    stateUpper,
+    stats,
+    stateAvgU91,
+    u91Count: stations.filter((s) => getFuelPrice(s.prices, "U91")).length,
+    lastUpdated,
+  });
 
   // 模板化正文：以真实数据变量填充，清除 thin-content 阈值
   const prose = buildProse({
@@ -222,11 +236,16 @@ export default async function SuburbPage({ params }: Props) {
         stateName={stateUpper}
         stateSlug={state.toLowerCase()}
         stations={stations}
-        cheapestU91={cheapestU91}
         lastUpdated={lastUpdated}
+        lede={lede}
         prose={prose}
         faqs={faqs}
-        nearby={nearby}
+        nearby={nearbyWithPrice}
+        cycleCard={
+          trendSeries.length > 0 ? (
+            <StateCycleCard series={trendSeries} fuel="U91" stateLabel={stateUpper} />
+          ) : null
+        }
         priceTrend={
           trendSeries.length > 0 ? (
             <PriceTrendSection
@@ -239,6 +258,28 @@ export default async function SuburbPage({ params }: Props) {
       />
     </>
   );
+}
+
+interface LedeInput extends ProseInput {
+  u91Count: number;
+  lastUpdated: string | null;
+}
+
+/** One-paragraph summary under the title, made of the page's real numbers (U91, the default fuel). */
+function buildLede({ suburbName, stateUpper, stats, stateAvgU91, u91Count, lastUpdated }: LedeInput): string {
+  if (!stats.cheapest) {
+    return `${stats.stationCount} station${stats.stationCount !== 1 ? "s" : ""} in ${suburbName}, ${stateUpper}. None reports U91 right now; pick another fuel below.`;
+  }
+  let text = `${u91Count} station${u91Count !== 1 ? "s" : ""} report${u91Count === 1 ? "s" : ""} U91 in ${suburbName}. The cheapest is ${stats.cheapest.name} at ${formatPriceCents(stats.cheapest.price)}\u00A2/L`;
+  if (stateAvgU91 != null) {
+    const diff = stateAvgU91 - stats.cheapest.price;
+    text += Math.abs(diff) < 0.05
+      ? `, level with the ${stateUpper} average`
+      : `, ${formatPriceCents(Math.abs(diff))}\u00A2 ${diff > 0 ? "under" : "over"} the ${stateUpper} average`;
+  }
+  text += ".";
+  if (lastUpdated) text += ` Updated ${timeAgo(lastUpdated)} from the ${stateUpper} government feed.`;
+  return text;
 }
 
 interface ProseInput {
@@ -267,16 +308,16 @@ function buildProse({
   );
 
   if (stats.avgU91 != null) {
-    let avgLine = `The average U91 (regular unleaded) price in ${suburbName} is currently ${formatPrice(stats.avgU91)}c per litre.`;
+    let avgLine = `The average U91 (regular unleaded) price in ${suburbName} is currently ${formatPriceCents(stats.avgU91)}c per litre.`;
     if (stateAvgU91 != null) {
       const diff = stats.avgU91 - stateAvgU91;
       const absDiff = Math.abs(diff);
       if (absDiff < 0.5) {
-        avgLine += ` That's in line with the ${stateUpper} average of ${formatPrice(stateAvgU91)}c.`;
+        avgLine += ` That's in line with the ${stateUpper} average of ${formatPriceCents(stateAvgU91)}c.`;
       } else if (diff < 0) {
-        avgLine += ` That's ${formatPrice(absDiff)}c cheaper than the ${stateUpper} average of ${formatPrice(stateAvgU91)}c — a relatively good area to refuel.`;
+        avgLine += ` That's ${formatPriceCents(absDiff)}c cheaper than the ${stateUpper} average of ${formatPriceCents(stateAvgU91)}c — a relatively good area to refuel.`;
       } else {
-        avgLine += ` That's ${formatPrice(absDiff)}c dearer than the ${stateUpper} average of ${formatPrice(stateAvgU91)}c, so it pays to shop around.`;
+        avgLine += ` That's ${formatPriceCents(absDiff)}c dearer than the ${stateUpper} average of ${formatPriceCents(stateAvgU91)}c, so it pays to shop around.`;
       }
     }
     paras.push(avgLine);
@@ -284,9 +325,9 @@ function buildProse({
 
   if (stats.cheapest && stats.dearest) {
     const spread = stats.dearest.price - stats.cheapest.price;
-    let priceLine = `Right now the cheapest U91 in ${suburbName} is ${formatPrice(stats.cheapest.price)}c at ${stats.cheapest.brand} (${stats.cheapest.name}).`;
+    let priceLine = `Right now the cheapest U91 in ${suburbName} is ${formatPriceCents(stats.cheapest.price)}c at ${stats.cheapest.brand} (${stats.cheapest.name}).`;
     if (spread > 0.5 && stats.dearest.name !== stats.cheapest.name) {
-      priceLine += ` The dearest is ${formatPrice(stats.dearest.price)}c at ${stats.dearest.brand} (${stats.dearest.name}) — a spread of ${formatPrice(spread)}c per litre, or about ${formatPrice(spread * 0.5)} on a 50-litre tank.`;
+      priceLine += ` The dearest is ${formatPriceCents(stats.dearest.price)}c at ${stats.dearest.brand} (${stats.dearest.name}) — a spread of ${formatPriceCents(spread)}c per litre, or about $${((spread * 50) / 100).toFixed(2)} on a 50-litre tank.`;
     }
     paras.push(priceLine);
   }
@@ -313,14 +354,14 @@ function buildFaqs({
   if (stats.cheapest) {
     faqs.push({
       q: `Where is the cheapest fuel in ${suburbName}?`,
-      a: `The cheapest U91 in ${suburbName} right now is ${formatPrice(stats.cheapest.price)}c per litre at ${stats.cheapest.brand} (${stats.cheapest.name}). ServoMap updates prices from the ${stateUpper} government feed throughout the day, so check before you head out.`,
+      a: `The cheapest U91 in ${suburbName} right now is ${formatPriceCents(stats.cheapest.price)}c per litre at ${stats.cheapest.brand} (${stats.cheapest.name}). ServoMap updates prices from the ${stateUpper} government feed throughout the day, so check before you head out.`,
     });
   }
 
   if (stats.avgU91 != null) {
-    let a = `The average U91 price across ${stats.stationCount} station${stats.stationCount !== 1 ? "s" : ""} in ${suburbName} is about ${formatPrice(stats.avgU91)}c per litre.`;
+    let a = `The average U91 price across ${stats.stationCount} station${stats.stationCount !== 1 ? "s" : ""} in ${suburbName} is about ${formatPriceCents(stats.avgU91)}c per litre.`;
     if (stateAvgU91 != null) {
-      a += ` The ${stateUpper} state average is ${formatPrice(stateAvgU91)}c per litre.`;
+      a += ` The ${stateUpper} state average is ${formatPriceCents(stateAvgU91)}c per litre.`;
     }
     faqs.push({
       q: `What is the average petrol price in ${suburbName}?`,

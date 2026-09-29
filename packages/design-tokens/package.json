@@ -1,0 +1,21 @@
+{
+  "name": "@servo-map/design-tokens",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./tokens.css": "./generated/tokens.css"
+  },
+  "scripts": {
+    "generate": "tsx scripts/generate.ts",
+    "typecheck": "tsc --noEmit",
+    "lint": "echo 'no linter configured'",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.7.0",
+    "vitest": "^2.1.9"
+  }
+}

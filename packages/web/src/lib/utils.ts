@@ -1,4 +1,6 @@
 import type { FuelPrice } from "@servo-map/shared";
+import { color } from "@servo-map/design-tokens";
+import type { Theme } from "@/lib/theme";
 
 // --- 价格颜色基于百分位动态计算 ---
 
@@ -21,13 +23,6 @@ export function computePriceRange(prices: number[]): PriceRange {
   return { cheapBelow: p33, midBelow: p66 };
 }
 
-export function priceColorClass(price: number, range?: PriceRange): string {
-  if (!range) return "text-text";
-  if (price <= range.cheapBelow) return "text-price-cheap";
-  if (price <= range.midBelow) return "text-price-mid";
-  return "text-price-expensive";
-}
-
 /** 价格档位：cheap / fair / pricey（相对附近站点）。颜色之外的非颜色信号。 */
 export type PriceTier = "cheap" | "fair" | "pricey";
 
@@ -46,18 +41,24 @@ export const TIER_LABELS: Record<PriceTier, string> = {
   pricey: "Pricey",
 };
 
-// 各主题下达到 WCAG AA（≥4.5:1）的档位色，供 Mapbox paint 等无法用 CSS 变量的场景使用。
-// 暗色面板沿用原始鲜亮色；浅色面板换成更深的同色系以保证对比度。
-const TIER_HEX_DARK: Record<PriceTier, string> = {
-  cheap: "#4ADE80",
-  fair: "#FBBF24",
-  pricey: "#F87171",
+/** 档位 → 文字色 class；仅用于档位标记（■）与标签，价格数字本身保持 ink。 */
+export const TIER_TEXT_CLASS: Record<PriceTier, string> = {
+  cheap: "text-price-cheap",
+  fair: "text-price-mid",
+  pricey: "text-price-expensive",
 };
-const TIER_HEX_LIGHT: Record<PriceTier, string> = {
-  cheap: "#15803D",
-  fair: "#B45309",
-  pricey: "#DC2626",
-};
+
+export function priceColorClass(price: number, range?: PriceRange): string {
+  return TIER_TEXT_CLASS[priceTier(price, range)];
+}
+
+// Tier colours come from the token package so Mapbox paint (which cannot read CSS
+// variables) and the DOM never drift apart.
+const TIER_COLOR = {
+  cheap: color.priceCheap,
+  fair: color.priceMid,
+  pricey: color.priceExpensive,
+} as const;
 
 /**
  * 按主题返回档位对应的十六进制颜色。
@@ -67,16 +68,15 @@ const TIER_HEX_LIGHT: Record<PriceTier, string> = {
 export function priceColorHex(
   price: number,
   range?: PriceRange,
-  theme: "dark" | "light" = "dark",
+  theme: Theme = "light",
 ): string {
-  if (!range) return theme === "light" ? "#6B6560" : "#9B9489";
-  const palette = theme === "light" ? TIER_HEX_LIGHT : TIER_HEX_DARK;
-  return palette[priceTier(price, range)];
+  if (!range) return color.ink3[theme];
+  return TIER_COLOR[priceTier(price, range)][theme];
 }
 
 /** 档位 → 主题色（供 MapView symbol paint 的 match 表达式直接取色）。 */
-export function tierHex(tier: PriceTier, theme: "dark" | "light"): string {
-  return (theme === "light" ? TIER_HEX_LIGHT : TIER_HEX_DARK)[tier];
+export function tierHex(tier: PriceTier, theme: Theme): string {
+  return TIER_COLOR[tier][theme];
 }
 
 /**

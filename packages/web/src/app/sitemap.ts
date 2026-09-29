@@ -45,6 +45,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const entries: MetadataRoute.Sitemap = [
     { url: BASE, lastModified: siteLastMod, changeFrequency: "hourly", priority: 1 },
+    // /saved is per-device and noindex, so it is deliberately absent.
+    { url: `${BASE}/trends`, lastModified: siteLastMod, changeFrequency: "daily", priority: 0.6 },
     { url: `${BASE}/about`, lastModified: siteLastMod, changeFrequency: "monthly", priority: 0.4 },
   ];
 
