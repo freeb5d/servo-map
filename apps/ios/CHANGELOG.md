@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.0](https://github.com/Misoto22/servo-map/compare/ios-v0.8.0...ios-v0.9.0) (2026-09-30)
+
+
+### Features
+
+* **ios:** redesign Trends with overview, states, cities and timing ([#70](https://github.com/Misoto22/servo-map/issues/70)) ([2c0b497](https://github.com/Misoto22/servo-map/commit/2c0b497b73ced5cea51d1de4fece68428289f7fa))
+
 ## [0.8.0](https://github.com/Misoto22/servo-map/compare/ios-v0.7.0...ios-v0.8.0) (2026-09-30)
 
 

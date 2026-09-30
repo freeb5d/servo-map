@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.9.0](https://github.com/Misoto22/servo-map/compare/v0.8.1...v0.9.0) (2026-09-30)
+
+
+### Features
+
+* **design:** add studio renders for 153 catalogue generations ([#67](https://github.com/Misoto22/servo-map/issues/67)) ([ea07b28](https://github.com/Misoto22/servo-map/commit/ea07b28fe80b392b14798ff4a0771bb724893a4c))
+* **ingest:** backfill daily prices from published history files ([#69](https://github.com/Misoto22/servo-map/issues/69)) ([69142ca](https://github.com/Misoto22/servo-map/commit/69142ca3a3a49c63ef5e9787c6fd4049b9c82bdc))
+* **ios:** redesign Trends with overview, states, cities and timing ([#70](https://github.com/Misoto22/servo-map/issues/70)) ([2c0b497](https://github.com/Misoto22/servo-map/commit/2c0b497b73ced5cea51d1de4fece68428289f7fa))
+
 ## [0.8.1](https://github.com/Misoto22/servo-map/compare/v0.8.0...v0.8.1) (2026-09-30)
 
 
