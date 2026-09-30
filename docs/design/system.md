@@ -81,6 +81,9 @@ Rules added after the owner found the first v2 build "too AI" (2026-09-29). They
 - Spacing scale: 4, 8, 12, 16, 24, 32, 48, 64.
 - Radii: `r-1` 2px (tags, chips, pins), `r-2` 4px (buttons, inputs, segmented control), `r-3` 6px (panels, sheets).
 - One shadow, `shadow-float`, only for chrome floating over the map. Panels docked to an edge use a hairline instead.
+- The 素 plain list ([decision 0008](../decisions/0008-ios-redesign-you-settings-trends.md)), token `list`: 24 gutters,
+  56 rows, a 0.5 hairline only between rows and inset past a 24 line icon and its 16 gap, 32 above a
+  Mincho group title. No card around a group; iOS Settings is built from it (`ServoMapList`).
 
 ## Components
 

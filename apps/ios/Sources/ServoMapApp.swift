@@ -3,14 +3,13 @@ import SwiftUI
 @main
 struct ServoMapApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
-    // Opens on the fuel from the car profile (MyCar writes "defaultFuel").
-    @State private var store = Store(fuel: FuelType(rawValue: UserDefaults.standard.string(forKey: "defaultFuel") ?? "") ?? .u91)
+    // Opens on the fuel, members-only choice and tier radius from Settings › Map.
+    @State private var store = MapPreferences.launchStore()
     @State private var log = FillUpLog()
     @State private var account = AccountStore()
-    // Launch arguments open a given screen, so design screenshots are reproducible:
-    // -tab map|trends|search, you to open the You sheet, or saved|log|car|alerts|sources for one of its pages, -filters, -detail (opens the cheapest station), -widgets.
-    // With -tab you: -addCar make|model|years|details [-addCarModel Make/Model] opens the add-a-car flow on that step.
-    private let args = ProcessInfo.processInfo.arguments
+    @AppStorage(StorageKey.appearance) private var appearance = Appearance.system.rawValue
+    // Launch arguments open a given screen, so design screenshots are reproducible (see LaunchRoute).
+    private let route = LaunchRoute(arguments: ProcessInfo.processInfo.arguments)
 
     init() {
         Fonts.register()
@@ -20,10 +19,10 @@ struct ServoMapApp: App {
     var body: some Scene {
         WindowGroup {
             Group {
-                if args.contains("-widgets") {
+                if route.widgets {
                     WidgetGallery()
                 } else {
-                    RootView(initialTab: value(after: "-tab") ?? "map", openFilters: args.contains("-filters"), openDetail: args.contains("-detail"))
+                    RootTabs(route: route).modifier(AccountSync())
                 }
             }
                 .environment(store)
@@ -31,27 +30,13 @@ struct ServoMapApp: App {
                 .environment(account)
                 .tint(ServoMapColor.accent)
                 .font(ServoMapFont.body(.footnote))
+                // Paper or Ink from Settings › Appearance; System follows the iPhone.
+                .preferredColorScheme(Appearance(rawValue: appearance)?.colorScheme)
                 .task {
                     await store.load()
                     await account.refresh(store: store, log: log)
                 }
         }
-    }
-
-    private func value(after flag: String) -> String? {
-        guard let i = args.firstIndex(of: flag), i + 1 < args.count else { return nil }
-        return args[i + 1]
-    }
-}
-
-struct RootView: View {
-    let initialTab: String
-    let openFilters: Bool
-    let openDetail: Bool
-
-    var body: some View {
-        MapScreen(tab: initialTab, openFilters: openFilters, openDetail: openDetail)
-            .modifier(AccountSync())
     }
 }
 
@@ -64,16 +49,16 @@ private struct AccountSync: ViewModifier {
     @Environment(Store.self) private var store
     @Environment(FillUpLog.self) private var log
     @Environment(AccountStore.self) private var account
-    @AppStorage("carName") private var carName = "My car"
-    @AppStorage("carVehicleID") private var carVehicleID = ""
-    @AppStorage("carBody") private var carBody = ""
-    @AppStorage("tankLitres") private var tankLitres = 50
-    @AppStorage("defaultFuel") private var defaultFuel = ""
-    @AppStorage("priceAlerts") private var priceAlerts = false
-    @AppStorage("alertCycleLow") private var cycleLow = false
-    @AppStorage("quietStart") private var quietStart = 22
-    @AppStorage("quietEnd") private var quietEnd = 7
-    @AppStorage("apnsToken") private var apnsToken = ""
+    @AppStorage(StorageKey.carName) private var carName = "My car"
+    @AppStorage(StorageKey.carVehicleID) private var carVehicleID = ""
+    @AppStorage(StorageKey.carBody) private var carBody = ""
+    @AppStorage(StorageKey.tankLitres) private var tankLitres = 50
+    @AppStorage(StorageKey.defaultFuel) private var defaultFuel = ""
+    @AppStorage(StorageKey.priceAlerts) private var priceAlerts = false
+    @AppStorage(StorageKey.alertCycleLow) private var cycleLow = false
+    @AppStorage(StorageKey.quietStart) private var quietStart = 22
+    @AppStorage(StorageKey.quietEnd) private var quietEnd = 7
+    @AppStorage(StorageKey.apnsToken) private var apnsToken = ""
     @State private var pending: Task<Void, Never>?
 
     func body(content: Content) -> some View {
@@ -91,10 +76,7 @@ private struct AccountSync: ViewModifier {
             .onChange(of: "\(carName)|\(carVehicleID)|\(carBody)|\(tankLitres)|\(defaultFuel)") { debounce { await account.pushCar() } }
             .onChange(of: "\(priceAlerts)|\(cycleLow)|\(quietStart)|\(quietEnd)") {
                 // "Near home" is where the user last located themselves, rounded to ~1 km on the server.
-                if cycleLow, let here = store.userLocation {
-                    UserDefaults.standard.set(here.lat, forKey: "homeLat")
-                    UserDefaults.standard.set(here.lng, forKey: "homeLng")
-                }
+                if cycleLow, let here = store.userLocation { AlertPrefs.setHome(lat: here.lat, lng: here.lng) }
                 debounce { await account.pushAlerts() }
             }
             .onChange(of: apnsToken) { _, token in if !token.isEmpty { Task { await account.pushDevice(token) } } }

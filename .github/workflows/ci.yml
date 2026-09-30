@@ -80,5 +80,6 @@ jobs:
       - run: pnpm brand-logos --check
       - run: pnpm car-renders --check
       - run: pnpm car-logos --check
+      - run: pnpm nav-app-icons --check
       # The favicon, web mark and app icon are rendered from the design tokens; fail if stale.
       - run: python3 design/app-icon/generate.py --check

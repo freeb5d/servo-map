@@ -28,7 +28,7 @@ final class AccountStore {
 
     init() {
         token = Keychain.read()
-        if let data = UserDefaults.standard.data(forKey: "account"), let saved = try? JSONDecoder().decode(AccountDTO.self, from: data), token != nil {
+        if let data = UserDefaults.standard.data(forKey: StorageKey.account), let saved = try? JSONDecoder().decode(AccountDTO.self, from: data), token != nil {
             account = saved
             status = .signedIn
         }
@@ -80,7 +80,7 @@ final class AccountStore {
         token = nil
         account = nil
         Keychain.delete()
-        UserDefaults.standard.removeObject(forKey: "account")
+        UserDefaults.standard.removeObject(forKey: StorageKey.account)
         status = .signedOut
     }
 
@@ -98,7 +98,7 @@ final class AccountStore {
 
     private func remember(_ account: AccountDTO) {
         self.account = account
-        UserDefaults.standard.set(try? JSONEncoder().encode(account), forKey: "account")
+        UserDefaults.standard.set(try? JSONEncoder().encode(account), forKey: StorageKey.account)
     }
 
     // MARK: Sync
@@ -168,15 +168,15 @@ final class AccountStore {
 enum CarSettings {
     private static let d = UserDefaults.standard
 
-    static var isDefault: Bool { d.string(forKey: "carVehicleID") == nil && (d.string(forKey: "carName") ?? "My car") == "My car" }
+    static var isDefault: Bool { d.string(forKey: StorageKey.carVehicleID) == nil && (d.string(forKey: StorageKey.carName) ?? "My car") == "My car" }
 
     static var current: CarDTO {
-        CarDTO(vehicleId: d.string(forKey: "carVehicleID").flatMap { $0.isEmpty ? nil : $0 },
-               name: d.string(forKey: "carName") ?? "My car",
-               body: d.string(forKey: "carBody") ?? BodyType.hatch.rawValue,
-               fuel: d.string(forKey: "defaultFuel") ?? FuelType.u91.rawValue,
-               tankLitres: d.object(forKey: "tankLitres") as? Int ?? 50,
-               catalogueTankLitres: (d.object(forKey: "catalogueTankLitres") as? Int).flatMap { $0 > 0 ? $0 : nil })
+        CarDTO(vehicleId: d.string(forKey: StorageKey.carVehicleID).flatMap { $0.isEmpty ? nil : $0 },
+               name: d.string(forKey: StorageKey.carName) ?? "My car",
+               body: d.string(forKey: StorageKey.carBody) ?? BodyType.hatch.rawValue,
+               fuel: d.string(forKey: StorageKey.defaultFuel) ?? FuelType.u91.rawValue,
+               tankLitres: d.object(forKey: StorageKey.tankLitres) as? Int ?? 50,
+               catalogueTankLitres: (d.object(forKey: StorageKey.catalogueTankLitres) as? Int).flatMap { $0 > 0 ? $0 : nil })
     }
 
     static func apply(_ car: CarDTO, store: Store) {
@@ -185,12 +185,12 @@ enum CarSettings {
             d.removeObject(forKey: MyCar.Key.vehicle)
             d.set(Date.now.timeIntervalSince1970, forKey: MyCar.Key.since)
         }
-        d.set(car.vehicleId ?? "", forKey: "carVehicleID")
-        d.set(car.name, forKey: "carName")
-        d.set(car.body, forKey: "carBody")
-        d.set(car.fuel, forKey: "defaultFuel")
-        d.set(car.tankLitres, forKey: "tankLitres")
-        d.set(car.catalogueTankLitres ?? 0, forKey: "catalogueTankLitres")
+        d.set(car.vehicleId ?? "", forKey: StorageKey.carVehicleID)
+        d.set(car.name, forKey: StorageKey.carName)
+        d.set(car.body, forKey: StorageKey.carBody)
+        d.set(car.fuel, forKey: StorageKey.defaultFuel)
+        d.set(car.tankLitres, forKey: StorageKey.tankLitres)
+        d.set(car.catalogueTankLitres ?? 0, forKey: StorageKey.catalogueTankLitres)
         if let f = FuelType(rawValue: car.fuel) { store.fuel = f }
     }
 }
@@ -200,16 +200,25 @@ enum CarSettings {
 enum AlertPrefs {
     private static let d = UserDefaults.standard
 
+    /** "Near home" for low-price alerts: where the user last located themselves or set it in Alerts. */
+    static var home: AlertsDTO.Home? {
+        (d.object(forKey: StorageKey.homeLat) as? Double).flatMap { lat in (d.object(forKey: StorageKey.homeLng) as? Double).map { AlertsDTO.Home(lat: lat, lng: $0) } }
+    }
+
+    static func setHome(lat: Double, lng: Double) {
+        d.set(lat, forKey: StorageKey.homeLat)
+        d.set(lng, forKey: StorageKey.homeLng)
+    }
+
     static var current: AlertsDTO {
-        let home = (d.object(forKey: "homeLat") as? Double).flatMap { lat in (d.object(forKey: "homeLng") as? Double).map { AlertsDTO.Home(lat: lat, lng: $0) } }
-        return AlertsDTO(priceDrop: d.bool(forKey: "priceAlerts"), cycleLow: d.bool(forKey: "alertCycleLow"),
-                         quietStart: d.object(forKey: "quietStart") as? Int ?? 22, quietEnd: d.object(forKey: "quietEnd") as? Int ?? 7, home: home)
+        AlertsDTO(priceDrop: d.bool(forKey: StorageKey.priceAlerts), cycleLow: d.bool(forKey: StorageKey.alertCycleLow),
+                         quietStart: d.object(forKey: StorageKey.quietStart) as? Int ?? 22, quietEnd: d.object(forKey: StorageKey.quietEnd) as? Int ?? 7, home: home)
     }
 
     static func apply(_ a: AlertsDTO) {
-        d.set(a.priceDrop, forKey: "priceAlerts")
-        d.set(a.cycleLow, forKey: "alertCycleLow")
-        d.set(a.quietStart, forKey: "quietStart")
-        d.set(a.quietEnd, forKey: "quietEnd")
+        d.set(a.priceDrop, forKey: StorageKey.priceAlerts)
+        d.set(a.cycleLow, forKey: StorageKey.alertCycleLow)
+        d.set(a.quietStart, forKey: StorageKey.quietStart)
+        d.set(a.quietEnd, forKey: StorageKey.quietEnd)
     }
 }

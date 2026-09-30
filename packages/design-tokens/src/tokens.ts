@@ -143,6 +143,25 @@ export const space = [4, 8, 12, 16, 24, 32, 48, 64] as const;
 /** Corner radii in px (直線): r1 tags and pins, r2 controls, r3 panels and sheets. */
 export const radius = { r1: 2, r2: 4, r3: 6 } as const;
 
+/**
+ * The 素 plain list (decision 0008), used by every list screen: rows on paper with no card around
+ * the group, and a hairline only between rows, inset to the text past the row's line icon.
+ * Sizes in px (points on iOS).
+ */
+export const list = {
+  /** Left and right margin of the page. */
+  gutter: space[4],
+  /** Minimum height of a one-line row. */
+  rowHeight: 56,
+  /** Width of the rule between rows. */
+  hairline: 0.5,
+  /** Edge of a row's line icon; the hairline starts past the icon and `iconGap`. */
+  iconSize: 24,
+  iconGap: 16,
+  /** Space above a group title. */
+  groupGap: space[5],
+} as const;
+
 /** Motion (静): opacity plus a small translate, never scale or bounce. */
 export const motion = {
   easing: [0.4, 0, 0.2, 1],

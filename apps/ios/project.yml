@@ -45,6 +45,15 @@ targets:
       - path: ../../packages/shared/generated/swift/ServoMapBrands.swift
       - path: ../../packages/shared/generated/swift/ServoMapDataSources.swift
       - path: ../../packages/shared/generated/swift/ServoMapVehicleImages.swift
+    # Keys the build settings cannot carry; merged with the generated Info.plist.
+    info:
+      path: Config/ServoMap-Info.plist
+      properties:
+        # xcodegen writes literal versions otherwise; these keep release-please and fastlane in charge.
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        # Settings › Directions offers Google Maps and Waze only when installed (DirectionsLauncher).
+        LSApplicationQueriesSchemes: [comgooglemaps, waze]
     # Push for price alerts. Release builds (TestFlight, App Store) use the production APNs gateway.
     entitlements:
       path: Config/ServoMap.entitlements
@@ -71,6 +80,7 @@ targets:
       - path: Sources/Trend.swift
       - path: Sources/Components.swift
       - path: Sources/Store.swift
+      - path: Sources/StorageKey.swift
       - path: Sources/FuelType+AppEnum.swift
       - path: Resources/Fonts
       # Brand logos, so widgets show the same marks as the app.

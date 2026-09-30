@@ -81,9 +81,16 @@ final class Store {
     /** Upper-case codes of states with live prices, from /metadata. */
     private(set) var liveStates: [String] = []
     private(set) var failed = false
-    var savedIDs: [String] = UserDefaults.standard.stringArray(forKey: "saved") ?? [] {
-        didSet { UserDefaults.standard.set(savedIDs, forKey: "saved") }
+    var savedIDs: [String] = UserDefaults.standard.stringArray(forKey: StorageKey.saved) ?? [] {
+        didSet { UserDefaults.standard.set(savedIDs, forKey: StorageKey.saved) }
     }
+    /**
+     * Price tiers compare stations within this many km of the user (or of the fetch centre before
+     * they locate themselves), as set in Settings › Map; nil compares every station fetched.
+     */
+    var compareKm: Int? { didSet { if compareKm != oldValue { derive() } } }
+    /** Where tiers are compared around: the user once located, otherwise the fetch centre. */
+    var compareCentre: (lat: Double, lng: Double) { userLocation ?? center }
 
     private let api = API()
     /** Bumped by each fetch of stations; a response that is no longer the latest is dropped. */
@@ -156,12 +163,13 @@ final class Store {
     /** Records the user's position; the map keeps showing it however far they pan away. */
     func setUserLocation(_ lat: Double, _ lng: Double) {
         userLocation = (lat, lng)
+        if compareKm != nil { derive() }
     }
 
     private func derive() {
         let prices = stations.compactMap { $0.price(fuel)?.price }
         // Before `ranked`: the tier filter in `matching` reads it.
-        range = PriceRange(prices)
+        range = PriceRange(Store.tierPrices(stations, fuel: fuel, around: compareCentre, withinKm: compareKm))
         ranked = matching(filters)
         let now = Date()
         outdated = stations.filter { $0.price(fuel) != nil && !$0.hasCurrentPrice(fuel, now: now) }
@@ -202,6 +210,28 @@ final class Store {
         let parts = [TrendMath.verdict(trend), againstAverage]
         let text = parts.compactMap { $0 }.joined(separator: " ")
         return text.isEmpty ? nil : text
+    }
+
+    /**
+     * The prices tiers are cut from: stations with a price for `fuel` within `km` of `centre`. With
+     * fewer than three inside, thirds mean nothing, so every station fetched counts instead.
+     */
+    nonisolated static func tierPrices(_ stations: [Station], fuel: FuelType, around centre: (lat: Double, lng: Double), withinKm km: Int?) -> [Double] {
+        let all = stations.compactMap { $0.price(fuel)?.price }
+        guard let km else { return all }
+        let inside = stations.compactMap { s -> Double? in
+            guard let p = s.price(fuel)?.price, distanceKm(centre, (s.lat, s.lng)) <= Double(km) else { return nil }
+            return p
+        }
+        return inside.count >= 3 ? inside : all
+    }
+
+    /** Great-circle distance in km (haversine), as the worker measures it. */
+    nonisolated static func distanceKm(_ a: (lat: Double, lng: Double), _ b: (lat: Double, lng: Double)) -> Double {
+        let rad = Double.pi / 180
+        let dLat = (b.lat - a.lat) * rad, dLng = (b.lng - a.lng) * rad
+        let h = sin(dLat / 2) * sin(dLat / 2) + cos(a.lat * rad) * cos(b.lat * rad) * sin(dLng / 2) * sin(dLng / 2)
+        return 6_371 * 2 * atan2(sqrt(h), sqrt(1 - h))
     }
 
     /** A radius the map's zoom asks for, clamped to what the list can use (5 to 50 km). */

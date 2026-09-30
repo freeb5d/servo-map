@@ -6,15 +6,16 @@ import Foundation
  * shows without a network call, and `carSince` dates "In this car".
  */
 enum MyCar {
+    /** The car's keys, named once in StorageKey. */
     enum Key {
-        static let name = "carName"
-        static let vehicleID = "carVehicleID"
-        static let vehicle = "carVehicle"
-        static let body = "carBody"
-        static let tank = "tankLitres"
-        static let catalogueTank = "catalogueTankLitres"
-        static let fuel = "defaultFuel"
-        static let since = "carSince"
+        static let name = StorageKey.carName
+        static let vehicleID = StorageKey.carVehicleID
+        static let vehicle = StorageKey.carVehicle
+        static let body = StorageKey.carBody
+        static let tank = StorageKey.tankLitres
+        static let catalogueTank = StorageKey.catalogueTankLitres
+        static let fuel = StorageKey.defaultFuel
+        static let since = StorageKey.carSince
     }
 
     /** The name before the user gives one; not shown as a nickname. */

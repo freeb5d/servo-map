@@ -212,7 +212,7 @@ private struct FuelLadder: View {
             let scale = ChartScale.nice(rungs.map(\.average), ticks: 3, pad: 4)
             // Read on each redraw: the car setting may change while Trends is open.
             let defaults = UserDefaults.standard
-            let tank = defaults.object(forKey: "tankLitres") == nil ? nil : defaults.integer(forKey: "tankLitres")
+            let tank = defaults.object(forKey: StorageKey.tankLitres) == nil ? nil : defaults.integer(forKey: StorageKey.tankLitres)
             TrendsSection(title: "Every fuel, today", note: "\(StateName.code(state)) average") {
                 DotRows(rows: rungs, domain: scale.domain, ticks: scale.ticks, labelWidth: 56, rowHeight: 34) { rung in
                     Text(rung.fuel.rawValue).font(ServoMapFont.body(.subheadline)).foregroundStyle(ServoMapColor.ink)

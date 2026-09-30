@@ -9,8 +9,10 @@ struct StationDetail: View {
     @Environment(Store.self) private var store
     @Environment(FillUpLog.self) private var log
     let station: Station
-    @AppStorage("tankLitres") private var tankLitres = 50
+    @AppStorage(StorageKey.tankLitres) private var tankLitres = 50
     @State private var logging = false
+    /** Set to open directions; DirectionsLauncher picks the app (Settings › Directions). */
+    @State private var directionsTo: DirectionsLauncher.Destination?
 
     var body: some View {
         List {
@@ -37,6 +39,7 @@ struct StationDetail: View {
         .contentMargins(.top, 0, for: .scrollContent)
         .listSectionSpacing(14)
         .sheet(isPresented: $logging) { AddFillUpSheet(station: station) }
+        .directionsPrompt($directionsTo)
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackgroundVisibility(.hidden, for: .navigationBar)
     }
@@ -239,9 +242,7 @@ struct StationDetail: View {
     private var price: FuelPrice? { station.price(store.fuel) }
 
     private func openInMaps() {
-        let item = MKMapItem(location: CLLocation(latitude: station.lat, longitude: station.lng), address: nil)
-        item.name = station.name
-        item.openInMaps(launchOptions: [MKLaunchOptionsDirectionsModeKey: MKLaunchOptionsDirectionsModeDriving])
+        directionsTo = DirectionsLauncher.Destination(station)
     }
 }
 

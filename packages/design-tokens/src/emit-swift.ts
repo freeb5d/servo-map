@@ -1,4 +1,4 @@
-import { color, font, motion, radius, space, text } from "./tokens";
+import { color, font, list, motion, radius, space, text } from "./tokens";
 
 function hex(value: string): string {
   return `0x${value.slice(1).toUpperCase()}`;
@@ -65,6 +65,7 @@ export function emitSwift(): string {
   );
   const spaces = space.map((px, i) => `    public static let x${i + 1}: CGFloat = ${px}`);
   const radii = Object.entries(radius).map(([name, px]) => `    public static let ${name}: CGFloat = ${px}`);
+  const listMetrics = Object.entries(list).map(([name, px]) => `    public static let ${name}: CGFloat = ${px}`);
   // iOS keeps its own type sizes: each step uses the system size of its text style and scales with Dynamic Type.
   const styles = Object.entries(text).map(
     ([name, s]) =>
@@ -92,6 +93,11 @@ ${spaces.join("\n")}
 
 public enum ServoMapRadius {
 ${radii.join("\n")}
+}
+
+/** The 素 plain list: page gutter, row height, hairline and icon column. */
+public enum ServoMapList {
+${listMetrics.join("\n")}
 }
 
 public enum ServoMapFont {

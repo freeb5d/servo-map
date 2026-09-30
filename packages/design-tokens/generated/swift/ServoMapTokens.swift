@@ -53,6 +53,16 @@ public enum ServoMapRadius {
     public static let r3: CGFloat = 6
 }
 
+/** The 素 plain list: page gutter, row height, hairline and icon column. */
+public enum ServoMapList {
+    public static let gutter: CGFloat = 24
+    public static let rowHeight: CGFloat = 56
+    public static let hairline: CGFloat = 0.5
+    public static let iconSize: CGFloat = 24
+    public static let iconGap: CGFloat = 16
+    public static let groupGap: CGFloat = 32
+}
+
 public enum ServoMapFont {
     public static let label = Font.system(.caption2, weight: .regular)
     public static let small = Font.system(.caption, weight: .regular)

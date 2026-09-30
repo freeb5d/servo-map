@@ -59,6 +59,13 @@
   --radius-2: 4px;
   --radius-3: 6px;
 
+  --list-gutter: 24px;
+  --list-row-height: 56px;
+  --list-hairline: 0.5px;
+  --list-icon-size: 24px;
+  --list-icon-gap: 16px;
+  --list-group-gap: 32px;
+
   --shadow-float: 0 1px 2px rgb(42 41 39 / 0.06), 0 4px 16px rgb(42 41 39 / 0.06);
 
   --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);

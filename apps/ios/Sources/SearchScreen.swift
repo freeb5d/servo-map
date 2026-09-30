@@ -10,7 +10,7 @@ struct SearchScreen: View {
     @State private var results: [Station] = []
     @State private var resultTitle = ""
     @State private var searched = false
-    @AppStorage("recentSearches") private var recentRaw = ""
+    @AppStorage(StorageKey.recentSearches) private var recentRaw = ""
 
     var body: some View {
         NavigationStack {

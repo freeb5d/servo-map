@@ -15,8 +15,8 @@ struct TrendsScreen: View {
     @Environment(Store.self) private var store
     @State private var data = TrendsData()
     // `-trendsPage cities` and `-trendsState wa` open a given page, so design screenshots are reproducible.
-    @State private var page = TrendsPage(rawValue: UserDefaults.standard.string(forKey: "trendsPage") ?? "") ?? .overview
-    @State private var state = UserDefaults.standard.string(forKey: "trendsState") ?? "nsw"
+    @State private var page = TrendsPage(rawValue: UserDefaults.standard.string(forKey: StorageKey.trendsPage) ?? "") ?? .overview
+    @State private var state = UserDefaults.standard.string(forKey: StorageKey.trendsState) ?? "nsw"
 
     var body: some View {
         @Bindable var store = store

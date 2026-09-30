@@ -1,12 +1,16 @@
 import MapKit
 import SwiftUI
 
+/**
+ * The Nearby tab: the map under the tab bar, with the fuel switch, avatar and map controls on top.
+ * The results list is a sheet raised from the tab bar's accessory or by picking a station (see RootTabs).
+ */
 struct MapScreen: View {
     @Environment(Store.self) private var store
-    @State private var detent: PresentationDetent
-    @State private var tab: String
+    @Binding var showResults: Bool
+    @State private var detent: PresentationDetent = .medium
     /** The You sheet (saved, log, car, alerts) and the page it opens on. */
-    @State private var showYou = false
+    @State private var showYou: Bool
     @State private var youPage: YouScreen.Page?
     @State private var selected: Station?
     @State private var showFilters: Bool
@@ -22,6 +26,8 @@ struct MapScreen: View {
     @State private var pendingFetch: Task<Void, Never>?
     @State private var proxy: MapProxy?
     @State private var mapSize: CGSize = .zero
+    /** How much of the map's foot the tab bar and its accessory cover. */
+    @State private var mapBottomInset: CGFloat = 0
     /** Set before the app moves the camera itself, so that move is not mistaken for a user pan. */
     @State private var appMoved = true
     /** True until the first load and after locating: the next result set reframes the camera. */
@@ -30,30 +36,25 @@ struct MapScreen: View {
     @State private var lastRegion: MKCoordinateRegion?
     private let openDetail: Bool
 
-    init(tab: String = "map", openFilters: Bool = false, openDetail: Bool = false) {
-        self.openDetail = openDetail
-        // Saved and Log moved into the You sheet; their launch names open it on that page.
-        let page = YouScreen.Page.allCases.first { "\($0)" == tab }
-        if tab == "you" || page != nil {
-            _showYou = State(initialValue: true)
-            _youPage = State(initialValue: page)
-        }
-        let tab = ["trends", "search"].contains(tab) ? tab : "map"
-        _tab = State(initialValue: tab)
-        _detent = State(initialValue: tab == "map" ? .medium : .large)
-        _showFilters = State(initialValue: openFilters)
+    init(route: LaunchRoute, showResults: Binding<Bool>) {
+        _showResults = showResults
+        openDetail = route.openDetail
+        _showYou = State(initialValue: route.openYou)
+        _youPage = State(initialValue: route.youPage)
+        _showFilters = State(initialValue: route.openFilters)
     }
 
     var body: some View {
         MapReader { reader in
             // Compared by what it draws: this closure re-runs on every settle, and the sheet's detent
-            // and tabs re-run the body, without redrawing the map. A skipped map keeps its earlier
+            // re-runs the body, without redrawing the map. A skipped map keeps its earlier
             // `onSettle`, whose proxy still converts for the live camera.
             StationMap(camera: $camera, selection: $selected, selected: selected, placement: placement, dots: dots) { region in
                 settle(on: region, reader)
             }
             .equatable()
             .onGeometryChange(for: CGSize.self) { $0.size } action: { mapSize = $0 }
+            .onGeometryChange(for: CGFloat.self) { $0.safeAreaInsets.bottom } action: { mapBottomInset = $0 }
         }
         .safeAreaInset(edge: .top) { topControls }
         // A new fuel or filter re-colours and re-ranks every dot; ease it like the design's list rows.
@@ -63,59 +64,23 @@ struct MapScreen: View {
             placeTags()
         }
         .onChange(of: store.filters) { placeTags() }
-        .onChange(of: detent) { placeTags() }
-        .onChange(of: selected) { if let selected { reveal(selected) } }
-        .sheet(isPresented: .constant(true)) {
-            // Tabs live inside the sheet, as in Find My, so the map stays behind every section.
-            TabView(selection: $tab) {
-                Tab(value: "map") {
-                    ResultsSheet(selected: $selected, showFilters: $showFilters).modifier(page)
-                } label: { tabLabel("Nearby", "fuelpump", "map") }
-                Tab(value: "trends") { TrendsScreen().modifier(page) } label: { tabLabel("Trends", "chart.line.uptrend.xyaxis", "trends") }
-                Tab(value: "search", role: .search) { SearchScreen().modifier(page) }
-            }
-            // As in Health: scrolling down folds the bar into one round button for the current tab,
-            // with search on its own at the right.
-            .tabBarMinimizeBehavior(.onScrollDown)
-            .sheet(isPresented: $showYou) { YouScreen(page: youPage) }
-            .overlay(alignment: .top) {
-                if detent == collapsed {
-                    CollapsedTabBar(tab: $tab) { value in
-                        tab = value
-                        detent = value == "map" ? .medium : .large
-                    }
-                    .fixedSize(horizontal: false, vertical: true)
-                    .padding(.top, 10)
-                }
-            }
-            .onChange(of: tab) { detent = tab == "map" ? .medium : .large }
-            // Picking a station on the map shows its page: back to Nearby, and up from the bar.
-            .onChange(of: selected) {
-                guard selected != nil else { return }
-                tab = "map"
-                if detent == collapsed { detent = .medium }
-            }
-                .presentationDetents([collapsed, .medium, .large], selection: $detent)
+        .onChange(of: showResults) { placeTags() }
+        .onChange(of: selected) {
+            guard let selected else { return }
+            // Picking a station on the map shows its page at half height, so the map stays in view.
+            if !showResults { detent = .medium; showResults = true }
+            reveal(selected)
+        }
+        .sheet(isPresented: $showResults, onDismiss: { selected = nil }) {
+            ResultsSheet(selected: $selected)
+                .presentationDetents([.medium, .large], selection: $detent)
                 .presentationBackgroundInteraction(.enabled(upThrough: .medium))
-                .interactiveDismissDisabled()
-                // Pulled down it is only the tab bar's own glass, floating over the map as in Find My;
-                // raised it is paper, as in the design.
-                .presentationBackground(detent == collapsed ? AnyShapeStyle(Color.clear) : AnyShapeStyle(ServoMapColor.bg))
+                .presentationBackground(ServoMapColor.bg)
+                // While the list is up, it presents the You sheet and the filters itself.
+                .modifier(MapModals(active: true, showYou: $showYou, youPage: youPage, showFilters: $showFilters))
         }
-    }
-
-    /** Pulled all the way down: just the tab bar, as in Find My. */
-    private let collapsed = PresentationDetent.height(88)
-    /** Collapsed, every page hides itself and the system tab bar; CollapsedTabBar stands in. */
-    private var page: CollapsedPage { CollapsedPage(collapsed: detent == collapsed) }
-
-    /** Selected tabs use the filled symbol and unselected ones the outline, so state reads by shape too. */
-    private func tabLabel(_ title: String, _ symbol: String, _ value: String) -> some View {
-        Label {
-            Text(title)
-        } icon: {
-            Image(systemName: symbol).environment(\.symbolVariants, tab == value ? .fill : .none)
-        }
+        .modifier(MapModals(active: !showResults, showYou: $showYou, youPage: youPage, showFilters: $showFilters))
+        .sensoryFeedback(.selection, trigger: selected) { _, new in new != nil }
     }
 
     /** The camera came to rest: the list follows what is on screen, tags are re-placed, and prices fetched if needed. */
@@ -137,15 +102,14 @@ struct MapScreen: View {
         pendingFetch?.cancel()
         store.setUserLocation(here.latitude, here.longitude)
         appMoved = true
-        withAnimation(.smooth(duration: 0.6)) {
-            camera = .region(MKCoordinateRegion(
-                center: CLLocationCoordinate2D(latitude: here.latitude - 0.012, longitude: here.longitude),
-                latitudinalMeters: 6_000, longitudinalMeters: 6_000))
-        }
+        // About 4 km across, with the user in the middle of the part of the map the chrome leaves.
+        let around = MapFraming.region(showing: here.latitude, here.longitude, latDelta: 0.036, lngDelta: 0.036,
+                                       in: visibleMap, of: mapSize)
+        withAnimation(.smooth(duration: 0.6)) { camera = .region(mkRegion(around)) }
         await store.move(to: here.latitude, here.longitude, name: "you", radiusKm: 10)
     }
 
-    /** The coordinates of the part of the map not under the sheet or the top controls. */
+    /** The coordinates of the part of the map not under the sheet, the tab bar or the top controls. */
     private func viewport(_ reader: MapProxy) -> Viewport? {
         // Inset by half a cheapest-tag width, so the station it names has room for its whole tag.
         let r = visibleMap.insetBy(dx: 56, dy: 0).offsetBy(dx: 0, dy: 30).insetBy(dx: 0, dy: 15)
@@ -156,10 +120,9 @@ struct MapScreen: View {
                         minLng: min(a.longitude, b.longitude), maxLng: max(a.longitude, b.longitude))
     }
 
-    /** The part of the map the sheet leaves uncovered at its current height, where tags are worth drawing. */
+    /** The part of the map the sheet or the tab bar leaves uncovered, where tags are worth drawing. */
     private var visibleMap: CGRect {
-        let bottom = detent == collapsed ? mapSize.height - 120 : mapSize.height * 0.46
-        return CGRect(x: 0, y: 70, width: mapSize.width, height: max(0, bottom - 70))
+        MapFraming.visible(size: mapSize, bottomInset: mapBottomInset, sheetUp: showResults)
     }
 
     /** Chooses tags and dots together, so a settle changes the map's annotations in one update. */
@@ -199,34 +162,37 @@ struct MapScreen: View {
         }
     }
 
-    /** Brings a picked station into the visible upper half of the map, keeping the zoom. */
+    /** Brings a picked station into the visible part of the map, keeping the zoom. */
     private func reveal(_ station: Station) {
+        let visible = visibleMap
         guard let point = proxy?.convert(CLLocationCoordinate2D(latitude: station.lat, longitude: station.lng), to: .local),
-              !visibleMap.insetBy(dx: 30, dy: 30).contains(point),
-              let region = lastRegion else { return }
+              !visible.insetBy(dx: 30, dy: 30).contains(point),
+              let region = lastRegion, mapSize.width > 0, mapSize.height > 0 else { return }
+        let target = MapFraming.region(showing: station.lat, station.lng,
+                                       latDelta: region.span.latitudeDelta * visible.height / mapSize.height,
+                                       lngDelta: region.span.longitudeDelta * visible.width / mapSize.width,
+                                       in: visible, of: mapSize)
         appMoved = true
-        withAnimation(.smooth(duration: 0.6)) {
-            camera = .region(MKCoordinateRegion(
-                center: CLLocationCoordinate2D(latitude: station.lat - region.span.latitudeDelta * 0.25, longitude: station.lng),
-                span: region.span))
-        }
+        withAnimation(.smooth(duration: 0.6)) { camera = .region(mkRegion(target)) }
     }
 
-    /**
-     * Frames the tagged (cheapest) stations in the part of the map the half-height sheet leaves
-     * visible: the region is stretched downward so they land in its upper half.
-     */
+    /** Frames the tagged (cheapest) stations in the part of the map the chrome leaves visible. */
     private func frameCheapest() {
         let top = store.ranked.prefix(8)
         guard let minLat = top.map(\.lat).min(), let maxLat = top.map(\.lat).max(),
               let minLng = top.map(\.lng).min(), let maxLng = top.map(\.lng).max() else { return }
-        let latSpan = max(maxLat - minLat, 0.02) * 1.4
-        let lngSpan = max(maxLng - minLng, 0.02) * 1.4
+        let target = MapFraming.region(showing: (minLat + maxLat) / 2, (minLng + maxLng) / 2,
+                                       latDelta: max(maxLat - minLat, 0.02) * 1.4,
+                                       lngDelta: max(maxLng - minLng, 0.02) * 1.4,
+                                       in: visibleMap, of: mapSize)
         appMoved = true
-        camera = .region(MKCoordinateRegion(
-            center: CLLocationCoordinate2D(latitude: (minLat + maxLat) / 2 - latSpan * 0.55, longitude: (minLng + maxLng) / 2),
-            span: MKCoordinateSpan(latitudeDelta: latSpan * 2.3, longitudeDelta: lngSpan)))
+        camera = .region(mkRegion(target))
         if openDetail, selected == nil { selected = store.ranked.first }
+    }
+
+    private func mkRegion(_ r: MapFraming.Region) -> MKCoordinateRegion {
+        MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: r.lat, longitude: r.lng),
+                           span: MKCoordinateSpan(latitudeDelta: r.latDelta, longitudeDelta: r.lngDelta))
     }
 
     /**
@@ -342,28 +308,24 @@ struct CheapestTag: View {
     }
 }
 
-/** Hides a tab's page and the system tab bar while the sheet is pulled all the way down. */
-private struct CollapsedPage: ViewModifier {
-    let collapsed: Bool
+/**
+ * The You sheet and the filters, presented by whichever view is on top: the map, or the results
+ * sheet while it is up (a view already presenting a sheet cannot present a second one).
+ */
+private struct MapModals: ViewModifier {
+    let active: Bool
+    @Binding var showYou: Bool
+    let youPage: YouScreen.Page?
+    @Binding var showFilters: Bool
+
     func body(content: Content) -> some View {
         content
-            .opacity(collapsed ? 0 : 1)
-            .background(TabBarHider(hidden: collapsed))
+            .sheet(isPresented: gated($showYou)) { YouScreen(page: youPage) }
+            .sheet(isPresented: gated($showFilters)) { FilterSheet() }
     }
-}
 
-/**
- * SwiftUI's tab bar visibility modifier has no effect on a TabView inside a sheet, so the
- * collapsed state reaches the UIKit tab bar that backs it directly.
- */
-private struct TabBarHider: UIViewControllerRepresentable {
-    let hidden: Bool
-
-    func makeUIViewController(context: Context) -> UIViewController { UIViewController() }
-
-    func updateUIViewController(_ controller: UIViewController, context: Context) {
-        // The controller joins its tab bar controller's hierarchy only after this pass.
-        DispatchQueue.main.async { controller.tabBarController?.tabBar.isHidden = hidden }
+    private func gated(_ flag: Binding<Bool>) -> Binding<Bool> {
+        Binding(get: { active && flag.wrappedValue }, set: { flag.wrappedValue = $0 })
     }
 }
 

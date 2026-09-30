@@ -16,7 +16,7 @@ enum Fonts {
     /**
      * The owner kept the accent as ink, and the glass tab bar always draws unselected tabs in the
      * primary colour, so colour cannot tell them apart. Weight does: the selected label is bold.
-     * (Icons switch between filled and outline in MapScreen.)
+     * (Icons switch between filled and outline in RootTabs.)
      */
     private static func styleTabBar() {
         let regular = UIFont.systemFont(ofSize: 10, weight: .medium)

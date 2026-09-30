@@ -5,7 +5,7 @@ struct AddFillUpSheet: View {
     @Environment(Store.self) private var store
     @Environment(FillUpLog.self) private var log
     @Environment(\.dismiss) private var dismiss
-    @AppStorage("tankLitres") private var tankLitres = 50
+    @AppStorage(StorageKey.tankLitres) private var tankLitres = 50
     @State private var stationID: String
     @State private var litres: Double = 0
     @State private var price: Double = 0

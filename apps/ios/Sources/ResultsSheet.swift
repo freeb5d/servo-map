@@ -4,7 +4,6 @@ import SwiftUI
 struct ResultsSheet: View {
     @Environment(Store.self) private var store
     @Binding var selected: Station?
-    @Binding var showFilters: Bool
 
     var body: some View {
         NavigationStack {
@@ -43,7 +42,6 @@ struct ResultsSheet: View {
             .paperList()
             .navigationDestination(for: Station.self) { StationDetail(station: $0) }
             .navigationDestination(item: $selected) { StationDetail(station: $0) }
-            .sheet(isPresented: $showFilters) { FilterSheet() }
             .overlay {
                 if store.failed && store.stations.isEmpty { failure }
                 else if store.stations.isEmpty && !store.loading { noCoverage }

@@ -10,7 +10,7 @@ struct SavedScreen: View {
     @Environment(AccountStore.self) private var account
     @State private var far: [Station] = []
     /** Price per station when this screen was last shown; the baseline for the change column. */
-    @AppStorage("savedLastSeen") private var lastSeenRaw = "{}"
+    @AppStorage(StorageKey.savedLastSeen) private var lastSeenRaw = "{}"
     @State private var baseline: [String: Double] = [:]
 
     var body: some View {

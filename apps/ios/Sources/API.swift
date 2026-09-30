@@ -5,7 +5,7 @@ struct API: Sendable {
     static let base: URL = {
         #if DEBUG
         // `-apiBase http://127.0.0.1:8787/api/v1` points a debug build at a local `wrangler dev`.
-        if let raw = UserDefaults.standard.string(forKey: "apiBase"), let url = URL(string: raw) { return url }
+        if let raw = UserDefaults.standard.string(forKey: StorageKey.apiBase), let url = URL(string: raw) { return url }
         #endif
         return URL(string: "https://api.servo-map.com/api/v1")!
     }()

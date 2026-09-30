@@ -21,13 +21,16 @@ struct StationMap: View {
     let dots: Set<String>?
     /** Called with the region each time the camera comes to rest. */
     let onSettle: (MKCoordinateRegion) -> Void
+    /** Settings › Map can leave week-old prices off the map; a picked one still shows. */
+    // Not private: a private wrapper would make the memberwise initialiser private too.
+    @AppStorage(StorageKey.showOldPrices) var showOld = true
 
     var body: some View {
         Map(position: $camera, selection: $selection) {
             if store.located { UserAnnotation() }
             // Stations whose price is more than a week old: hollow, so they read as "a station is here"
             // without competing with current prices. Still selectable.
-            ForEach(store.outdated.filter { $0 != selected && drawsDot($0) }) { station in
+            ForEach(showOld ? store.outdated.filter { $0 != selected && drawsDot($0) } : []) { station in
                 Annotation(station.name, coordinate: station.coordinate) {
                     Circle()
                         .stroke(ServoMapColor.ink3, lineWidth: 1.5)
