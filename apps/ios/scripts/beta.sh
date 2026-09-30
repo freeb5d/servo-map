@@ -10,6 +10,10 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
+# fastlane parses xcodebuild output as text and crashes on its non-ASCII arrows under the C locale
+# that non-login shells default to.
+export LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8
+
 OP_ITEM="op://02 Personal Production/App Store Connect API Key - kioku-ios-ops"
 
 ASC_KEY_ID="$(op read "$OP_ITEM/key_id")"
