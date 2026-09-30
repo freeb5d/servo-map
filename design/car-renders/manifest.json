@@ -1,0 +1,44 @@
+{
+  "generic-hatch": {
+    "prompt": "Studio catalogue render of a white modern generic hatchback of no real brand, an original unbranded design, front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, simple five-spoke wheels, blank number plates, no badges, no emblems, no logos, no lettering anywhere on the vehicle, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 740373254,
+    "generatedAt": "2026-09-30T05:54:41.661Z",
+    "reviewed": true
+  },
+  "generic-sedan": {
+    "prompt": "Studio catalogue render of a white modern generic sedan of no real brand, an original unbranded design, front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, simple five-spoke wheels, blank number plates, no badges, no emblems, no logos, no lettering anywhere on the vehicle, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 1102383105,
+    "generatedAt": "2026-09-30T05:56:02.462Z",
+    "reviewed": true
+  },
+  "generic-suv": {
+    "prompt": "Studio catalogue render of a white modern generic SUV of no real brand, an original unbranded design, front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, simple five-spoke wheels, blank number plates, no badges, no emblems, no logos, no lettering anywhere on the vehicle, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 875367300,
+    "generatedAt": "2026-09-30T05:54:43.834Z",
+    "reviewed": true
+  },
+  "generic-ute": {
+    "prompt": "Studio catalogue render of a white modern generic ute of no real brand, an original unbranded design, front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, simple five-spoke wheels, blank number plates, no badges, no emblems, no logos, no lettering anywhere on the vehicle, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 1331681499,
+    "generatedAt": "2026-09-30T05:55:05.494Z",
+    "reviewed": true
+  },
+  "generic-van": {
+    "prompt": "Studio catalogue render of a white modern generic van of no real brand, an original unbranded design, front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, simple five-spoke wheels, blank number plates, no badges, no emblems, no logos, no lettering anywhere on the vehicle, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 1709445507,
+    "generatedAt": "2026-09-30T05:56:00.927Z",
+    "reviewed": true
+  },
+  "generic-wagon": {
+    "prompt": "Studio catalogue render of a white modern generic station wagon of no real brand, an original unbranded design, front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, simple five-spoke wheels, blank number plates, no badges, no emblems, no logos, no lettering anywhere on the vehicle, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 1928011319,
+    "generatedAt": "2026-09-30T05:54:44.215Z",
+    "reviewed": true
+  }
+}
