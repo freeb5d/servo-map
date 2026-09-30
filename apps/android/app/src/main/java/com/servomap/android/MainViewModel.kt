@@ -1,6 +1,7 @@
 package com.servomap.android
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
@@ -18,20 +19,45 @@ data class UiState(
     val selected: Station? = null,
     val centre: Pair<Double, Double> = SYDNEY,
     val query: String = "",
+    val savedIds: Set<String> = emptySet(),
+    val saved: List<Station> = emptyList(),
 ) {
     companion object {
         val SYDNEY = -33.8688 to 151.2093
     }
 }
 
-class MainViewModel : ViewModel() {
+class MainViewModel(app: Application) : AndroidViewModel(app) {
+    private val prefs = app.getSharedPreferences("saved", 0)
     private val _state = MutableStateFlow(UiState())
     val state: StateFlow<UiState> = _state.asStateFlow()
     private var job: Job? = null
 
-    init { reload() }
+    init {
+        _state.value = _state.value.copy(savedIds = prefs.getStringSet("ids", emptySet()).orEmpty().toSet())
+        reload()
+        loadSaved()
+    }
 
-    fun setFuel(fuel: Fuel) { _state.value = _state.value.copy(fuel = fuel); reload() }
+    fun toggleSaved(id: String) {
+        val ids = _state.value.savedIds.let { if (id in it) it - id else it + id }
+        prefs.edit().putStringSet("ids", ids).apply()
+        _state.value = _state.value.copy(savedIds = ids, saved = _state.value.saved.filter { it.id in ids })
+        loadSaved()
+    }
+
+    /** Fetches the current prices of every saved station; one that fails to load is left out. */
+    fun loadSaved() {
+        val ids = _state.value.savedIds
+        viewModelScope.launch {
+            val loaded = ids.mapNotNull { id ->
+                try { Api.station(id) } catch (e: CancellationException) { throw e } catch (e: Exception) { null }
+            }.sortedBy { it.price(_state.value.fuel)?.price ?: Double.MAX_VALUE }
+            _state.value = _state.value.copy(saved = loaded.filter { it.id in _state.value.savedIds })
+        }
+    }
+
+    fun setFuel(fuel: Fuel) { _state.value = _state.value.copy(fuel = fuel); reload(); loadSaved() }
 
     fun setCentre(lat: Double, lng: Double) { _state.value = _state.value.copy(centre = lat to lng, query = ""); reload() }
 

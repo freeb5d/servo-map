@@ -26,4 +26,10 @@ class ModelsTest {
         assertEquals(Tier.Cheap, t["a"]); assertEquals(Tier.Mid, t["b"]); assertEquals(Tier.Expensive, t["c"])
         assertTrue("stale" !in t)
     }
+
+    @Test fun parsesSingleStation() {
+        val body = """{"status":"success","data":{"id":"a","name":"N","brand":"BP","address":"x","suburb":"s",
+            "state":"nsw","postcode":"2000","lat":-33.0,"lng":151.0,"prices":[]}}"""
+        assertEquals("a", parseOne(body).id)
+    }
 }

@@ -38,6 +38,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -112,6 +113,7 @@ fun App(vm: MainViewModel, locate: () -> Pair<Double, Double>?) {
             NavigationBar {
                 NavigationBarItem(selected = tab == 0, onClick = { tab = 0 }, icon = { Text("◎") }, label = { Text("Map") })
                 NavigationBarItem(selected = tab == 1, onClick = { tab = 1 }, icon = { Text("≡") }, label = { Text("List") })
+                NavigationBarItem(selected = tab == 2, onClick = { tab = 2 }, icon = { Text("★") }, label = { Text("Saved") })
             }
         },
     ) { pad ->
@@ -129,7 +131,7 @@ fun App(vm: MainViewModel, locate: () -> Pair<Double, Double>?) {
         }
         ui.selected?.let { s ->
             ModalBottomSheet(onDismissRequest = { vm.select(null) }) {
-                StationDetail(s, ui.fuel, ui.tiers[s.id]) {
+                StationDetail(s, ui.fuel, ui.tiers[s.id], s.id in ui.savedIds, onToggleSaved = { vm.toggleSaved(s.id) }) {
                     val uri = Uri.parse("geo:${s.lat},${s.lng}?q=${s.lat},${s.lng}(${Uri.encode(s.name)})")
                     context.startActivity(Intent(Intent.ACTION_VIEW, uri))
                 }
@@ -139,10 +141,10 @@ fun App(vm: MainViewModel, locate: () -> Pair<Double, Double>?) {
 }
 
 @Composable
-fun StationList(ui: UiState, onSelect: (Station) -> Unit) {
+fun StationList(stations: List<Station>, ui: UiState, onSelect: (Station) -> Unit) {
     val dark = isSystemInDarkTheme()
     LazyColumn(Modifier.fillMaxSize()) {
-        items(ui.stations, key = { it.id }) { s ->
+        items(stations, key = { it.id }) { s ->
             val p = s.price(ui.fuel)
             Row(
                 Modifier.fillMaxWidth().clickable { onSelect(s) }.padding(horizontal = 16.dp, vertical = 12.dp),
@@ -166,7 +168,7 @@ fun StationList(ui: UiState, onSelect: (Station) -> Unit) {
 }
 
 @Composable
-fun StationDetail(s: Station, fuel: Fuel, tier: Tier?, onDirections: () -> Unit) {
+fun StationDetail(s: Station, fuel: Fuel, tier: Tier?, saved: Boolean, onToggleSaved: () -> Unit, onDirections: () -> Unit) {
     val dark = isSystemInDarkTheme()
     Column(Modifier.padding(horizontal = 24.dp).padding(bottom = 32.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
         Text(s.name, fontSize = 22.sp, fontWeight = FontWeight.SemiBold)
@@ -181,5 +183,6 @@ fun StationDetail(s: Station, fuel: Fuel, tier: Tier?, onDirections: () -> Unit)
         }
         Spacer(Modifier.height(12.dp))
         Button(onClick = onDirections, modifier = Modifier.fillMaxWidth()) { Text("Directions") }
+        OutlinedButton(onClick = onToggleSaved, modifier = Modifier.fillMaxWidth()) { Text(if (saved) "★ Saved" else "☆ Save") }
     }
 }

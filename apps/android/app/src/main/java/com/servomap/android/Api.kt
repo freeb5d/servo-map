@@ -20,17 +20,22 @@ object Api {
     suspend fun search(text: String, fuel: Fuel): List<Station> =
         fetch(url("stations", "q" to text, "fuel" to fuel.code, "limit" to "100", "sort" to "price_asc"))
 
+    suspend fun station(id: String): Station =
+        get(url("stations/" + URLEncoder.encode(id, "UTF-8")), ::parseOne)
+
     private fun url(path: String, vararg params: Pair<String, String>): String =
         BuildConfig.API_BASE + "/" + path + "?" +
             params.joinToString("&") { (k, v) -> k + "=" + URLEncoder.encode(v, "UTF-8") }
 
-    private suspend fun fetch(url: String): List<Station> = withContext(Dispatchers.IO) {
+    private suspend fun fetch(url: String): List<Station> = get(url, ::parse)
+
+    private suspend fun <T> get(url: String, decode: (String) -> T): T = withContext(Dispatchers.IO) {
         val conn = URL(url).openConnection() as HttpURLConnection
         try {
             conn.connectTimeout = 10_000
             conn.readTimeout = 15_000
             check(conn.responseCode == 200) { "Server returned ${conn.responseCode}" }
-            parse(conn.inputStream.bufferedReader().use { it.readText() })
+            decode(conn.inputStream.bufferedReader().use { it.readText() })
         } finally {
             conn.disconnect()
         }
@@ -39,3 +44,6 @@ object Api {
     fun parse(body: String): List<Station> =
         json.decodeFromString(Envelope.serializer(ListSerializer(Station.serializer())), body).data
 }
+
+fun parseOne(body: String): Station =
+    Json { ignoreUnknownKeys = true }.decodeFromString(Envelope.serializer(Station.serializer()), body).data
