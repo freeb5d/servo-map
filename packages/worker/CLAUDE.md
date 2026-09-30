@@ -39,6 +39,7 @@ Declared in `src/env.ts`:
 - `KV` (binding — production id in `wrangler.toml`)
 - `NSW_API_KEY`, `NSW_API_AUTH`, `QLD_API_TOKEN`
 - `DB` (D1 binding `servo-map-accounts`), `SESSION_SECRET` (secret), `APPLE_AUDIENCES` and `GOOGLE_CLIENT_IDS` (plain `[vars]`). Without `DB` or `SESSION_SECRET` the account routes answer 503.
+- `PRICES` (D1 `servo-map-prices`, decision 0006; written by the ingest script, not read by routes yet)
 
 Personal alerts are not sent from the worker: APNs needs HTTP/2, so `scripts/send-alerts.ts` runs in the ingest workflow and uses the rules in `src/alerts/`.
 

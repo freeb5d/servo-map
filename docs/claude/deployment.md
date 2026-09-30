@@ -68,6 +68,16 @@ Provisioned 2026-09-30, except Google sign-in (no OAuth clients yet). Without `D
   - `NSW_API_KEY`, `NSW_API_AUTH`, `QLD_API_TOKEN` (and whatever new adapters need)
   - `CF_ACCOUNT_ID`, `CF_API_TOKEN`
   - `CF_KV_NAMESPACE_ID` (hardcoded in the workflow today; centralise if it changes)
+  - `D1_PRICES_DATABASE_ID` (GitHub variable; D1 sync skips itself when unset)
+
+## Price history database (decision 0006)
+
+Provisioned 2026-09-30.
+
+1. D1 database `servo-map-prices` (`68620ec7-0764-417f-8b05-f62b511b7274`, region OC) is bound as `PRICES` in `wrangler.toml`, separate from `servo-map-accounts`. Apply new migrations with `wrangler d1 migrations apply servo-map-prices --remote` (from `packages/worker`).
+2. GitHub variable `D1_PRICES_DATABASE_ID` feeds the ingest step. It uses the same `CLOUDFLARE_API_TOKEN` (D1 Write).
+3. Seeded 2026-09-30 with the live NSW and WA stations and the KV `history:{nsw,wa}` series (2026-06-01 to 2026-09-30, 75 days).
+4. Budget: watch `SELECT run_at, state, rows_written FROM ingest_runs ORDER BY run_at DESC` against the free plan's 100,000 rows written a day, and the database size against 500 MB.
 
 ## Environment variable inventory
 

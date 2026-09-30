@@ -17,6 +17,7 @@ import { createSign } from "node:crypto";
 import type { AustralianState, FuelType, PriceSnapshot, Station } from "@servo-map/shared";
 import { KV_KEYS } from "../packages/worker/src/kv/keys";
 import { cycleLows, priceDrops, selectDeliveries, type Alert, type HomeWatch, type Watch } from "../packages/worker/src/alerts/rules";
+import { d1Query } from "./d1-rest";
 
 const env = (name: string) => process.env[name] ?? "";
 
@@ -30,10 +31,7 @@ async function cf(path: string, init: RequestInit = {}): Promise<Response> {
 }
 
 async function d1<T = Record<string, unknown>>(sql: string, params: unknown[] = []): Promise<T[]> {
-  const res = await cf(`d1/database/${env("D1_DATABASE_ID")}/query`, { method: "POST", body: JSON.stringify({ sql, params }) });
-  const body = (await res.json()) as { success: boolean; errors?: { message: string }[]; result?: { results: T[] }[] };
-  if (!body.success) throw new Error(`D1 query failed: ${body.errors?.map((e) => e.message).join("; ")}`);
-  return body.result?.[0]?.results ?? [];
+  return (await d1Query<T>(env("D1_DATABASE_ID"), sql, params)).results;
 }
 
 async function kvJson<T>(key: string): Promise<T | null> {
