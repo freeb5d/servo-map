@@ -8,8 +8,21 @@ binding = "KV"
 id = "7bb3949a4e20480fbde7fefeadd1fe41"
 preview_id = "2680cad997854e1c81dd38bd6a8cfaaa"
 
+# Accounts store (decision 0004). Schema lives in migrations/; apply with
+# `wrangler d1 migrations apply servo-map-accounts --remote`.
+[[d1_databases]]
+binding = "DB"
+database_name = "servo-map-accounts"
+database_id = "e16b836e-8809-4a34-89fb-fb40442a7889"
+migrations_dir = "migrations"
+
 # Reliable scheduler: CF Cron Triggers fire on time, then the scheduled handler
 # dispatches the GitHub Actions ingest (which runs on GH egress IPs the state
 # APIs are happy with). Requires the GH_DISPATCH_TOKEN secret.
 [triggers]
 crons = ["*/15 * * * *"]
+
+# Accounts (decision 0004). Audiences accepted in sign-in identity tokens; not secrets.
+# GOOGLE_CLIENT_IDS joins once the Google OAuth clients exist.
+[vars]
+APPLE_AUDIENCES = "com.misoto22.servomap"

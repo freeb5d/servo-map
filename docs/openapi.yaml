@@ -345,6 +345,187 @@ paths:
                         items:
                           type: string
 
+  /auth/{provider}:
+    post:
+      operationId: signIn
+      tags: [Accounts]
+      summary: Sign in with Apple or Google
+      description: |
+        Exchanges an identity token from Sign in with Apple or Google for a ServoMap session token
+        (valid 180 days). Creates the account on first sign-in. Answers 503 until accounts are
+        provisioned.
+      security: []
+      parameters:
+        - name: provider
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [apple, google]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [identityToken]
+              properties:
+                identityToken:
+                  type: string
+                name:
+                  type: string
+                  description: Apple sends the name only to the app on first sign-in; pass it on.
+      responses:
+        "200":
+          description: Signed in
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          token:
+                            type: string
+                          account:
+                            $ref: "#/components/schemas/Account"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          description: The identity token did not verify (`UNAUTHENTICATED`)
+
+  /me:
+    get:
+      operationId: getMe
+      tags: [Accounts]
+      summary: Everything synced for the signed-in account
+      security:
+        - session: []
+      responses:
+        "200":
+          description: The account, saved stations, fill-ups, car and alert settings
+        "401":
+          description: Missing or expired session (`UNAUTHENTICATED`)
+    delete:
+      operationId: deleteMe
+      tags: [Accounts]
+      summary: Delete the account and everything stored with it
+      security:
+        - session: []
+      responses:
+        "204":
+          description: Deleted
+        "401":
+          description: Missing or expired session
+
+  /me/saved:
+    put:
+      operationId: putSaved
+      tags: [Accounts]
+      summary: Replace the saved stations
+      security:
+        - session: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [stationIds]
+              properties:
+                stationIds:
+                  type: array
+                  maxItems: 200
+                  items:
+                    type: string
+      responses:
+        "204":
+          description: Saved
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+  /me/fillups:
+    put:
+      operationId: putFillUps
+      tags: [Accounts]
+      summary: Add or replace fill-ups by id
+      description: Idempotent; uploading the same fill-up twice leaves one copy. Invalid fields are all reported in `errors`.
+      security:
+        - session: []
+      responses:
+        "204":
+          description: Stored
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+  /me/fillups/{id}:
+    delete:
+      operationId: deleteFillUp
+      tags: [Accounts]
+      summary: Delete one fill-up
+      security:
+        - session: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          description: No such fill-up for this account
+
+  /me/car:
+    put:
+      operationId: putCar
+      tags: [Accounts]
+      summary: Set the car
+      security:
+        - session: []
+      responses:
+        "204":
+          description: Stored
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+  /me/alerts:
+    put:
+      operationId: putAlerts
+      tags: [Accounts]
+      summary: Set alert switches, quiet hours and home area
+      description: The home position is rounded to two decimals (about 1 km) before it is stored.
+      security:
+        - session: []
+      responses:
+        "204":
+          description: Stored
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+  /me/devices/{token}:
+    put:
+      operationId: putDevice
+      tags: [Accounts]
+      summary: Register this device's APNs token for alerts
+      security:
+        - session: []
+      parameters:
+        - name: token
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: "^[0-9a-f]{64,200}$"
+      responses:
+        "204":
+          description: Registered
+        "400":
+          $ref: "#/components/responses/BadRequest"
 
 components:
   parameters:
@@ -460,7 +641,32 @@ components:
         default: 0
         minimum: 0
 
+  securitySchemes:
+    session:
+      type: http
+      scheme: bearer
+      description: The session token from `POST /auth/{provider}`.
+
   schemas:
+    Account:
+      type: object
+      required: [id, provider, createdAt]
+      properties:
+        id:
+          type: string
+        provider:
+          type: string
+          enum: [apple, google]
+        email:
+          type: string
+        name:
+          type: string
+        picture:
+          type: string
+          format: uri
+        createdAt:
+          type: string
+          format: date-time
     Vehicle:
       type: object
       required: [id, make, model, fromYear, body, fuel, tankLitres, source]

@@ -25,6 +25,8 @@ settings:
     INFOPLIST_KEY_UIRequiresFullScreen: YES
     # Only HTTPS to the ServoMap API, which is exempt; answers the export question per upload.
     INFOPLIST_KEY_ITSAppUsesNonExemptEncryption: NO
+    # Google sign-in's iOS OAuth client id (decision 0004); empty hides the Google button.
+    GOOGLE_IOS_CLIENT_ID: ""
     TARGETED_DEVICE_FAMILY: "1"
 targets:
   ServoMap:
@@ -46,12 +48,14 @@ targets:
       path: Config/ServoMap.entitlements
       properties:
         aps-environment: production
+        com.apple.developer.applesignin: [Default]
     dependencies:
       - target: ServoMapWidgets
         embed: true
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.misoto22.servomap
+        INFOPLIST_KEY_ServoMapGoogleClientID: $(GOOGLE_IOS_CLIENT_ID)
         ASSETCATALOG_COMPILER_APPICON_NAME: ServoMap
   ServoMapWidgets:
     type: app-extension

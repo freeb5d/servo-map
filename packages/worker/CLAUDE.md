@@ -4,9 +4,10 @@
 
 ## What lives here
 
-Cloudflare Worker + Hono. One responsibility:
+Cloudflare Worker + Hono. Two responsibilities:
 
-**Read API** (`/api/v1/*`) — serves station / brand / metadata from KV. The worker never writes KV.
+1. **Read API** (`/api/v1/*`): serves station, brand, metadata, trend and vehicle data from KV and `@servo-map/shared`. The worker never writes KV.
+2. **Accounts** (`/api/v1/auth/*`, `/api/v1/me*`, decision 0004): verifies Apple and Google identity tokens (`src/auth/`), issues session tokens, and reads and writes the user's data in D1 (`src/db/`, schema in `migrations/`). Every query is scoped to the session's user id.
 
 Ingest lives outside the worker: GitHub Actions runs `scripts/fetch-data.ts` every 15 min, which imports this package's `StateAdapter` list and writes to the same KV via the Cloudflare REST API.
 
@@ -37,6 +38,9 @@ Declared in `src/env.ts`:
 
 - `KV` (binding — production id in `wrangler.toml`)
 - `NSW_API_KEY`, `NSW_API_AUTH`, `QLD_API_TOKEN`
+- `DB` (D1 binding `servo-map-accounts`), `SESSION_SECRET` (secret), `APPLE_AUDIENCES` and `GOOGLE_CLIENT_IDS` (plain `[vars]`). Without `DB` or `SESSION_SECRET` the account routes answer 503.
+
+Personal alerts are not sent from the worker: APNs needs HTTP/2, so `scripts/send-alerts.ts` runs in the ingest workflow and uses the rules in `src/alerts/`.
 
 See `.dev.vars.example`.
 

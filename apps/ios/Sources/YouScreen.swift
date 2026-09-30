@@ -1,3 +1,4 @@
+import AuthenticationServices
 import SwiftUI
 
 /**
@@ -13,7 +14,10 @@ struct YouScreen: View {
 
     @Environment(Store.self) private var store
     @Environment(FillUpLog.self) private var log
+    @Environment(AccountStore.self) private var account
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.colorScheme) private var colorScheme
+    @State private var confirmDelete = false
     @State private var path: [Page]
     @AppStorage("carName") private var carName = "My car"
     @AppStorage("tankLitres") private var tankLitres = 50
@@ -37,6 +41,7 @@ struct YouScreen: View {
                     savedCarousel
                     logCard
                     alertsCard
+                    if account.account != nil { accountCard }
                 }
                 .padding(.horizontal, 16)
                 .padding(.bottom, 32)
@@ -70,17 +75,74 @@ struct YouScreen: View {
     // MARK: Blocks
 
     private var profile: some View {
-        HStack(spacing: 14) {
-            Circle().fill(ServoMapColor.ink)
-                .frame(width: 60, height: 60)
-                .overlay(Image(systemName: "person.fill").font(.system(size: 26, weight: .semibold)).foregroundStyle(ServoMapColor.surface))
-            VStack(alignment: .leading, spacing: 3) {
-                Text("You").font(ServoMapFont.display(.largeTitle, weight: 600))
-                Label("Kept on this iPhone", systemImage: "iphone")
-                    .font(ServoMapFont.small).foregroundStyle(ServoMapColor.ink3)
+        VStack(alignment: .leading, spacing: 14) {
+            HStack(spacing: 14) {
+                EditableAvatar()
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(account.displayName).font(ServoMapFont.display(.largeTitle, weight: 600)).lineLimit(1).minimumScaleFactor(0.6)
+                    Label(syncLine, systemImage: account.account == nil ? "iphone" : "checkmark.icloud")
+                        .font(ServoMapFont.small).foregroundStyle(ServoMapColor.ink3)
+                }
+            }
+            if account.account == nil { signIn }
+            if case .failed(let message) = account.status {
+                Text(message).font(ServoMapFont.small).foregroundStyle(ServoMapColor.priceExpensive)
             }
         }
         .padding(.top, 4)
+    }
+
+    private var syncLine: String {
+        if account.account == nil { return "Kept on this iPhone" }
+        if let when = account.lastSynced { return "Synced \(when.formatted(.relative(presentation: .named)))" }
+        return account.account?.email ?? "Signed in"
+    }
+
+    /** Apple first (App Store rule 4.8), Google when this build has a client id. */
+    private var signIn: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Sign in to keep your stations, log and car on all your devices.")
+                .font(ServoMapFont.body).foregroundStyle(ServoMapColor.ink2)
+            SignInWithAppleButton(.signIn) { request in
+                request.requestedScopes = [.fullName, .email]
+            } onCompletion: { result in
+                Task { await account.signInWithApple(result, store: store, log: log) }
+            }
+            .signInWithAppleButtonStyle(colorScheme == .dark ? .white : .black)
+            .frame(height: 48)
+            .clipShape(Capsule())
+            if GoogleSignIn.clientID != nil {
+                Button { Task { await account.signInWithGoogle(store: store, log: log) } } label: {
+                    Label("Sign in with Google", systemImage: "g.circle.fill")
+                        .actionFont().frame(maxWidth: .infinity, minHeight: 36)
+                }
+                .buttonStyle(.glass)
+                .buttonBorderShape(.capsule)
+            }
+        }
+        .disabled(account.status == .signingIn)
+        .overlay { if account.status == .signingIn { ProgressView() } }
+    }
+
+    private var accountCard: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Account").font(ServoMapFont.display(.title3, weight: 600))
+            VStack(spacing: 0) {
+                Button("Sign out") { account.signOut() }
+                    .actionFont().frame(maxWidth: .infinity, alignment: .leading).padding(.vertical, 10)
+                Divider()
+                Button("Delete account", role: .destructive) { confirmDelete = true }
+                    .actionFont().frame(maxWidth: .infinity, alignment: .leading).padding(.vertical, 10)
+            }
+            .card(padding: 14)
+            Text("Deleting removes your account and everything stored with it. This iPhone keeps its own copy.")
+                .font(ServoMapFont.small).foregroundStyle(ServoMapColor.ink3)
+        }
+        .confirmationDialog("Delete your ServoMap account?", isPresented: $confirmDelete, titleVisibility: .visible) {
+            Button("Delete account", role: .destructive) { Task { await account.deleteAccount() } }
+        } message: {
+            Text("Your saved stations, fill-ups, car and alert settings are removed from ServoMap's servers. This cannot be undone.")
+        }
     }
 
     private var carCard: some View {
@@ -261,24 +323,19 @@ private extension View {
     }
 }
 
-/** The avatar on the map: initials once signed in, a person glyph before. */
+/** The avatar on the map: the user's photo or initials, a person glyph before any. */
 struct AvatarButton: View {
-    var initials: String?
     let action: () -> Void
+    @State private var version = 0
 
     var body: some View {
         Button(action: action) {
-            Group {
-                if let initials {
-                    Text(initials).font(ServoMapFont.body(.footnote, weight: 700))
-                } else {
-                    Image(systemName: "person.fill").font(ServoMapFont.body(.body, weight: 600))
-                }
-            }
-            .frame(width: 30, height: 30)
+            AvatarImage(size: 36, version: version)
         }
-        .buttonStyle(.glass)
-        .buttonBorderShape(.circle)
+        .buttonStyle(.plain)
+        .padding(4)
+        .glassEffect(.regular, in: .circle)
+        .onReceive(NotificationCenter.default.publisher(for: .avatarChanged)) { _ in version += 1 }
         .accessibilityLabel("You: saved stations, log, car and alerts")
     }
 }

@@ -29,3 +29,11 @@ export {
   vehicleMakes,
 } from "./vehicles";
 export { VEHICLES } from "./generated/vehicles.data";
+export type {
+  Account,
+  FillUpRecord,
+  CarProfile,
+  AlertSettings,
+  MeResponse,
+  SessionResponse,
+} from "./account";

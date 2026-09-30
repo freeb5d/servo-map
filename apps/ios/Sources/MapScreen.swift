@@ -273,7 +273,7 @@ struct MapScreen: View {
                 // Map labels showed through the bare segmented control; glass blurs them out.
                 .padding(3)
                 .glassEffect(.regular, in: .capsule)
-                AvatarButton(initials: nil) { youPage = nil; showYou = true }
+                AvatarButton { youPage = nil; showYou = true }
             }
             VStack(spacing: 0) {
                 Button { showFilters = true } label: {

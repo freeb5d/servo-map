@@ -104,6 +104,17 @@ final class FillUpLog {
         persist()
     }
 
+    /** Adds fill-ups from another device that this log does not have yet; returns how many. */
+    @discardableResult
+    func merge(_ others: [FillUp]) -> Int {
+        let known = Set(entries.map(\.id))
+        let new = others.filter { !known.contains($0.id) }
+        guard !new.isEmpty else { return 0 }
+        entries = (entries + new).sorted { $0.date > $1.date }
+        persist()
+        return new.count
+    }
+
     func remove(_ ids: Set<UUID>) {
         entries.removeAll { ids.contains($0.id) }
         persist()

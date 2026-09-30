@@ -62,6 +62,15 @@ platform :ios do
       app_id.create_capability(push)
       UI.success("Enabled Push Notifications on #{APP_BUNDLE_ID}")
     end
+    # Sign in with Apple (decision 0004), as the primary App ID of its group.
+    apple_id = Spaceship::ConnectAPI::BundleIdCapability::Type::APPLE_ID_AUTH
+    unless app_id.get_capabilities.any? { |c| c.capability_type == apple_id }
+      app_id.create_capability(apple_id, settings: [{
+        key: "APPLE_ID_AUTH_APP_CONSENT",
+        options: [{ key: "PRIMARY_APP_CONSENT" }]
+      }])
+      UI.success("Enabled Sign in with Apple on #{APP_BUNDLE_ID}")
+    end
 
     # The App Store Connect API cannot create apps ("apps does not allow CREATE"),
     # so the record is made once by hand; stop with the exact fields if it is missing.

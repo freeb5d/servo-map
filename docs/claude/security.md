@@ -12,7 +12,10 @@
 | Web (prod)         | Vercel project env (build-time)                  | Injected at deploy      |
 | CI (GH Actions)    | Repo secrets (Settings → Secrets → Actions)      | Referenced as `${{ secrets.NAME }}` |
 | iOS release (local)| 1Password `op://02 Personal Production/App Store Connect API Key - kioku-ios-ops` (team App Manager key, shared with kioku-ios) | Read by `apps/ios/scripts/beta.sh` into the environment; the `.p8` exists only in ignored `apps/ios/build/` during a lane |
-| iOS push (future)  | 1Password `02 Personal Production / jade-apns` (the team's APNs auth key; one key serves every app on team `BZVKP6884D`) | For the server that will send price alerts |
+| Account sessions   | Worker secret `SESSION_SECRET` (`wrangler secret put`); its value also in 1Password `02 Personal Production / ServoMap session secret` | Signs ServoMap session tokens (HS256). Rotating it signs everyone out. |
+| Account data       | Cloudflare D1 database `servo-map-accounts`, binding `DB` | Schema in `packages/worker/migrations/`. Email, name, Google photo URL, saved stations, fill-ups, car, alert settings, home rounded to ~1 km, APNs tokens. |
+| Sign-in audiences  | Worker vars `APPLE_AUDIENCES` (iOS bundle id), `GOOGLE_CLIENT_IDS` (OAuth client ids) | Not secret; `wrangler.toml` `[vars]`. |
+| iOS push (alerts)  | GitHub Actions secrets `APNS_KEY`, `APNS_KEY_ID` from 1Password `02 Personal Production / jade-apns` (the team's APNs auth key; one key serves every app on team `BZVKP6884D`) | Read by `scripts/send-alerts.ts` in the ingest workflow. |
 
 **Never commit** `.dev.vars`, `.env`, `.env.local`, or anything under `.wrangler/`. `.gitignore` already excludes them — verify before every commit.
 
@@ -60,6 +63,14 @@ Same pattern — regenerate a subscriber token at `fuelpricesqld.com.au`, update
 1. Vercel → Account Settings → Tokens → create new.
 2. Update `VERCEL_TOKEN` in GH secrets.
 3. Verify `deploy-web.yml` succeeds on `workflow_dispatch`, then roll the old token.
+
+## Accounts
+
+- Identity tokens from Apple and Google are verified in the Worker against the provider's published keys (`packages/worker/src/auth/`), checking signature, issuer, audience and expiry. Sign-in failures answer one generic 401.
+- Every `/me` query is scoped to the session's user id; the tests check that one account cannot read, change or delete another's rows.
+- Account routes answer only the ServoMap web origins over CORS; the iOS app sends no Origin.
+- The iOS app keeps its session token in the Keychain (`kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly`), never in UserDefaults.
+- Deleting an account removes every row for it in every table (App Store rule 5.1.1(v)).
 
 ## Things we never log
 

@@ -49,6 +49,16 @@ The app in `apps/ios` has its own version, separate from web and worker.
 - **Push.** The app registers for APNs when the user turns on price alerts and keeps the token on the device. Sending needs the team's APNs auth key (see `security.md`) and a server, which do not exist yet.
 - **CI.** Not wired: there is no macOS runner for this repository. Uploads run on a Mac with the distribution certificate.
 
+## Accounts and alerts (decision 0004)
+
+Provisioned 2026-09-30, except Google sign-in (no OAuth clients yet). Without `DB` or `SESSION_SECRET`, `/api/v1/auth/*` and `/api/v1/me*` answer 503; without the D1 or APNs settings, the alert step in the ingest workflow skips itself.
+
+1. The account-owned Cloudflare token `servo-map` (the local token and the `CLOUDFLARE_API_TOKEN` GitHub secret) has D1 Read and D1 Write. Account tokens are edited through `/accounts/{account}/tokens/{id}`, not `/user/tokens`.
+2. D1 database `servo-map-accounts` (`e16b836e-8809-4a34-89fb-fb40442a7889`, region OC) is bound as `DB` in `wrangler.toml`. Apply new migrations with `wrangler d1 migrations apply servo-map-accounts --remote`.
+3. Worker secret `SESSION_SECRET`; its value is in 1Password `02 Personal Production / ServoMap session secret`.
+4. `APPLE_AUDIENCES = "com.misoto22.servomap"` in `wrangler.toml` `[vars]`. Once Google OAuth clients exist, add `GOOGLE_CLIENT_IDS` there and put the iOS client id in `apps/ios/project.yml` `GOOGLE_IOS_CLIENT_ID`.
+5. GitHub: variable `D1_DATABASE_ID`, secrets `APNS_KEY` (the `.p8` contents) and `APNS_KEY_ID`.
+
 ## Ingest cron
 
 - **Runner:** GitHub Actions, `.github/workflows/fetch-data.yml`, schedule `*/15 * * * *` (+ `workflow_dispatch`).
