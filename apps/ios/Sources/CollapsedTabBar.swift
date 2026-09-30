@@ -19,8 +19,6 @@ struct CollapsedTabBar: View {
     static let items: [(value: String, title: String, symbol: String)] = [
         ("map", "Nearby", "fuelpump"),
         ("trends", "Trends", "chart.line.uptrend.xyaxis"),
-        ("saved", "Saved", "bookmark"),
-        ("log", "Log", "list.bullet.rectangle"),
         ("search", "Search", "magnifyingglass"),
     ]
 

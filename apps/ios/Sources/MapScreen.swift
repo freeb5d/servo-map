@@ -5,6 +5,9 @@ struct MapScreen: View {
     @Environment(Store.self) private var store
     @State private var detent: PresentationDetent
     @State private var tab: String
+    /** The You sheet (saved, log, car, alerts) and the page it opens on. */
+    @State private var showYou = false
+    @State private var youPage: YouScreen.Page?
     @State private var selected: Station?
     @State private var showFilters: Bool
     @State private var camera: MapCameraPosition = .region(MKCoordinateRegion(
@@ -25,6 +28,12 @@ struct MapScreen: View {
 
     init(tab: String = "map", openFilters: Bool = false, openDetail: Bool = false) {
         self.openDetail = openDetail
+        // Saved and Log moved into the You sheet; their launch names open it on that page.
+        if tab == "you" || YouScreen.Page(rawValue: tab.capitalized) != nil {
+            _showYou = State(initialValue: true)
+            _youPage = State(initialValue: YouScreen.Page(rawValue: tab.capitalized))
+        }
+        let tab = ["trends", "search"].contains(tab) ? tab : "map"
         _tab = State(initialValue: tab)
         _detent = State(initialValue: tab == "map" ? .medium : .large)
         _showFilters = State(initialValue: openFilters)
@@ -110,13 +119,12 @@ struct MapScreen: View {
                     ResultsSheet(selected: $selected, showFilters: $showFilters).modifier(page)
                 } label: { tabLabel("Nearby", "fuelpump", "map") }
                 Tab(value: "trends") { TrendsScreen().modifier(page) } label: { tabLabel("Trends", "chart.line.uptrend.xyaxis", "trends") }
-                Tab(value: "saved") { SavedScreen().modifier(page) } label: { tabLabel("Saved", "bookmark", "saved") }
-                Tab(value: "log") { LogScreen().modifier(page) } label: { tabLabel("Log", "list.bullet.rectangle", "log") }
                 Tab(value: "search", role: .search) { SearchScreen().modifier(page) }
             }
             // As in Health: scrolling down folds the bar into one round button for the current tab,
             // with search on its own at the right.
             .tabBarMinimizeBehavior(.onScrollDown)
+            .sheet(isPresented: $showYou) { YouScreen(page: youPage) }
             .overlay(alignment: .top) {
                 if detent == collapsed {
                     CollapsedTabBar(tab: $tab) { value in
@@ -250,32 +258,41 @@ struct MapScreen: View {
         if openDetail, selected == nil { selected = store.ranked.first }
     }
 
+    /**
+     * As in Maps: the fuel switch and the avatar across the top, and the map's own controls (filters,
+     * location) stacked in one glass column on the right, so the fuel names never truncate.
+     */
     private var topControls: some View {
         @Bindable var store = store
-        // Spacing below the 10 pt gap, so the picker and the two buttons stay separate pieces of glass.
-        return GlassEffectContainer(spacing: 4) {
-          HStack(spacing: 10) {
-            Picker("Fuel", selection: $store.fuel) {
-                ForEach(FuelType.allCases) { Text($0.rawValue).tag($0) }
+        return VStack(alignment: .trailing, spacing: 10) {
+            HStack(spacing: 10) {
+                Picker("Fuel", selection: $store.fuel) {
+                    ForEach(FuelType.allCases) { Text($0.rawValue).tag($0) }
+                }
+                .pickerStyle(.segmented)
+                // Map labels showed through the bare segmented control; glass blurs them out.
+                .padding(3)
+                .glassEffect(.regular, in: .capsule)
+                AvatarButton(initials: nil) { youPage = nil; showYou = true }
             }
-            .pickerStyle(.segmented)
-            // Map labels showed through the bare segmented control; glass blurs them out.
-            .padding(3)
+            VStack(spacing: 0) {
+                Button { showFilters = true } label: {
+                    Image(systemName: store.filters.activeCount > 0 ? "line.3.horizontal.decrease.circle.fill" : "line.3.horizontal.decrease")
+                        .mapControl()
+                }
+                .accessibilityLabel(store.filters.activeCount > 0 ? "Filters, \(store.filters.activeCount) on" : "Filters")
+                Divider().frame(width: 28)
+                Button { Task { await locate() } } label: {
+                    Image(systemName: location.state == .denied ? "location.slash" : store.located ? "location.fill" : "location")
+                        .symbolEffect(.pulse, isActive: location.state == .locating)
+                        .mapControl()
+                }
+                .accessibilityLabel(store.located ? "Showing prices near you" : "Use my location")
+            }
+            .buttonStyle(.plain)
+            .foregroundStyle(ServoMapColor.ink)
+            .padding(.vertical, 4)
             .glassEffect(.regular, in: .capsule)
-            Button { showFilters = true } label: {
-                Image(systemName: store.filters.activeCount > 0 ? "line.3.horizontal.decrease.circle.fill" : "line.3.horizontal.decrease")
-                    .mapControl()
-            }
-            .buttonStyle(.glass)
-            .accessibilityLabel(store.filters.activeCount > 0 ? "Filters, \(store.filters.activeCount) on" : "Filters")
-            Button { Task { await locate() } } label: {
-                Image(systemName: location.state == .denied ? "location.slash" : store.located ? "location.fill" : "location")
-                    .symbolEffect(.pulse, isActive: location.state == .locating)
-                    .mapControl()
-            }
-            .buttonStyle(.glass)
-            .accessibilityLabel(store.located ? "Showing prices near you" : "Use my location")
-          }
         }
         .padding(.horizontal, 16)
         .padding(.top, 4)
@@ -382,6 +399,6 @@ private struct TabBarHider: UIViewControllerRepresentable {
 private extension View {
     /** Map control glyphs: semibold at body size in a 44 pt square, so they read over the map. */
     func mapControl() -> some View {
-        font(ServoMapFont.body(.body, weight: 600)).frame(width: 30, height: 30)
+        font(ServoMapFont.body(.body, weight: 600)).frame(width: 44, height: 44).contentShape(Rectangle())
     }
 }

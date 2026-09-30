@@ -101,7 +101,6 @@ struct CarForm: View {
             }
         }
         .paperList()
-        .navigationTitle("Your car")
         .onChange(of: defaultFuel) { if let f = FuelType(rawValue: defaultFuel) { store.fuel = f } }
     }
 }

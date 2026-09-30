@@ -8,42 +8,30 @@ struct LogScreen: View {
     @Environment(Store.self) private var store
     @Environment(FillUpLog.self) private var log
     @State private var adding = false
-    @AppStorage("carName") private var carName = "My car"
-    @AppStorage("tankLitres") private var tankLitres = 50
-
     var body: some View {
-        NavigationStack {
-            List {
-                if log.entries.isEmpty {
-                    emptySection
-                } else {
-                    monthSection
-                    spendingSection
-                    priceSection
-                    habitsSection
-                }
-                Section("Your car") {
-                    NavigationLink { CarForm() } label: {
-                        LabeledContent(carName, value: "\(store.fuel.rawValue), \(tankLitres) L tank")
-                    }
-                    .paperRow()
-                }
-                ForEach(byMonth, id: \.title) { group in
-                    Section(group.title) {
-                        ForEach(group.fills) { FillUpRow(fillUp: $0).paperRow() }
-                            .onDelete { offsets in log.remove(Set(offsets.map { group.fills[$0].id })) }
-                    }
+        List {
+            if log.entries.isEmpty {
+                emptySection
+            } else {
+                monthSection
+                spendingSection
+                priceSection
+                habitsSection
+            }
+            ForEach(byMonth, id: \.title) { group in
+                Section(group.title) {
+                    ForEach(group.fills) { FillUpRow(fillUp: $0).paperRow() }
+                        .onDelete { offsets in log.remove(Set(offsets.map { group.fills[$0].id })) }
                 }
             }
-            .paperList()
-            .navigationTitle("Log")
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button("Log a fill-up", systemImage: "plus") { adding = true }.buttonStyle(.glassProminent).actionFont()
-                }
-            }
-            .sheet(isPresented: $adding) { AddFillUpSheet(station: nil) }
         }
+        .paperList()
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button("Log a fill-up", systemImage: "plus") { adding = true }.buttonStyle(.glassProminent).actionFont()
+            }
+        }
+        .sheet(isPresented: $adding) { AddFillUpSheet(station: nil) }
     }
 
     // MARK: Cards

@@ -12,33 +12,28 @@ struct SavedScreen: View {
     @State private var baseline: [String: Double] = [:]
 
     var body: some View {
-        NavigationStack {
-            List {
-                if saved.isEmpty {
-                    emptySections
-                } else {
-                    summary
-                    Section {
-                        ForEach(saved) { station in
-                            NavigationLink(value: station) { SavedRow(station: station, fuel: store.fuel, before: baseline[station.id]) }
-                                .swipeActions {
-                                    Button("Remove", systemImage: "bookmark.slash", role: .destructive) { store.toggleSaved(station) }
-                                }
-                        }
-                        .paperRow()
-                    } footer: {
-                        Text("Changes are since you last opened Saved. Saved stations stay on this iPhone.")
+        List {
+            if saved.isEmpty {
+                emptySections
+            } else {
+                summary
+                Section {
+                    ForEach(saved) { station in
+                        NavigationLink(value: station) { SavedRow(station: station, fuel: store.fuel, before: baseline[station.id]) }
+                            .swipeActions {
+                                Button("Remove", systemImage: "bookmark.slash", role: .destructive) { store.toggleSaved(station) }
+                            }
                     }
-                    PriceAlertsSection()
+                    .paperRow()
+                } footer: {
+                    Text("Changes are since you last opened Saved.")
                 }
             }
-            .paperList()
-            .navigationTitle("Saved")
-            .task(id: store.savedIDs) { await loadFar() }
-            .onAppear { baseline = decode(lastSeenRaw) }
-            .onDisappear { remember() }
-            .navigationDestination(for: Station.self) { StationDetail(station: $0) }
         }
+        .paperList()
+        .task(id: store.savedIDs) { await loadFar() }
+        .onAppear { baseline = decode(lastSeenRaw) }
+        .onDisappear { remember() }
     }
 
     // MARK: Sections
