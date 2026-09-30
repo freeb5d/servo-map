@@ -7,7 +7,6 @@ import android.graphics.Color as AColor
 import android.graphics.Paint
 import android.graphics.RectF
 import android.graphics.drawable.BitmapDrawable
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
@@ -29,7 +28,7 @@ fun StationMap(
     onSelect: (Station) -> Unit,
 ) {
     val context = LocalContext.current
-    val dark = isSystemInDarkTheme()
+    val dark = LocalDark.current
     AndroidView(
         modifier = Modifier,
         factory = { ctx ->

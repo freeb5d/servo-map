@@ -5,6 +5,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.graphics.Color
 
 /** 素 design tokens (packages/design-tokens): paper and sumi ink, with price tiers the only chroma. */
@@ -26,9 +28,21 @@ fun tierColor(tier: Tier?, dark: Boolean): Color = when (tier) {
     null -> if (dark) Ink.ink2Dark else Ink.ink2
 }
 
+/** Whether the app is drawn dark: the Settings choice, or the system's when set to "system". */
+val LocalDark = compositionLocalOf { false }
+
 @Composable
-fun ServoTheme(content: @Composable () -> Unit) {
-    val dark = isSystemInDarkTheme()
+fun ServoTheme(mode: String = "system", content: @Composable () -> Unit) {
+    val dark = when (mode) {
+        "dark" -> true
+        "light" -> false
+        else -> isSystemInDarkTheme()
+    }
+    CompositionLocalProvider(LocalDark provides dark) { ServoScheme(dark, content) }
+}
+
+@Composable
+private fun ServoScheme(dark: Boolean, content: @Composable () -> Unit) {
     val scheme = if (dark) darkColorScheme(
         primary = Ink.inkDark, onPrimary = Ink.paperDark, background = Ink.paperDark, surface = Ink.paperDark,
         onBackground = Ink.inkDark, onSurface = Ink.inkDark, surfaceVariant = Ink.washDark,

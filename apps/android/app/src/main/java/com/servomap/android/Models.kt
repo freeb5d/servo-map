@@ -4,7 +4,13 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import java.time.Instant
 
-enum class Fuel(val code: String) { U91("U91"), E10("E10"), U95("U95"), U98("U98"), Diesel("Diesel") }
+enum class Fuel(val code: String) {
+    U91("U91"), E10("E10"), U95("U95"), U98("U98"), Diesel("Diesel");
+
+    companion object {
+        fun fromCode(code: String): Fuel = entries.firstOrNull { it.code == code } ?: U91
+    }
+}
 
 @Serializable
 data class FuelPrice(
@@ -37,6 +43,13 @@ data class Station(
         return now.epochSecond - updated.epochSecond <= CURRENT_FOR_SECONDS
     }
 
+    /** Whether the [fuel] price was reported within the last [hours] hours; always true when [hours] is null. */
+    fun reportedWithin(fuel: Fuel, hours: Int?, now: Instant = Instant.now()): Boolean {
+        if (hours == null) return true
+        val updated = price(fuel)?.let { runCatching { Instant.parse(it.updatedAt) }.getOrNull() } ?: return false
+        return now.epochSecond - updated.epochSecond <= hours * 3600L
+    }
+
     companion object {
         const val CURRENT_FOR_SECONDS = 7L * 86_400
     }
@@ -44,6 +57,19 @@ data class Station(
 
 @Serializable
 data class Envelope<T>(val data: T)
+
+/** What the filter sheet narrows the loaded stations to: brands to hide and how recent a price must be. */
+data class Filters(val hiddenBrands: Set<String> = emptySet(), val freshHours: Int? = null) {
+    val active: Boolean get() = hiddenBrands.isNotEmpty() || freshHours != null
+
+    fun apply(stations: List<Station>, fuel: Fuel): List<Station> =
+        stations.filter { it.brand !in hiddenBrands && it.reportedWithin(fuel, freshHours) }
+
+    companion object {
+        /** The "reported within" choices: label to hours (null means any age). */
+        val freshChoices: List<Pair<String, Int?>> = listOf("6 h" to 6, "24 h" to 24, "3 days" to 72, "A week" to null)
+    }
+}
 
 enum class Tier { Cheap, Mid, Expensive }
 
