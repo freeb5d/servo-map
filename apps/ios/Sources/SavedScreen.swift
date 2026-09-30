@@ -6,6 +6,8 @@ import SwiftUI
  */
 struct SavedScreen: View {
     @Environment(Store.self) private var store
+    @Environment(FillUpLog.self) private var log
+    @Environment(AccountStore.self) private var account
     @State private var far: [Station] = []
     /** Price per station when this screen was last shown; the baseline for the change column. */
     @AppStorage("savedLastSeen") private var lastSeenRaw = "{}"
@@ -100,7 +102,15 @@ struct SavedScreen: View {
         let loaded = Set(store.stations.map(\.id))
         var out: [Station] = []
         for id in store.savedIDs where !loaded.contains(id) {
-            if let s = try? await API().station(id: id) { out.append(s) }
+            guard let s = try? await API().station(id: id) else { continue }
+            // The server answers an old id with the station under its current one (a renamed id such as
+            // an ACT station that used to be nsw-); adopt it so saved stations and the log keep matching.
+            if s.id != id {
+                store.adoptStationID(id, as: s.id)
+                let moved = log.renameStation(id, to: s.id)
+                if !moved.isEmpty { await account.pushFillUps(moved) }
+            }
+            out.append(s)
         }
         far = out
     }

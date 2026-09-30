@@ -173,6 +173,13 @@ final class Store {
     func toggleSaved(_ s: Station) {
         if let i = savedIDs.firstIndex(of: s.id) { savedIDs.remove(at: i) } else { savedIDs.append(s.id) }
     }
+
+    /** Follows a saved station the server now reports under another id, keeping its place in the list. */
+    func adoptStationID(_ old: String, as new: String) {
+        guard old != new, savedIDs.contains(old) else { return }
+        var seen = Set<String>()
+        savedIDs = savedIDs.map { $0 == old ? new : $0 }.filter { seen.insert($0).inserted }
+    }
 }
 
 /** A latitude/longitude box, for what the map shows. */

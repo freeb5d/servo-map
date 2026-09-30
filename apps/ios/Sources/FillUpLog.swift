@@ -85,7 +85,7 @@ struct LogHabits: Equatable, Sendable {
     }
 }
 
-/** The fill-up log, kept as JSON in the app's documents folder; nothing leaves the device. */
+/** The fill-up log, kept as JSON in the app's documents folder and synced to the account when signed in. */
 @MainActor @Observable
 final class FillUpLog {
     private(set) var entries: [FillUp] = []
@@ -113,6 +113,19 @@ final class FillUpLog {
         entries = (entries + new).sorted { $0.date > $1.date }
         persist()
         return new.count
+    }
+
+    /** Points fill-ups at a station's new id after a rename; returns the changed entries so they can be synced. */
+    @discardableResult
+    func renameStation(_ old: String, to new: String) -> [FillUp] {
+        guard old != new else { return [] }
+        var changed: [FillUp] = []
+        for i in entries.indices where entries[i].stationID == old {
+            entries[i].stationID = new
+            changed.append(entries[i])
+        }
+        if !changed.isEmpty { persist() }
+        return changed
     }
 
     func remove(_ ids: Set<UUID>) {
