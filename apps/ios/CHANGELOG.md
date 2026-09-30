@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.2](https://github.com/Misoto22/servo-map/compare/ios-v0.5.1...ios-v0.5.2) (2026-09-30)
+
+
+### Bug Fixes
+
+* **ios:** adopt the station id the server returns for a saved station ([#48](https://github.com/Misoto22/servo-map/issues/48)) ([43f7da6](https://github.com/Misoto22/servo-map/commit/43f7da66734ca50141a604cd8ebb028840add14b))
+
 ## [0.5.1](https://github.com/Misoto22/servo-map/compare/ios-v0.5.0...ios-v0.5.1) (2026-09-30)
 
 
