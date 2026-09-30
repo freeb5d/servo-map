@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.6.1](https://github.com/Misoto22/servo-map/compare/v0.6.0...v0.6.1) (2026-09-30)
+
+
+### Bug Fixes
+
+* **ingest:** keep skipped states' brands in the brand list ([#53](https://github.com/Misoto22/servo-map/issues/53)) ([d31626b](https://github.com/Misoto22/servo-map/commit/d31626bc31253ff7803a11a7ef703e9fb21b89df))
+* **worker:** fetch TAS and file ACT stations under ACT ([#46](https://github.com/Misoto22/servo-map/issues/46)) ([43cb4d1](https://github.com/Misoto22/servo-map/commit/43cb4d15c0f157e468f2837b1e39b10fe6af65cc))
+
 ## [0.6.0](https://github.com/Misoto22/servo-map/compare/v0.5.0...v0.6.0) (2026-09-30)
 
 
