@@ -12,16 +12,28 @@ struct ResultsSheet: View {
                 Section { verdict }
                 if store.stations.isEmpty && store.loading {
                     placeholderRows
-                } else if !store.ranked.isEmpty {
+                } else if !store.ranked.isEmpty && store.inView.isEmpty {
                     Section {
-                        ForEach(store.ranked.prefix(60)) { station in
+                        Text("No stations in this part of the map. Zoom out or move the map.")
+                            .font(ServoMapFont.body).foregroundStyle(ServoMapColor.ink2)
+                            .paperRow()
+                    }
+                } else if !store.inView.isEmpty {
+                    // The list follows the map: what is on screen, cheapest first.
+                    Section {
+                        ForEach(Array(store.inView.prefix(60).enumerated()), id: \.element.id) { index, station in
                             NavigationLink(value: station) {
-                                StationRow(station: station, fuel: store.fuel, range: store.range)
+                                StationRow(station: station, fuel: store.fuel, range: store.range, rank: index + 1)
                             }
+                            // The cheapest row carries the cheap tier's wash, matching its map tag. Set before
+                            // paperRow: the innermost row background wins.
+                            .listRowBackground(index == 0 ? ServoMapColor.priceCheapSoft : ServoMapColor.surface)
                             .paperRow()
                         }
                     } header: {
-                        Text("\(store.ranked.count) stations, cheapest first")
+                        Text(store.inView.count == store.ranked.count
+                             ? "\(store.inView.count) stations, cheapest first"
+                             : "\(store.inView.count) on the map, cheapest first")
                     }
                 }
             }
@@ -38,12 +50,15 @@ struct ResultsSheet: View {
     }
 
     @ViewBuilder private var verdict: some View {
-        if let cheapest = store.ranked.first, let p = cheapest.price(store.fuel) {
+        if let cheapest = store.inView.first, let p = cheapest.price(store.fuel) {
             VStack(alignment: .leading, spacing: 6) {
-                Text("\(store.fuel.rawValue) near \(store.placeName)").font(ServoMapFont.small).foregroundStyle(ServoMapColor.ink3)
+                Text(store.inView.count == store.ranked.count
+                     ? "Cheapest \(store.fuel.rawValue) near \(store.placeName)"
+                     : "Cheapest \(store.fuel.rawValue) on the map")
+                    .font(ServoMapFont.body(.footnote, weight: 600)).foregroundStyle(ServoMapColor.priceCheap)
                 HStack(alignment: .firstTextBaseline, spacing: 10) {
                     PriceText(cents: p.price, font: ServoMapFont.display(.largeTitle))
-                    BrandSeal(family: cheapest.family)
+                    BrandSeal(family: cheapest.family, size: 22)
                     Text(cheapest.suburb).font(ServoMapFont.body).foregroundStyle(ServoMapColor.ink2)
                 }
                 if let line = store.verdictLine {
@@ -77,6 +92,7 @@ struct ResultsSheet: View {
                 Task { await store.move(to: Store.sydney.lat, Store.sydney.lng, name: "Sydney CBD") }
             }
             .buttonStyle(.glassProminent)
+            .actionFont()
         }
     }
 
@@ -93,7 +109,7 @@ struct ResultsSheet: View {
         } description: {
             Text("\(store.stations.count) stations are nearby, but none pass your filters.")
         } actions: {
-            Button("Reset filters") { store.filters = Filters() }.buttonStyle(.glassProminent)
+            Button("Reset filters") { store.filters = Filters() }.buttonStyle(.glassProminent).actionFont()
         }
     }
 
@@ -103,7 +119,7 @@ struct ResultsSheet: View {
         } description: {
             Text("Check your connection, then try again.")
         } actions: {
-            Button("Try again") { Task { await store.load() } }.buttonStyle(.glassProminent)
+            Button("Try again") { Task { await store.load() } }.buttonStyle(.glassProminent).actionFont()
         }
     }
 }

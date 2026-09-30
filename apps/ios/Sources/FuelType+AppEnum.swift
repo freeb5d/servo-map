@@ -14,8 +14,8 @@ enum Nearby {
 
     static func cheapest(_ fuel: FuelType, limit: Int = 3) async throws -> [Station] {
         let all = try await API().stations(fuel: fuel, lat: Store.sydney.lat, lng: Store.sydney.lng, radiusKm: 20)
-        // Same rule as the app: prices older than a day do not rank.
-        let fresh = all.filter { ($0.price(fuel)?.updatedAt ?? .distantPast) > Date().addingTimeInterval(-86_400) }
+        // Same rule as the app: only a current price can be quoted as the cheapest.
+        let fresh = all.filter { $0.hasCurrentPrice(fuel) }
         return Array(fresh.sorted { ($0.price(fuel)?.price ?? .infinity) < ($1.price(fuel)?.price ?? .infinity) }.prefix(limit))
     }
 }

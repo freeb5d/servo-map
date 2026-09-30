@@ -5,7 +5,7 @@
 | [`../README.md`](../README.md)                | What ServoMap is, how to run and release it.        |
 | [`../CLAUDE.md`](../CLAUDE.md)                | Project constitution for agents. Start here.        |
 | [`design/system.md`](./design/system.md)      | Design system: tokens, type, components, platforms. |
-| [`decisions/`](./decisions)                   | Decision records (design direction, web IA).        |
+| [`decisions/`](./decisions)                   | Decision records (design direction, web IA, brand logos, accounts). |
 | [`../plan.md`](../plan.md)                    | Product narrative, data sources, roadmap, risks.    |
 | [`openapi.yaml`](./openapi.yaml)              | **Source of truth** for the REST API contract.      |
 | [`claude/architecture.md`](./claude/architecture.md)   | Package boundaries, data flow, KV schema.      |

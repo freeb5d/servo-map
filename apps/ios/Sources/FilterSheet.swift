@@ -24,13 +24,14 @@ struct FilterSheet: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Reset") { store.filters = Filters() }.disabled(store.filters == Filters())
+                    Button("Reset") { store.filters = Filters() }.actionFont().disabled(store.filters == Filters())
                 }
                 // The count sits on the confirm button in the bar, as iOS forms do, rather than a
                 // full-width bar floating over the list.
                 ToolbarItem(placement: .confirmationAction) {
                     Button(store.ranked.isEmpty ? "No matches" : "Show \(store.ranked.count)") { dismiss() }
                         .buttonStyle(.glassProminent)
+                        .actionFont()
                         .disabled(store.ranked.isEmpty)
                         .accessibilityLabel(store.ranked.isEmpty ? "No stations match" : "Show \(store.ranked.count) stations")
                 }
@@ -67,7 +68,9 @@ struct FilterSheet: View {
         } header: {
             Text("Price updated within")
         } footer: {
-            Text(store.filters.freshHours == nil ? "Prices older than a day never rank." : "Hides \(removedCount { $0.freshHours = nil }) stations. Prices older than a day never rank.")
+            Text(store.filters.freshHours == nil
+                 ? "Prices more than a week old show on the map but are not ranked."
+                 : "Hides \(removedCount { $0.freshHours = nil }) stations.")
         }
     }
 

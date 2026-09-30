@@ -38,7 +38,7 @@ struct PriceWidgetView: View {
                     .font(ServoMapFont.display(.largeTitle, size: 36)).minimumScaleFactor(0.6).lineLimit(1)
                 Spacer(minLength: 0)
                 HStack(spacing: 6) {
-                    BrandSeal(family: best.family)
+                    BrandSeal(family: best.family, size: 20)
                     Text(best.suburb).font(ServoMapFont.small).lineLimit(1)
                 }
                 Text(p.updatedAt, format: .relative(presentation: .named)).font(ServoMapFont.label).foregroundStyle(ServoMapColor.ink3)
@@ -59,7 +59,7 @@ struct PriceWidgetView: View {
             }
             ForEach(entry.stations) { station in
                 HStack(spacing: 8) {
-                    BrandSeal(family: station.family)
+                    BrandSeal(family: station.family, size: 22)
                     Text(station.name).font(ServoMapFont.body).lineLimit(1)
                     Spacer()
                     if let p = station.price(entry.fuel) {

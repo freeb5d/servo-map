@@ -47,9 +47,9 @@ struct AddFillUpSheet: View {
             .navigationTitle("Log a fill-up")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
+                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() }.actionFont() }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Save") { save() }.buttonStyle(.glassProminent).disabled(!canSave)
+                    Button("Save") { save() }.buttonStyle(.glassProminent).actionFont().disabled(!canSave)
                 }
             }
             .onAppear(perform: prefill)

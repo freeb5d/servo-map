@@ -5,30 +5,38 @@ import Foundation
 public struct BrandFamily: Identifiable, Hashable, Sendable {
     public enum Group: String, Sendable { case major, value, members, independent }
 
+    /** The brand mark's colours as 0xRRGGBB; the same in light and dark, like a sign. */
+    public struct Mark: Hashable, Sendable {
+        public let background: UInt32
+        public let foreground: UInt32
+        public let stripe: UInt32?
+    }
+
     public let id: String
     public let name: String
     public let seal: String
     public let group: Group
+    public let mark: Mark
     let names: [String]
     let contains: [String]
 
     /** Every family in display order; the last is the Independent catch-all. */
     public static let all: [BrandFamily] = [
-        BrandFamily(id: "ampol", name: "Ampol", seal: "AMP", group: .major, names: [], contains: ["ampol"]),
-        BrandFamily(id: "bp", name: "BP", seal: "BP", group: .major, names: ["bp"], contains: []),
-        BrandFamily(id: "shell", name: "Shell", seal: "SHL", group: .major, names: ["reddy express", "coles express"], contains: ["shell"]),
-        BrandFamily(id: "7-eleven", name: "7-Eleven", seal: "7E", group: .major, names: ["7-eleven", "7 eleven"], contains: []),
-        BrandFamily(id: "caltex", name: "Caltex", seal: "CTX", group: .major, names: [], contains: ["caltex"]),
-        BrandFamily(id: "mobil", name: "Mobil", seal: "MOB", group: .major, names: [], contains: ["mobil"]),
-        BrandFamily(id: "metro", name: "Metro", seal: "MET", group: .value, names: [], contains: ["metro"]),
-        BrandFamily(id: "united", name: "United", seal: "UTD", group: .value, names: ["united"], contains: []),
-        BrandFamily(id: "speedway", name: "Speedway", seal: "SPD", group: .value, names: ["speedway"], contains: []),
-        BrandFamily(id: "liberty", name: "Liberty", seal: "LIB", group: .value, names: ["liberty"], contains: []),
-        BrandFamily(id: "puma", name: "Puma", seal: "PUM", group: .value, names: ["puma"], contains: []),
-        BrandFamily(id: "astron", name: "Astron", seal: "AST", group: .value, names: ["astron"], contains: []),
-        BrandFamily(id: "u-go", name: "U-Go", seal: "UGO", group: .value, names: ["u-go", "ugo"], contains: []),
-        BrandFamily(id: "costco", name: "Costco", seal: "CST", group: .members, names: ["costco"], contains: []),
-        BrandFamily(id: "independent", name: "Independent", seal: "IND", group: .independent, names: ["independent"], contains: []),
+        BrandFamily(id: "ampol", name: "Ampol", seal: "AMP", group: .major, mark: Mark(background: 0x0B2D72, foreground: 0xFFFFFF, stripe: 0xE4002B), names: [], contains: ["ampol"]),
+        BrandFamily(id: "bp", name: "BP", seal: "BP", group: .major, mark: Mark(background: 0x007A33, foreground: 0xFFFFFF, stripe: 0xFFD100), names: ["bp"], contains: []),
+        BrandFamily(id: "shell", name: "Shell", seal: "SHL", group: .major, mark: Mark(background: 0xFFD200, foreground: 0xA30D14, stripe: 0xDD1D21), names: ["reddy express", "coles express"], contains: ["shell"]),
+        BrandFamily(id: "7-eleven", name: "7-Eleven", seal: "7E", group: .major, mark: Mark(background: 0x006B4F, foreground: 0xFFFFFF, stripe: 0xF47B20), names: ["7-eleven", "7 eleven"], contains: []),
+        BrandFamily(id: "caltex", name: "Caltex", seal: "CTX", group: .major, mark: Mark(background: 0xC8102E, foreground: 0xFFFFFF, stripe: 0x0055A5), names: [], contains: ["caltex"]),
+        BrandFamily(id: "mobil", name: "Mobil", seal: "MOB", group: .major, mark: Mark(background: 0x1E4494, foreground: 0xFFFFFF, stripe: 0xE31B23), names: [], contains: ["mobil"]),
+        BrandFamily(id: "metro", name: "Metro", seal: "MET", group: .value, mark: Mark(background: 0x003DA5, foreground: 0xFFFFFF, stripe: 0xFFC72C), names: [], contains: ["metro"]),
+        BrandFamily(id: "united", name: "United", seal: "UTD", group: .value, mark: Mark(background: 0xB5122D, foreground: 0xFFFFFF, stripe: 0x00338D), names: ["united"], contains: []),
+        BrandFamily(id: "speedway", name: "Speedway", seal: "SPD", group: .value, mark: Mark(background: 0x1F1F1F, foreground: 0xFFFFFF, stripe: 0xE4002B), names: ["speedway"], contains: []),
+        BrandFamily(id: "liberty", name: "Liberty", seal: "LIB", group: .value, mark: Mark(background: 0x00539B, foreground: 0xFFFFFF, stripe: 0xE03C31), names: ["liberty"], contains: []),
+        BrandFamily(id: "puma", name: "Puma", seal: "PUM", group: .value, mark: Mark(background: 0xB71C24, foreground: 0xFFFFFF, stripe: nil), names: ["puma"], contains: []),
+        BrandFamily(id: "astron", name: "Astron", seal: "AST", group: .value, mark: Mark(background: 0xF37021, foreground: 0x1F1F1F, stripe: nil), names: ["astron"], contains: []),
+        BrandFamily(id: "u-go", name: "U-Go", seal: "UGO", group: .value, mark: Mark(background: 0x7AC143, foreground: 0x1F1F1F, stripe: nil), names: ["u-go", "ugo"], contains: []),
+        BrandFamily(id: "costco", name: "Costco", seal: "CST", group: .members, mark: Mark(background: 0x005DAA, foreground: 0xFFFFFF, stripe: 0xE31837), names: ["costco"], contains: []),
+        BrandFamily(id: "independent", name: "Independent", seal: "IND", group: .independent, mark: Mark(background: 0x5A5750, foreground: 0xFFFFFF, stripe: nil), names: ["independent"], contains: []),
     ]
 
     /** Resolves a raw upstream brand name; unknown names fall back to Independent. */

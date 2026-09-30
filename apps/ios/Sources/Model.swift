@@ -65,6 +65,19 @@ struct Station: Codable, Identifiable, Hashable, Sendable {
 
     func price(_ fuel: FuelType) -> FuelPrice? { prices.first { $0.fuel == fuel.rawValue } }
 
+    /**
+     * How long a reported price counts as current. NSW stations report only when their price
+     * changes, so a price several days old is usually still right; past a week the station may
+     * have stopped reporting, and it is shown but not ranked.
+     */
+    static let currentFor: TimeInterval = 7 * 86_400
+
+    /** Whether this station's price for `fuel` is recent enough to rank and to quote as cheapest. */
+    func hasCurrentPrice(_ fuel: FuelType, now: Date = .now) -> Bool {
+        guard let p = price(fuel) else { return false }
+        return now.timeIntervalSince(p.updatedAt) <= Station.currentFor
+    }
+
     /** Stand-in row for the loading state; redacted before it is shown. */
     static func placeholder(_ i: Int) -> Station {
         Station(id: "placeholder-\(i)", name: "Station name here", brand: "Independent", address: "", suburb: "Suburb",

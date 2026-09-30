@@ -67,6 +67,8 @@ targets:
       - path: Sources/Store.swift
       - path: Sources/FuelType+AppEnum.swift
       - path: Resources/Fonts
+      # Brand logos, so widgets show the same marks as the app.
+      - path: Resources/Assets.xcassets
       - path: ../../packages/design-tokens/generated/swift/ServoMapTokens.swift
       - path: ../../packages/shared/generated/swift/ServoMapBrands.swift
     info:

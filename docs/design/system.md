@@ -90,9 +90,11 @@ Rules added after the owner found the first v2 build "too AI" (2026-09-29). They
 | Freshness | coloured pill | neutral tag with a 6px tier square |
 | StaleBanner | glass banner | `price-mid-soft` fill, no border |
 | Ledger row | `StationCard` rounded card | rank, seal, name + suburb · distance, price + tier; hairline divider; selected = `accent-soft`; rows older than 24 h sit below a separator |
+| Map dot (iOS) | — | filled tier colour for a current price; hollow ink-3 ring for a price more than a week old, which shows on the map and its page but is not ranked or quoted as cheapest |
 | Verdict | list header "Nearby Stations" | cheapest price, one-sentence cycle verdict in Mincho, cycle bar |
 | PriceTag | Syne bold + coloured number | Mincho number in `ink`, tier shown by label + ■ in tier colour |
-| BrandSeal | brand as small ochre text | monogram of the brand family (`BRAND_FAMILIES` in `@servo-map/shared`), 1px `ink-2` border, `r-1`; dashed for members-only brands. Never a third-party logo |
+| BrandSeal | brand as small ochre text | Web: monogram of the brand family (`BRAND_FAMILIES` in `@servo-map/shared`), 1px `ink-2` border, `r-1`; dashed for members-only brands. iOS (decision 0003): the brand's logo on a white rounded tile, or the monogram on a tile in `BRAND_FAMILIES[].mark` colours where no logo is bundled |
+| Cheapest tag (iOS) | — | the cheapest ranked station's map tag: larger, `price-cheap` fill, "Cheapest" label, a halo that breathes by opacity; list row 1 on `price-cheap-soft` with rank numbers down the list |
 | Map tag | bare coloured price text | paper tag: seal cell, Mincho price, tier square; selected tag inverts to `accent`; clusters show "from {min}" |
 | Cluster | ochre circle | `ink` circle, count in `surface` |
 
