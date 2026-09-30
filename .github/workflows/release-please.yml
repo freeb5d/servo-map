@@ -20,6 +20,11 @@
 # footer takes it to 1.0.0. The root package excludes apps/ios, so iOS-only
 # commits do not bump the web and worker version.
 #
+# GitHub marks the newest release Latest, and release-please has no way to opt
+# a component out (it never sends `make_latest`). The keep-app-latest job points
+# Latest back at the newest web and worker `vX.Y.Z` after any release, so an
+# `ios-vX.Y.Z` never holds it.
+#
 # This repository has never been tagged, so release-please-config.json carries a
 # bootstrap-sha pinned to the main HEAD this workflow was added at. Commits
 # before it are not considered.
@@ -42,3 +47,33 @@ jobs:
       app-client-id: ${{ vars.APP_CLIENT_ID }}
     secrets:
       APP_PRIVATE_KEY: ${{ secrets.APP_PRIVATE_KEY }}
+
+  keep-app-latest:
+    needs: release
+    if: needs.release.outputs.releases_created == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Mark the newest vX.Y.Z release as Latest
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          found=$(gh api "repos/$REPO/releases?per_page=100" --jq '
+            [.[] | select(.draft == false and .prerelease == false
+                          and (.tag_name | test("^v[0-9]+\\.[0-9]+\\.[0-9]+$")))]
+            | sort_by(.created_at) | last // empty | "\(.id) \(.tag_name)"')
+          if [ -z "$found" ]; then
+            echo "No vX.Y.Z release yet; nothing to mark."
+            exit 0
+          fi
+          read -r id tag <<<"$found"
+          gh api -X PATCH "repos/$REPO/releases/$id" -f make_latest=true --jq '.tag_name' >/dev/null
+          latest=$(gh api "repos/$REPO/releases/latest" --jq '.tag_name')
+          if [ "$latest" != "$tag" ]; then
+            echo "::error::Latest is $latest, expected $tag"
+            exit 1
+          fi
+          echo "Latest is $tag"
