@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import type { AustralianState } from "@servo-map/shared";
+import { DATA_SOURCES, dataAttribution, type AustralianState } from "@servo-map/shared";
 import { getMetadata } from "@/lib/api";
 import { liveStates, STATE_LABELS } from "@/lib/coverage";
 import { SITE_URL } from "@/lib/site";
@@ -20,56 +20,6 @@ export const metadata: Metadata = {
     title: "About ServoMap — How We Source Fuel Prices",
     description:
       "How ServoMap sources, normalises and refreshes Australian fuel prices.",
-  },
-};
-
-/**
- * 各州数据出处（provenance）。仅展示当前 live 的州，但出处文案为所有州预置，
- * 便于上线新州时无需改动此页。来源名称需与官方计划一致以建立可信度。
- */
-const PROVENANCE: Record<
-  AustralianState,
-  { source: string; url: string; note: string }
-> = {
-  nsw: {
-    source: "NSW Government FuelCheck",
-    url: "https://www.fuelcheck.nsw.gov.au/",
-    note: "Mandatory real-time price reporting under the NSW Fuel Price Reporting scheme.",
-  },
-  qld: {
-    source: "Queensland Government Fuel Price Reporting",
-    url: "https://www.qld.gov.au/transport/projects/fuel-price-reporting",
-    note: "Real-time prices published under Queensland's mandatory fuel-price reporting scheme.",
-  },
-  vic: {
-    source: "Victorian Government fuel-price data",
-    url: "https://www.vic.gov.au/",
-    note: "Pending integration.",
-  },
-  wa: {
-    source: "WA FuelWatch",
-    url: "https://www.fuelwatch.wa.gov.au/",
-    note: "FuelWatch publishes each day's prices for the next day, so WA prices change once a day.",
-  },
-  sa: {
-    source: "South Australian fuel-price data",
-    url: "https://www.sa.gov.au/",
-    note: "Pending integration.",
-  },
-  tas: {
-    source: "Tasmanian fuel-price data",
-    url: "https://www.tas.gov.au/",
-    note: "Pending integration.",
-  },
-  act: {
-    source: "ACT fuel-price data",
-    url: "https://www.act.gov.au/",
-    note: "Pending integration.",
-  },
-  nt: {
-    source: "NT MyFuel",
-    url: "https://fuel.nt.gov.au/",
-    note: "Pending integration.",
   },
 };
 
@@ -148,7 +98,8 @@ export default async function AboutPage() {
             </p>
             <dl className="space-y-4">
               {live.map((s) => {
-                const p = PROVENANCE[s];
+                const p = DATA_SOURCES[s];
+                const statement = dataAttribution(s, new Date().getFullYear());
                 return (
                   <div
                     key={s}
@@ -159,7 +110,7 @@ export default async function AboutPage() {
                         {STATE_LABELS[s]}
                       </span>
                       <span className="text-body font-medium text-ink">
-                        {p.source}
+                        {p.name}
                       </span>
                     </dt>
                     <dd className="text-body text-ink-2 mt-2">
@@ -173,6 +124,23 @@ export default async function AboutPage() {
                         Official source
                       </a>
                     </dd>
+                    {statement && (
+                      <dd className="text-small text-ink-3 mt-2">{statement}</dd>
+                    )}
+                    {p.reportUrl && (
+                      <dd className="text-small text-ink-3 mt-2">
+                        Price out of date?{" "}
+                        <a
+                          href={p.reportUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="link"
+                        >
+                          Report it to Consumer and Business Services
+                        </a>
+                        .
+                      </dd>
+                    )}
                   </div>
                 );
               })}

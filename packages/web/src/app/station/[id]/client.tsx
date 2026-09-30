@@ -98,7 +98,7 @@ export function StationPageClient({ station, lastUpdated, suburbHref }: Props) {
         <Icon name="arrow-right" size={14} />
       </Link>
 
-      <DocFooter lastUpdated={lastUpdated} />
+      <DocFooter lastUpdated={lastUpdated} state={station.state} />
     </DocPage>
   );
 }

@@ -1,4 +1,4 @@
-import type { AustralianState, StationWithDistance } from "@servo-map/shared";
+import { DATA_SOURCES, type AustralianState, type StationWithDistance } from "@servo-map/shared";
 
 /** The state most stations in view belong to; the cycle verdict follows it. */
 export function dominantState(stations: readonly StationWithDistance[]): AustralianState | null {
@@ -15,15 +15,9 @@ export function dominantState(stations: readonly StationWithDistance[]): Austral
   return best;
 }
 
-const SOURCES: Partial<Record<AustralianState, string>> = {
-  nsw: "NSW FuelCheck",
-  qld: "Fuel Prices QLD",
-  wa: "FuelWatch",
-};
-
 /** Name of the official feed a price came from. */
 export function sourceLabel(state: AustralianState): string {
-  return SOURCES[state] ?? "state feed";
+  return DATA_SOURCES[state].name;
 }
 
 /** Mean position of the stations; the distance origin for a searched suburb. Null when empty. */

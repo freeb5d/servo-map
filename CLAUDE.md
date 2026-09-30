@@ -46,7 +46,7 @@ servo-map/
 │   └── brand-logos/ # Brand logo PNGs + SOURCES.md; `pnpm brand-logos` copies them to iOS and web.
 ├── packages/
 │   ├── design-tokens/ # Design system tokens (素). Generates web CSS + iOS Swift. See docs/design/system.md.
-│   ├── shared/      # Pure TS types, enums and reference tables (fuel types, brand families). No I/O.
+│   ├── shared/      # Pure TS types, enums and reference tables (fuel types, brand families, data sources). No I/O.
 │   ├── worker/      # Read-only Hono API + KV readers. Ingest runs from GH Actions (scripts/fetch-data.ts).
 │   └── web/         # Next.js App Router. Map, hooks, station pages.
 ├── scripts/

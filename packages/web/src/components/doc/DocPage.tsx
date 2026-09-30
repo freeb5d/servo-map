@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
+import { DATA_SOURCES, type AustralianState } from "@servo-map/shared";
+import { SourceNotice } from "./SourceNotice";
 import { MobileTabs } from "@/components/shell/MobileTabs";
 import { cn, timeAgo } from "@/lib/utils";
 
@@ -66,22 +68,27 @@ export function DocTitle({ children }: { children: ReactNode }) {
 }
 
 /** Source line under the content: where prices come from and how fresh they are. */
-export function DocFooter({ lastUpdated }: { lastUpdated: string | null }) {
+export function DocFooter({ lastUpdated, state }: { lastUpdated: string | null; state?: AustralianState }) {
   return (
-    <p className="border-t border-line-subtle pt-4 text-small text-ink-3">
-      Prices sourced from state government fuel-price feeds.
-      {lastUpdated ? ` Last updated ${timeAgo(lastUpdated)}.` : ""}{" "}
-      <Link href="/about" className="link">
-        How it works
-      </Link>
-      {" · "}
-      <Link href="/privacy" className="link">
-        Privacy
-      </Link>
-      {" · "}
-      <Link href="/support" className="link">
-        Support
-      </Link>
-    </p>
+    <div className="grid gap-2 border-t border-line-subtle pt-4 text-small text-ink-3">
+      <p>
+        {state
+          ? `Prices from ${DATA_SOURCES[state].name}, the official fuel-price reporting scheme.`
+          : "Prices sourced from state government fuel-price feeds."}
+        {lastUpdated ? ` Last updated ${timeAgo(lastUpdated)}.` : ""}{" "}
+        <Link href="/about" className="link">
+          How it works
+        </Link>
+        {" · "}
+        <Link href="/privacy" className="link">
+          Privacy
+        </Link>
+        {" · "}
+        <Link href="/support" className="link">
+          Support
+        </Link>
+      </p>
+      {state && <SourceNotice state={state} />}
+    </div>
   );
 }

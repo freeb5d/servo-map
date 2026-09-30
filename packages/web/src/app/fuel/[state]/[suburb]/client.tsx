@@ -178,7 +178,7 @@ export function SuburbPageClient({
         </section>
       )}
 
-      <DocFooter lastUpdated={lastUpdated} />
+      <DocFooter lastUpdated={lastUpdated} state={stations[0]?.state} />
     </DocPage>
   );
 }

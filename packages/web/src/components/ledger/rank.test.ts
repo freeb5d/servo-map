@@ -83,6 +83,7 @@ describe("station meta", () => {
 
   it("names the price source", () => {
     expect(sourceLabel("nsw")).toBe("NSW FuelCheck");
-    expect(sourceLabel("vic")).toBe("state feed");
+    expect(sourceLabel("act")).toBe("NSW FuelCheck");
+    expect(sourceLabel("vic")).toBe("Servo Saver");
   });
 });
