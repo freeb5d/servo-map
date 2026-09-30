@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.1](https://github.com/Misoto22/servo-map/compare/v0.8.0...v0.8.1) (2026-09-30)
+
+
+### Bug Fixes
+
+* **worker:** read WA 98 RON as U98 and stop mislabelling LPG and E85 ([#65](https://github.com/Misoto22/servo-map/issues/65)) ([c31ec08](https://github.com/Misoto22/servo-map/commit/c31ec08dd10fca560253b924a0d4a28946c06a36))
+
 ## [0.8.0](https://github.com/Misoto22/servo-map/compare/v0.7.1...v0.8.0) (2026-09-30)
 
 
