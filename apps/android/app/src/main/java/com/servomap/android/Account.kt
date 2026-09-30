@@ -133,21 +133,21 @@ object AccountApi {
         call("POST", "auth/$provider", null, json.encodeToString(SignInBody.serializer(), SignInBody(identityToken, name)), SessionDto.serializer())!!
 
     suspend fun me(token: String): MeDto = call("GET", "me", token, null, MeDto.serializer())!!
-    suspend fun deleteAccount(token: String) { call("DELETE", "me", token, null, null) }
+    suspend fun deleteAccount(token: String) { call<Unit>("DELETE", "me", token, null, null) }
 
     suspend fun putSaved(token: String, ids: List<String>) {
-        call("PUT", "me/saved", token, json.encodeToString(SavedBody.serializer(), SavedBody(ids)), null)
+        call<Unit>("PUT", "me/saved", token, json.encodeToString(SavedBody.serializer(), SavedBody(ids)), null)
     }
 
     suspend fun putFillUps(token: String, fills: List<FillUpDto>) {
         if (fills.isEmpty()) return
-        call("PUT", "me/fillups", token, json.encodeToString(FillUpsBody.serializer(), FillUpsBody(fills)), null)
+        call<Unit>("PUT", "me/fillups", token, json.encodeToString(FillUpsBody.serializer(), FillUpsBody(fills)), null)
     }
 
-    suspend fun deleteFillUp(token: String, id: String) { call("DELETE", "me/fillups/$id", token, null, null) }
-    suspend fun putCar(token: String, car: CarDto) { call("PUT", "me/car", token, json.encodeToString(CarDto.serializer(), car), null) }
+    suspend fun deleteFillUp(token: String, id: String) { call<Unit>("DELETE", "me/fillups/$id", token, null, null) }
+    suspend fun putCar(token: String, car: CarDto) { call<Unit>("PUT", "me/car", token, json.encodeToString(CarDto.serializer(), car), null) }
     suspend fun putAlerts(token: String, alerts: AlertsDto) {
-        call("PUT", "me/alerts", token, json.encodeToString(AlertsDto.serializer(), alerts), null)
+        call<Unit>("PUT", "me/alerts", token, json.encodeToString(AlertsDto.serializer(), alerts), null)
     }
 
     private suspend fun <T> call(method: String, path: String, token: String?, body: String?, reply: KSerializer<T>?): T? =

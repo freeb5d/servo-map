@@ -1,6 +1,7 @@
 package com.servomap.android
 
 import android.content.Context
+import android.content.Intent
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.glance.GlanceId
@@ -70,7 +71,7 @@ class PriceWidget : GlanceAppWidget() {
                     .background(ColorProvider(day = Ink.paper, night = Ink.paperDark))
                     .cornerRadius(20.dp)
                     .padding(14.dp)
-                    .clickable(actionStartActivity<MainActivity>()),
+                    .clickable(actionStartActivity(Intent(context, MainActivity::class.java))),
             ) {
                 Text("Cheapest ${data?.fuel ?: "fuel"} nearby", style = TextStyle(color = muted, fontSize = 12.sp))
                 if (data == null) {
