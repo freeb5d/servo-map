@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.0](https://github.com/Misoto22/servo-map/compare/v0.6.1...v0.7.0) (2026-09-30)
+
+
+### Features
+
+* **shared:** credit each state's data source as its licence requires ([#55](https://github.com/Misoto22/servo-map/issues/55)) ([8520eeb](https://github.com/Misoto22/servo-map/commit/8520eebe73a535c8bf9bdab994b9f21c3b7d2c4a))
+
 ## [0.6.1](https://github.com/Misoto22/servo-map/compare/v0.6.0...v0.6.1) (2026-09-30)
 
 
