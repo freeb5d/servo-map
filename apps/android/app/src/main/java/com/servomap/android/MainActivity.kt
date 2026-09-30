@@ -2,7 +2,10 @@ package com.servomap.android
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.UiModeManager
+import android.content.ActivityNotFoundException
 import android.content.Context
+import android.content.res.Configuration as UiConfig
 import android.content.Intent
 import android.location.LocationManager
 import android.net.Uri
@@ -20,6 +23,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -29,7 +33,9 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
@@ -51,6 +57,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -83,6 +90,9 @@ fun App(vm: MainViewModel, locate: () -> Pair<Double, Double>?) {
     var tab by remember { mutableIntStateOf(0) }
     var searchText by remember { mutableStateOf("") }
     val context = LocalContext.current
+    // Wide screens (tablets, foldables, landscape, Android TV) show the list beside the map instead of behind tabs.
+    val wide = LocalConfiguration.current.screenWidthDp >= 840
+    val tv = remember { isTelevision(context) }
     val permission = rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
         locate()?.let { (lat, lng) -> vm.setCentre(lat, lng) }
     }
@@ -111,16 +121,23 @@ fun App(vm: MainViewModel, locate: () -> Pair<Double, Double>?) {
         },
         bottomBar = {
             NavigationBar {
-                NavigationBarItem(selected = tab == 0, onClick = { tab = 0 }, icon = { Text("◎") }, label = { Text("Map") })
-                NavigationBarItem(selected = tab == 1, onClick = { tab = 1 }, icon = { Text("≡") }, label = { Text("List") })
+                NavigationBarItem(selected = tab == 0, onClick = { tab = 0 }, icon = { Text("◎") }, label = { Text(if (wide) "Nearby" else "Map") })
+                if (!wide) NavigationBarItem(selected = tab == 1, onClick = { tab = 1 }, icon = { Text("≡") }, label = { Text("List") })
                 NavigationBarItem(selected = tab == 2, onClick = { tab = 2 }, icon = { Text("★") }, label = { Text("Saved") })
             }
         },
     ) { pad ->
         Box(Modifier.padding(pad).fillMaxSize()) {
-            if (tab == 0) {
+            if (tab == 0 && wide) {
+                Row(Modifier.fillMaxSize()) {
+                    Box(Modifier.weight(0.4f).fillMaxHeight()) { StationList(ui.stations, ui, onSelect = vm::select) }
+                    Box(Modifier.weight(0.6f).fillMaxHeight()) {
+                        StationMap(ui.stations, ui.tiers, ui.fuel, ui.centre, onSelect = vm::select)
+                    }
+                }
+            } else if (tab == 0) {
                 StationMap(ui.stations, ui.tiers, ui.fuel, ui.centre, onSelect = vm::select)
-            } else if (tab == 1) {
+            } else if (tab == 1 && !wide) {
                 StationList(ui.stations, ui, onSelect = vm::select)
             } else if (ui.saved.isEmpty()) {
                 Text("No saved stations yet. Open a station and tap Save.", color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -135,11 +152,19 @@ fun App(vm: MainViewModel, locate: () -> Pair<Double, Double>?) {
             }
         }
         ui.selected?.let { s ->
-            ModalBottomSheet(onDismissRequest = { vm.select(null) }) {
-                StationDetail(s, ui.fuel, ui.tiers[s.id], s.id in ui.savedIds, onToggleSaved = { vm.toggleSaved(s.id) }) {
+            val detail: @Composable () -> Unit = {
+                StationDetail(s, ui.fuel, ui.tiers[s.id], s.id in ui.savedIds, onToggleSaved = { vm.toggleSaved(s.id) }, showDirections = !tv) {
                     val uri = Uri.parse("geo:${s.lat},${s.lng}?q=${s.lat},${s.lng}(${Uri.encode(s.name)})")
-                    context.startActivity(Intent(Intent.ACTION_VIEW, uri))
+                    try { context.startActivity(Intent(Intent.ACTION_VIEW, uri)) } catch (_: ActivityNotFoundException) {}
                 }
+            }
+            // A bottom sheet is awkward with a remote or keyboard, so wide screens and TVs get a dialog.
+            if (wide || tv) {
+                AlertDialog(onDismissRequest = { vm.select(null) }, confirmButton = {
+                    TextButton(onClick = { vm.select(null) }) { Text("Close") }
+                }, text = { detail() })
+            } else {
+                ModalBottomSheet(onDismissRequest = { vm.select(null) }) { detail() }
             }
         }
     }
@@ -173,7 +198,7 @@ fun StationList(stations: List<Station>, ui: UiState, onSelect: (Station) -> Uni
 }
 
 @Composable
-fun StationDetail(s: Station, fuel: Fuel, tier: Tier?, saved: Boolean, onToggleSaved: () -> Unit, onDirections: () -> Unit) {
+fun StationDetail(s: Station, fuel: Fuel, tier: Tier?, saved: Boolean, onToggleSaved: () -> Unit, showDirections: Boolean = true, onDirections: () -> Unit) {
     val dark = isSystemInDarkTheme()
     Column(Modifier.padding(horizontal = 24.dp).padding(bottom = 32.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
         Text(s.name, fontSize = 22.sp, fontWeight = FontWeight.SemiBold)
@@ -187,7 +212,10 @@ fun StationDetail(s: Station, fuel: Fuel, tier: Tier?, saved: Boolean, onToggleS
             }
         }
         Spacer(Modifier.height(12.dp))
-        Button(onClick = onDirections, modifier = Modifier.fillMaxWidth()) { Text("Directions") }
+        if (showDirections) Button(onClick = onDirections, modifier = Modifier.fillMaxWidth()) { Text("Directions") }
         OutlinedButton(onClick = onToggleSaved, modifier = Modifier.fillMaxWidth()) { Text(if (saved) "★ Saved" else "☆ Save") }
     }
 }
+
+fun isTelevision(context: Context): Boolean =
+    (context.getSystemService(Context.UI_MODE_SERVICE) as UiModeManager).currentModeType == UiConfig.UI_MODE_TYPE_TELEVISION
