@@ -1,231 +1,145 @@
-import Charts
 import SwiftUI
 
 /**
- * Filters as a system form, filled with the data behind each choice: the price distribution,
- * how many stations each option removes, and every brand's station count and average today.
+ * Filters as a sheet over the map (decision 0008): order, brands as a grid of their marks, the
+ * price distribution in view coloured by tier, how recently prices were reported, members-only.
+ * Every control writes `store.filters`, so the map and the list follow while the sheet is open.
  */
 struct FilterSheet: View {
     @Environment(Store.self) private var store
     @Environment(\.dismiss) private var dismiss
+    @State private var detent: PresentationDetent = .large
 
     var body: some View {
         @Bindable var store = store
-        NavigationStack {
-            Form {
-                PriceSection(filters: $store.filters)
-                distance
-                freshness
-                BrandSection(filters: $store.filters)
-                alsoSells
-            }
-            .paperList()
-            .navigationTitle("Filters")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Reset") { store.filters = Filters() }.actionFont().disabled(store.filters == Filters())
+        VStack(spacing: 0) {
+            header
+            ScrollView {
+                VStack(alignment: .leading, spacing: ServoMapSpace.x5) {
+                    order
+                    BrandGrid(filters: $store.filters, present: BrandChoice.present(in: store.stations))
+                    priceSection
+                    FreshnessScale(hours: $store.filters.freshHours)
+                    membersOnly
                 }
-                // The count sits on the confirm button in the bar, as iOS forms do, rather than a
-                // full-width bar floating over the list.
-                ToolbarItem(placement: .confirmationAction) {
-                    Button(store.ranked.isEmpty ? "No matches" : "Show \(store.ranked.count)") { dismiss() }
-                        .buttonStyle(.glassProminent)
-                        .actionFont()
-                        .disabled(store.ranked.isEmpty)
-                        .accessibilityLabel(store.ranked.isEmpty ? "No stations match" : "Show \(store.ranked.count) stations")
-                }
+                .padding(.horizontal, Self.gutter)
+                .padding(.top, ServoMapSpace.x4)
+                .padding(.bottom, ServoMapSpace.x5)
             }
+            .scrollBounceBehavior(.basedOnSize)
         }
+        .safeAreaInset(edge: .bottom, spacing: 0) { showButton }
+        .background(ServoMapColor.bg)
+        .presentationDetents([.medium, .large], selection: $detent)
+        .presentationDragIndicator(.visible)
+        .presentationBackground(ServoMapColor.bg)
+        .sensoryFeedback(.selection, trigger: store.filters)
     }
 
-    private var distance: some View {
+    /** The artboard's side margin. */
+    static let gutter: CGFloat = 20
+
+    private var header: some View {
+        HStack(alignment: .center) {
+            Text("Filters")
+                .font(ServoMapFont.display(.title2, weight: 500, size: 26))
+                .foregroundStyle(ServoMapColor.ink)
+                .accessibilityAddTraits(.isHeader)
+            Spacer()
+            Button("Reset") { withAnimation(.snappy) { store.filters = Filters() } }
+                .buttonStyle(.glass)
+                .actionFont()
+                .disabled(store.filters == Filters())
+        }
+        .padding(.leading, Self.gutter)
+        .padding(.trailing, ServoMapSpace.x4)
+        .padding(.top, ServoMapSpace.x6)
+    }
+
+    private var order: some View {
         @Bindable var store = store
-        return Section {
-            Picker("Within", selection: $store.filters.radiusKm) {
-                Text("Any").tag(Int?.none)
-                ForEach([2, 5, 10], id: \.self) { Text("\($0) km").tag(Int?.some($0)) }
+        return VStack(alignment: .leading, spacing: ServoMapSpace.x2) {
+            FilterTitle("Order")
+            Picker("Order", selection: $store.filters.order) {
+                ForEach(StationOrder.allCases) { Text($0.rawValue).tag($0) }
             }
             .pickerStyle(.segmented)
-            .paperRow()
-        } header: {
-            Text("Distance")
-        } footer: {
-            let from = store.located ? "your location" : store.placeName
-            Text(store.filters.radiusKm == nil ? "Measured from \(from)." : "Measured from \(from). Hides \(removedCount { $0.radiusKm = nil }) stations further out.")
         }
     }
 
-    private var freshness: some View {
+    private var priceSection: some View {
         @Bindable var store = store
-        return Section {
-            Picker("Updated", selection: $store.filters.freshHours) {
-                Text("Any").tag(Int?.none)
-                ForEach([1, 6, 24], id: \.self) { Text("\($0) h").tag(Int?.some($0)) }
-            }
-            .pickerStyle(.segmented)
-            .paperRow()
-        } header: {
-            Text("Price updated within")
-        } footer: {
-            Text(store.filters.freshHours == nil
-                 ? "Prices more than a week old show on the map but are not ranked."
-                 : "Hides \(removedCount { $0.freshHours = nil }) stations.")
+        let prices = PriceHistogram.pricesInView(store.stations, fuel: store.fuel, viewport: store.viewport)
+        return VStack(alignment: .leading, spacing: ServoMapSpace.x2) {
+            FilterTitle("Price", note: "\(prices.count) in view")
+            TierHistogram(histogram: PriceHistogram(prices), range: store.range, hidden: store.filters.hiddenTiers)
+            TierChips(hidden: $store.filters.hiddenTiers)
+                .padding(.top, ServoMapSpace.x1)
         }
     }
 
-    private var alsoSells: some View {
-        Section {
-            HStack(spacing: 8) {
-                ForEach(FuelType.allCases.filter { $0 != store.fuel }) { fuel in
-                    Toggle(fuel.rawValue, isOn: Binding(
-                        get: { store.filters.alsoSells.contains(fuel) },
-                        set: { on in if on { store.filters.alsoSells.insert(fuel) } else { store.filters.alsoSells.remove(fuel) } }))
-                        .toggleStyle(.button)
-                        .buttonStyle(.bordered)
-                }
+    private var membersOnly: some View {
+        @Bindable var store = store
+        return Toggle(isOn: $store.filters.hideMembersOnly.animation(.snappy)) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Hide members-only stations").font(ServoMapFont.lead).foregroundStyle(ServoMapColor.ink)
+                Text("Costco and other warehouse clubs").font(ServoMapFont.body(.footnote)).foregroundStyle(ServoMapColor.ink3)
             }
-            .paperRow()
-        } header: {
-            Text("Also sells")
-        } footer: {
-            Text("Useful when you run two cars on different fuels.")
         }
+        .tint(ServoMapColor.accent)
+        .padding(.vertical, ServoMapSpace.x3)
+        .overlay(alignment: .top) { Hairline() }
+        .overlay(alignment: .bottom) { Hairline() }
     }
 
-    /** Stations that would come back if this one setting were cleared. */
-    private func removedCount(_ clear: (inout Filters) -> Void) -> Int {
-        var without = store.filters
-        clear(&without)
-        return store.matching(without).count - store.ranked.count
+    private var showButton: some View {
+        let title = ShowStations.title(inView: store.inView.count, ranked: store.ranked.count)
+        return Button { dismiss() } label: {
+            Text(title)
+                .contentTransition(.numericText())
+                .frame(maxWidth: .infinity)
+        }
+        .buttonStyle(.glassProminent)
+        .controlSize(.extraLarge)
+        .actionFont()
+        .disabled(store.ranked.isEmpty)
+        .animation(.snappy, value: title)
+        .padding(.horizontal, Self.gutter)
+        .padding(.top, ServoMapSpace.x3)
+        .padding(.bottom, ServoMapSpace.x2)
     }
 }
 
-private struct PriceSection: View {
-    @Environment(Store.self) private var store
-    @Binding var filters: Filters
+/** A section title in Mincho, with an optional quiet note on the right. */
+struct FilterTitle: View {
+    let text: String
+    var note: String? = nil
+
+    init(_ text: String, note: String? = nil) {
+        self.text = text
+        self.note = note
+    }
 
     var body: some View {
-        let prices = store.stations.compactMap { $0.price(store.fuel)?.price }
-        let bounds = (prices.min() ?? 150).rounded(.down)...(prices.max() ?? 300).rounded(.up)
-        let ceiling = filters.maxPrice ?? bounds.upperBound
-
-        Section {
-            histogramChart(histogram(prices, bins: 28), bounds: bounds, ceiling: ceiling).paperRow()
-
-            Slider(value: Binding(get: { ceiling }, set: { filters.maxPrice = $0 >= bounds.upperBound ? nil : $0.rounded() }),
-                   in: bounds, step: 1)
-                .paperRow()
-            LabeledContent("Up to") {
-                Text(filters.maxPrice == nil ? "Any price" : "\(ceiling.formatted(.number.precision(.fractionLength(1)))) ¢/L")
-            }
-            .paperRow()
-        } header: {
-            Text("Price, \(store.fuel.rawValue)")
-        } footer: {
-            if let avg = store.localAverage {
-                Text("Local average \(avg.formatted(.number.precision(.fractionLength(1)))) ¢/L.")
+        HStack(alignment: .firstTextBaseline) {
+            Text(text)
+                .font(ServoMapFont.display(.headline, weight: 600, size: 18))
+                .foregroundStyle(ServoMapColor.ink)
+                .accessibilityAddTraits(.isHeader)
+            Spacer(minLength: ServoMapSpace.x2)
+            if let note {
+                Text(note)
+                    .font(ServoMapFont.body(.footnote))
+                    .foregroundStyle(ServoMapColor.ink3)
+                    .contentTransition(.numericText())
             }
         }
-    }
-
-    private func histogramChart(_ bins: [Bin], bounds: ClosedRange<Double>, ceiling: Double) -> some View {
-        let top: Double = Double(max(1, bins.map(\.count).max() ?? 1))
-        // Empty bins are left out rather than drawn as slivers.
-        return Chart(bins.filter { $0.count > 0 }, id: \.from) { (bin: Bin) in
-            RectangleMark(xStart: .value("From", bin.barStart), xEnd: .value("To", bin.barEnd),
-                    yStart: .value("None", 0.0), yEnd: .value("Stations", Double(bin.count)))
-                .cornerRadius(1)
-                .foregroundStyle(barStyle(bin, ceiling: ceiling))
-        }
-        .chartXScale(domain: bounds)
-        .chartYScale(domain: 0.0...top)
-        .chartYAxis(.hidden)
-        .chartXAxis { AxisMarks(values: .automatic(desiredCount: 4)) }
-        .frame(height: 90)
-        .accessibilityLabel("How many stations charge each price")
-    }
-
-    private struct Bin {
-        let from: Double
-        let mid: Double
-        let width: Double
-        let count: Int
-        var barStart: Double { mid - width * 0.22 }
-        var barEnd: Double { mid + width * 0.22 }
-    }
-
-    /** Bars at or under the ceiling are ink; the rest fade back to the hairline colour. */
-    private func barStyle(_ bin: Bin, ceiling: Double) -> AnyShapeStyle {
-        AnyShapeStyle(bin.mid <= ceiling ? ServoMapColor.ink.opacity(0.55) : ServoMapColor.line)
-    }
-
-    private func histogram(_ prices: [Double], bins: Int) -> [Bin] {
-        guard let lo = prices.min(), let hi = prices.max(), hi > lo else { return [] }
-        let width = (hi - lo) / Double(bins)
-        var counts = Array(repeating: 0, count: bins)
-        for p in prices { counts[min(bins - 1, Int((p - lo) / width))] += 1 }
-        return counts.enumerated().map { i, c in Bin(from: lo + Double(i) * width, mid: lo + (Double(i) + 0.5) * width, width: width, count: c) }
     }
 }
 
-private struct BrandSection: View {
-    @Environment(Store.self) private var store
-    @Binding var filters: Filters
-
-    private static let groups: [(BrandFamily.Group, String)] = [
-        (.major, "Majors"), (.value, "Value chains"), (.members, "Members only"), (.independent, "Independent"),
-    ]
-
+/** A 0.5 pt rule in the line colour. */
+struct Hairline: View {
     var body: some View {
-        let stats = brandStats
-        Section {
-            Picker("Brands", selection: $filters.hideBrands) {
-                Text("Only these").tag(false)
-                Text("Hide these").tag(true)
-            }
-            .pickerStyle(.segmented)
-            .paperRow()
-        } header: {
-            Text("Brands")
-        } footer: {
-            Text(filters.brands.isEmpty ? "No brands chosen, so every brand shows." : "\(filters.brands.count) chosen.")
-        }
-
-        ForEach(Self.groups, id: \.0) { group, title in
-            let families = BrandFamily.all.filter { $0.group == group }
-            Section(title) {
-                ForEach(families) { family in
-                    brandRow(family, stats[family.id]).paperRow()
-                }
-            }
-        }
-    }
-
-    private func brandRow(_ family: BrandFamily, _ stat: (count: Int, avg: Double)?) -> some View {
-        Button {
-            if filters.brands.contains(family.id) { filters.brands.remove(family.id) } else { filters.brands.insert(family.id) }
-        } label: {
-            HStack(spacing: 12) {
-                BrandSeal(family: family)
-                VStack(alignment: .leading, spacing: 1) {
-                    Text(family.name).foregroundStyle(ServoMapColor.ink)
-                    Text(stat.map { "\($0.count) nearby" } ?? "None nearby")
-                        .font(ServoMapFont.small).foregroundStyle(ServoMapColor.ink3)
-                }
-                Spacer()
-                if let stat { PriceText(cents: stat.avg, font: ServoMapFont.lead) }
-                Image(systemName: "checkmark")
-                    .fontWeight(.semibold)
-                    .opacity(filters.brands.contains(family.id) ? 1 : 0)
-                    .foregroundStyle(ServoMapColor.accent)
-            }
-        }
-        .disabled(stat == nil)
-    }
-
-    private var brandStats: [String: (count: Int, avg: Double)] {
-        let rows = store.stations.compactMap { s in s.price(store.fuel).map { (s.family.id, $0.price) } }
-        return Dictionary(grouping: rows, by: \.0).mapValues { ($0.count, $0.map(\.1).reduce(0, +) / Double($0.count)) }
+        Rectangle().fill(ServoMapColor.line).frame(height: 0.5)
     }
 }

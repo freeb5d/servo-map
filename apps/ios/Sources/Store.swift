@@ -12,10 +12,21 @@ struct Filters: Equatable, Sendable {
     var hideMembersOnly = false
     /** Other fuels a station must also sell. */
     var alsoSells: Set<FuelType> = []
+    /** Price tiers (from `Store.range`) to leave out; empty shows every tier. */
+    var hiddenTiers: Set<PriceTier> = []
+    /** How the list is sorted. Not a filter: `Store.ranked` stays cheapest first, so the cheapest tag holds. */
+    var order: StationOrder = .cheapest
 
     var activeCount: Int {
-        [maxPrice != nil, radiusKm != nil, freshHours != nil, !brands.isEmpty, hideMembersOnly, !alsoSells.isEmpty].filter { $0 }.count
+        [maxPrice != nil, radiusKm != nil, freshHours != nil, !brands.isEmpty, hideMembersOnly, !alsoSells.isEmpty,
+         !hiddenTiers.isEmpty].filter { $0 }.count
     }
+}
+
+/** The list orders the filter sheet offers. */
+enum StationOrder: String, CaseIterable, Identifiable, Sendable {
+    case cheapest = "Cheapest", nearest = "Nearest", newest = "Newest price"
+    var id: String { rawValue }
 }
 
 @MainActor @Observable
@@ -149,10 +160,11 @@ final class Store {
 
     private func derive() {
         let prices = stations.compactMap { $0.price(fuel)?.price }
+        // Before `ranked`: the tier filter in `matching` reads it.
+        range = PriceRange(prices)
         ranked = matching(filters)
         let now = Date()
         outdated = stations.filter { $0.price(fuel) != nil && !$0.hasCurrentPrice(fuel, now: now) }
-        range = PriceRange(prices)
         localAverage = prices.isEmpty ? nil : prices.reduce(0, +) / Double(prices.count)
         deriveInView()
     }
@@ -161,6 +173,7 @@ final class Store {
     func matching(_ f: Filters) -> [Station] {
         let filters = f
         let now = Date()
+        let range = range
         // Price is looked up once per station, not once per comparison in the sort.
         return stations.filter { s in
             guard let p = s.price(fuel) else { return false }
@@ -170,6 +183,7 @@ final class Store {
             if !filters.brands.isEmpty, filters.brands.contains(s.family.id) == filters.hideBrands { return false }
             if filters.alsoSells.contains(where: { s.price($0) == nil }) { return false }
             if filters.hideMembersOnly, s.family.group == .members { return false }
+            if !filters.hiddenTiers.isEmpty, filters.hiddenTiers.contains(range.tier(p.price)) { return false }
             return s.hasCurrentPrice(fuel, now: now)
         }
         .map { ($0, $0.price(fuel)?.price ?? .infinity) }

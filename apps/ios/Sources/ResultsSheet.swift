@@ -1,6 +1,6 @@
 import SwiftUI
 
-/** The full list of nearby stations, cheapest first, with the station page pushed inside. */
+/** The full list of nearby stations, in the order chosen in Filters, with the station page pushed inside. */
 struct ResultsSheet: View {
     @Environment(Store.self) private var store
     @Binding var selected: Station?
@@ -19,21 +19,24 @@ struct ResultsSheet: View {
                             .paperRow()
                     }
                 } else if !store.inView.isEmpty {
-                    // The list follows the map: what is on screen, cheapest first.
+                    // The list follows the map: what is on screen, in the order chosen in Filters.
+                    let order = store.filters.order
                     Section {
-                        ForEach(Array(store.inView.prefix(60).enumerated()), id: \.element.id) { index, station in
+                        ForEach(Array(order.sorted(store.inView, fuel: store.fuel).prefix(60).enumerated()), id: \.element.id) { index, station in
                             NavigationLink(value: station) {
-                                StationRow(station: station, fuel: store.fuel, range: store.range, rank: index + 1)
+                                // Ranks count price positions, so they show only in cheapest order.
+                                StationRow(station: station, fuel: store.fuel, range: store.range,
+                                           rank: order == .cheapest ? index + 1 : nil)
                             }
                             // The cheapest row carries the cheap tier's wash, matching its map tag. Set before
                             // paperRow: the innermost row background wins.
-                            .listRowBackground(index == 0 ? ServoMapColor.priceCheapSoft : ServoMapColor.surface)
+                            .listRowBackground(station == store.inView.first ? ServoMapColor.priceCheapSoft : ServoMapColor.surface)
                             .paperRow()
                         }
                     } header: {
                         Text(store.inView.count == store.ranked.count
-                             ? "\(store.inView.count) stations, cheapest first"
-                             : "\(store.inView.count) on the map, cheapest first")
+                             ? "\(store.inView.count) stations, \(order.caption)"
+                             : "\(store.inView.count) on the map, \(order.caption)")
                     }
                 }
             }

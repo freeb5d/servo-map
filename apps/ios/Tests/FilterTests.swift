@@ -65,6 +65,31 @@ struct FilterTests {
         #expect(f.activeCount == 0)
         f.maxPrice = 230; f.brands = ["bp"]; f.alsoSells = [.e10]
         #expect(f.activeCount == 3)
+        f.hiddenTiers = [.pricey]
+        #expect(f.activeCount == 4)
+        // The order sorts the list; it filters nothing.
+        f.order = .nearest
+        #expect(f.activeCount == 4)
+    }
+
+    @Test func hiddenTiersUseTheStoreTiers() {
+        let prices: [Double] = [200, 210, 220, 230, 240, 250, 260, 270, 280]
+        let s = Store(stations: prices.map { Fixture.station("p\(Int($0))", u91: $0) })
+        s.filters.hiddenTiers = [.pricey]
+        #expect(s.ranked.map { $0.price(.u91)?.price } == [200, 210, 220, 230, 240, 250])
+        s.filters.hiddenTiers = [.cheap, .pricey]
+        #expect(s.ranked.map { $0.price(.u91)?.price } == [230, 240, 250])
+        // Tiers describe every station nearby, so hiding one does not move the cut points.
+        #expect(s.range.cheapBelow == 220)
+        #expect(s.range.midBelow == 250)
+        s.filters.hiddenTiers = [.cheap, .fair, .pricey]
+        #expect(s.ranked.isEmpty)
+    }
+
+    @Test func orderLeavesRankedCheapestFirst() {
+        let s = store()
+        s.filters.order = .nearest
+        #expect(s.ranked.map(\.id) == ["c", "a", "b"])
     }
 
     @Test func cachedRankingFollowsFilterChanges() {

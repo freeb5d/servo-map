@@ -22,7 +22,12 @@ struct BrandSeal: View {
         .dynamicTypeSize(...DynamicTypeSize.large)
     }
 
-    private var shape: RoundedRectangle { RoundedRectangle(cornerRadius: size * 0.24, style: .continuous) }
+    private var shape: RoundedRectangle { Self.shape(size) }
+
+    /** The tile's outline at `size`, for anything drawn around a seal (the filter grid's selection ring). */
+    static func shape(_ size: CGFloat) -> RoundedRectangle {
+        RoundedRectangle(cornerRadius: size * 0.24, style: .continuous)
+    }
 
     /** The brand's own logo (generated into Resources/Assets.xcassets/BrandLogos from design/brand-logos) on a white tile, as on a price sign. */
     private func logoTile(_ logo: UIImage) -> some View {
