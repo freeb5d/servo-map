@@ -29,6 +29,7 @@ export {
   vehicleMakes,
 } from "./vehicles";
 export { VEHICLES } from "./generated/vehicles.data";
+export { type DataSource, DATA_SOURCES, dataAttribution } from "./data-sources";
 export type {
   Account,
   FillUpRecord,

@@ -10,6 +10,7 @@ import {
 import { BrandSeal } from "@/components/ui/BrandSeal";
 import { Icon } from "@/components/ui/Icon";
 import { TierLabel } from "@/components/ui/TierLabel";
+import { SourceNotice } from "@/components/doc/SourceNotice";
 import { sourceLabel } from "@/components/ledger/stationMeta";
 import { priceSpread, fillCost } from "@/lib/aggregate";
 import { usePriceRange } from "@/providers/PriceRangeProvider";
@@ -186,6 +187,7 @@ export function StationDetail({
           Price reported {timeAgo(selected.updated_at)} via {sourceLabel(station.state)}
         </p>
       )}
+      <SourceNotice state={station.state} className="text-[10.5px] leading-snug" />
     </div>
   );
 }

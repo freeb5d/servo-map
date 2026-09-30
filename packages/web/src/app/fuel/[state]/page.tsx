@@ -166,7 +166,7 @@ export default async function StateHubPage({ params }: Props) {
           <PriceTrendSection series={trendSeries} fuel="U91" stateLabel={stateUpper} />
         )}
 
-        <DocFooter lastUpdated={lastUpdated} />
+        <DocFooter lastUpdated={lastUpdated} state={stateLower as AustralianState} />
       </DocPage>
     </>
   );

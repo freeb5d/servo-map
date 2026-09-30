@@ -1,7 +1,14 @@
-// Writes generated/swift/ServoMapBrands.swift; the drift test fails when it is stale.
+// Writes the generated Swift files iOS compiles; the drift tests fail when one is stale.
 import { writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { emitBrandsSwift } from "../src/emit-brands-swift";
+import { emitDataSourcesSwift } from "../src/emit-data-sources-swift";
 
-writeFileSync(fileURLToPath(new URL("../generated/swift/ServoMapBrands.swift", import.meta.url)), emitBrandsSwift());
-console.log("shared: wrote generated/swift/ServoMapBrands.swift");
+const outputs: [string, string][] = [
+  ["ServoMapBrands.swift", emitBrandsSwift()],
+  ["ServoMapDataSources.swift", emitDataSourcesSwift()],
+];
+for (const [file, source] of outputs) {
+  writeFileSync(fileURLToPath(new URL(`../generated/swift/${file}`, import.meta.url)), source);
+  console.log(`shared: wrote generated/swift/${file}`);
+}
