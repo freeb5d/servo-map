@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.5.0](https://github.com/Misoto22/servo-map/compare/ios-v0.4.0...ios-v0.5.0) (2026-09-30)
+
+
+### Features
+
+* **accounts:** sign in with Apple and sync to Cloudflare D1 ([#42](https://github.com/Misoto22/servo-map/issues/42)) ([ee2e44f](https://github.com/Misoto22/servo-map/commit/ee2e44f4ea17291ee3c5374f6c79ca48d8a70e40))
+* **vehicles:** add the shared car catalogue and model picker ([#41](https://github.com/Misoto22/servo-map/issues/41)) ([30b8722](https://github.com/Misoto22/servo-map/commit/30b8722e8696e681d425cdd8603e8ba478748afb))
+
 ## [0.4.0](https://github.com/Misoto22/servo-map/compare/ios-v0.3.0...ios-v0.4.0) (2026-09-30)
 
 

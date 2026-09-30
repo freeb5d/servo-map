@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.5.0](https://github.com/Misoto22/servo-map/compare/v0.4.1...v0.5.0) (2026-09-30)
+
+
+### Features
+
+* **accounts:** sign in with Apple and sync to Cloudflare D1 ([#42](https://github.com/Misoto22/servo-map/issues/42)) ([ee2e44f](https://github.com/Misoto22/servo-map/commit/ee2e44f4ea17291ee3c5374f6c79ca48d8a70e40))
+* **alerts:** push saved-station price drops and cycle lows ([#43](https://github.com/Misoto22/servo-map/issues/43)) ([832402f](https://github.com/Misoto22/servo-map/commit/832402f0167382120b34075370afdf2e02faa2f4))
+* **vehicles:** add the shared car catalogue and model picker ([#41](https://github.com/Misoto22/servo-map/issues/41)) ([30b8722](https://github.com/Misoto22/servo-map/commit/30b8722e8696e681d425cdd8603e8ba478748afb))
+
 ## [0.4.1](https://github.com/Misoto22/servo-map/compare/v0.4.0...v0.4.1) (2026-09-30)
 
 
