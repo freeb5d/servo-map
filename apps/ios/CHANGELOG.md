@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.0](https://github.com/Misoto22/servo-map/compare/ios-v0.1.2...ios-v0.2.0) (2026-09-30)
+
+
+### Features
+
+* **ios:** audit fixes, brand logos, clearer cheapest station and finer trends ([#30](https://github.com/Misoto22/servo-map/issues/30)) ([5b0c009](https://github.com/Misoto22/servo-map/commit/5b0c009562dd238ced413ac68f7aa8771c605dbc))
+
 ## [0.1.2](https://github.com/Misoto22/servo-map/compare/ios-v0.1.1...ios-v0.1.2) (2026-09-30)
 
 
