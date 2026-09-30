@@ -42,7 +42,8 @@ servo-map/
 ├── apps/
 │   └── ios/         # SwiftUI app. xcodegen project.yml; fastlane lanes; version in Config/Version.xcconfig.
 ├── design/
-│   └── app-icon/    # generate.py: one fuel-gauge geometry → favicon, web mark, iOS Icon Composer icon.
+│   ├── app-icon/    # generate.py: one fuel-gauge geometry → favicon, web mark, iOS Icon Composer icon.
+│   └── brand-logos/ # Brand logo PNGs + SOURCES.md; `pnpm brand-logos` copies them to iOS and web.
 ├── packages/
 │   ├── design-tokens/ # Design system tokens (素). Generates web CSS + iOS Swift. See docs/design/system.md.
 │   ├── shared/      # Pure TS types, enums and reference tables (fuel types, brand families). No I/O.

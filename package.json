@@ -6,7 +6,8 @@
     "dev:web": "pnpm --filter @servo-map/web dev",
     "build": "pnpm -r build",
     "lint": "pnpm -r lint",
-    "typecheck": "pnpm -r typecheck"
+    "typecheck": "pnpm -r typecheck",
+    "brand-logos": "tsx design/brand-logos/generate.ts"
   },
   "engines": {
     "node": ">=20"
