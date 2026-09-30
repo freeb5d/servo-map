@@ -3,6 +3,8 @@ package com.servomap.android
 import android.content.Context
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.builtins.MapSerializer
+import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
 import java.time.Instant
 import java.time.YearMonth
@@ -24,7 +26,30 @@ data class Settings(
 }
 
 @Serializable
-data class Car(val name: String = "", val fuel: String = Fuel.U91.code, val tankLitres: Int = 50)
+data class Car(
+    val name: String = "",
+    val fuel: String = Fuel.U91.code,
+    val tankLitres: Int = 50,
+    /** Set when the car came from another device or the shared catalogue; kept so sync round-trips it. */
+    val vehicleId: String? = null,
+    val body: String = "hatch",
+    val catalogueTankLitres: Int? = null,
+)
+
+/** Alert switches, quiet hours (Sydney time, 24-hour) and home, as synced with the account. */
+@Serializable
+data class AlertSettings(
+    val priceDrop: Boolean = false,
+    val cycleLow: Boolean = false,
+    val quietStart: Int = 22,
+    val quietEnd: Int = 7,
+    val homeLat: Double? = null,
+    val homeLng: Double? = null,
+)
+
+/** One alert already shown, so the same one is never sent twice and only one goes out a day. */
+@Serializable
+data class AlertLogEntry(val kind: String, val key: String, val day: String)
 
 /** One fill-up the user recorded. Prices are cents per litre; the area average is captured at the time. */
 @Serializable
@@ -46,6 +71,8 @@ data class FillUp(
     val saved: Double get() = areaAverage?.let { maxOf(0.0, (it - centsPerLitre) * litres / 100) } ?: 0.0
 }
 
+private val SEEN_SERIALIZER = MapSerializer(String.serializer(), Double.serializer())
+
 /** Everything the app keeps on the device, as JSON in SharedPreferences. */
 class Store(context: Context) {
     private val sp = context.getSharedPreferences("servomap", Context.MODE_PRIVATE)
@@ -59,6 +86,29 @@ class Store(context: Context) {
 
     fun fillUps(): List<FillUp> = read("fillups", ListSerializer(FillUp.serializer())) ?: emptyList()
     fun saveFillUps(v: List<FillUp>) = write("fillups", ListSerializer(FillUp.serializer()), v)
+
+    fun alerts(): AlertSettings = read("alerts", AlertSettings.serializer()) ?: AlertSettings()
+    fun saveAlerts(v: AlertSettings) = write("alerts", AlertSettings.serializer(), v)
+
+    fun account(): AccountDto? = read("account", AccountDto.serializer())
+    fun saveAccount(v: AccountDto?) = if (v == null) sp.edit().remove("account").apply() else write("account", AccountDto.serializer(), v)
+
+    /** Last price seen per "stationId|fuel", the baseline the next check compares against. */
+    fun seenPrices(): Map<String, Double> =
+        read("seen", SEEN_SERIALIZER) ?: emptyMap()
+    fun saveSeenPrices(v: Map<String, Double>) =
+        write("seen", SEEN_SERIALIZER, v)
+
+    fun alertLog(): List<AlertLogEntry> = read("alert_log", ListSerializer(AlertLogEntry.serializer())) ?: emptyList()
+    fun saveAlertLog(v: List<AlertLogEntry>) = write("alert_log", ListSerializer(AlertLogEntry.serializer()), v)
+
+    /** Where the map was last centred, for the widget and alerts to reuse without asking for location again. */
+    fun lastCentre(): Pair<Double, Double>? {
+        if (!sp.contains("centre_lat")) return null
+        return Double.fromBits(sp.getLong("centre_lat", 0)) to Double.fromBits(sp.getLong("centre_lng", 0))
+    }
+    fun saveLastCentre(lat: Double, lng: Double) =
+        sp.edit().putLong("centre_lat", lat.toBits()).putLong("centre_lng", lng.toBits()).apply()
 
     fun savedIds(): Set<String> = sp.getStringSet("saved_ids", emptySet()).orEmpty().toSet()
     fun saveSavedIds(v: Set<String>) = sp.edit().putStringSet("saved_ids", v).apply()

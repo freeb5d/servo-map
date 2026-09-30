@@ -1,5 +1,6 @@
 package com.servomap.android
 
+import android.app.Activity
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
@@ -12,6 +13,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.util.UUID
+
+enum class AccountStatus { SignedOut, SigningIn, SignedIn, Failed }
 
 data class UiState(
     val fuel: Fuel = Fuel.U91,
@@ -34,6 +37,11 @@ data class UiState(
     val cities: Map<String, List<CityInsight>> = emptyMap(),
     val trendsLoading: Boolean = false,
     val trendsError: Boolean = false,
+    val alerts: AlertSettings = AlertSettings(),
+    val account: AccountDto? = null,
+    val accountStatus: AccountStatus = AccountStatus.SignedOut,
+    val accountMessage: String? = null,
+    val lastSynced: Long? = null,
 ) {
     /** The loaded stations that pass the filters. */
     val visible: List<Station> get() = filters.apply(stations, fuel)
@@ -53,22 +61,31 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     private val _state = MutableStateFlow(
         UiState(
             fuel = Fuel.fromCode(initial.fuel), settings = initial, savedIds = store.savedIds(),
-            fillUps = store.fillUps(), car = store.car(),
+            fillUps = store.fillUps(), car = store.car(), alerts = store.alerts(),
+            centre = store.lastCentre() ?: UiState.SYDNEY,
         ),
     )
+    private val tokens = TokenStore(app)
     val state: StateFlow<UiState> = _state.asStateFlow()
     private var job: Job? = null
 
     init {
+        val account = store.account()
+        if (account != null && tokens.read() != null) update { it.copy(account = account, accountStatus = AccountStatus.SignedIn) }
         reload()
         loadSaved()
+        refreshAccount()
     }
 
     private fun update(f: (UiState) -> UiState) { _state.value = f(_state.value) }
 
     fun setFuel(fuel: Fuel) { update { it.copy(fuel = fuel) }; reload(); loadSaved() }
 
-    fun setCentre(lat: Double, lng: Double) { update { it.copy(centre = lat to lng, query = "") }; reload() }
+    fun setCentre(lat: Double, lng: Double) {
+        store.saveLastCentre(lat, lng)
+        update { it.copy(centre = lat to lng, query = "") }
+        reload()
+    }
 
     fun select(station: Station?) { update { it.copy(selected = station) } }
 
@@ -90,6 +107,7 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         store.saveSavedIds(ids)
         update { it.copy(savedIds = ids, saved = it.saved.filter { s -> s.id in ids }) }
         loadSaved()
+        attempt { AccountApi.putSaved(it, ids.toList()) }
     }
 
     /** Fetches the current prices of every saved station; one that fails to load is left out. */
@@ -112,15 +130,28 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         val log = (_state.value.fillUps + entry).sortedByDescending { it.epochMs }
         store.saveFillUps(log)
         update { it.copy(fillUps = log) }
+        attempt { AccountApi.putFillUps(it, listOf(entry.toDto())) }
     }
 
     fun deleteFillUp(id: String) {
         val log = _state.value.fillUps.filter { it.id != id }
         store.saveFillUps(log)
         update { it.copy(fillUps = log) }
+        attempt { AccountApi.deleteFillUp(it, id) }
     }
 
-    fun saveCar(car: Car) { store.saveCar(car); update { it.copy(car = car) } }
+    fun saveCar(car: Car) {
+        store.saveCar(car)
+        update { it.copy(car = car) }
+        attempt { AccountApi.putCar(it, car.toDto()) }
+    }
+
+    fun updateAlerts(change: (AlertSettings) -> AlertSettings) {
+        val new = change(_state.value.alerts)
+        store.saveAlerts(new)
+        update { it.copy(alerts = new) }
+        attempt { AccountApi.putAlerts(it, new.toDto()) }
+    }
 
     /** Loads every live state's history at once; a state that fails keeps what was loaded before. */
     fun loadTrends() {
@@ -148,6 +179,115 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
             } catch (e: Exception) {
                 // keep whatever is on screen
             }
+        }
+    }
+
+    // Account and sync are optional; without an account everything stays on the device.
+
+    fun signInWithGoogle(activity: Activity) {
+        if (_state.value.accountStatus == AccountStatus.SigningIn) return
+        update { it.copy(accountStatus = AccountStatus.SigningIn, accountMessage = null) }
+        viewModelScope.launch {
+            try {
+                val (idToken, name) = GoogleSignIn.idToken(activity)
+                val session = AccountApi.signIn("google", idToken, name)
+                tokens.save(session.token)
+                store.saveAccount(session.account)
+                update { it.copy(account = session.account, accountStatus = AccountStatus.SignedIn) }
+                pull(session.token, pushLocal = true)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: GoogleSignIn.Cancelled) {
+                update { it.copy(accountStatus = if (it.account == null) AccountStatus.SignedOut else AccountStatus.SignedIn) }
+            } catch (e: ApiFailure) {
+                val message = when (e.code) {
+                    0 -> "Could not reach ServoMap to sign in. Check your connection."
+                    503 -> "Accounts are not switched on for ServoMap yet. Everything still works on this device."
+                    else -> "ServoMap could not verify that sign-in. Try again."
+                }
+                update { it.copy(accountStatus = AccountStatus.Failed, accountMessage = message) }
+            } catch (e: Exception) {
+                update { it.copy(accountStatus = AccountStatus.Failed, accountMessage = "Google sign-in did not finish. Try again.") }
+            }
+        }
+    }
+
+    fun signOut() {
+        tokens.clear()
+        store.saveAccount(null)
+        update { it.copy(account = null, accountStatus = AccountStatus.SignedOut, accountMessage = null, lastSynced = null) }
+    }
+
+    /** Deletes the account and everything stored with it on the server; this device keeps its copy. */
+    fun deleteAccount() {
+        val token = tokens.read() ?: return
+        viewModelScope.launch {
+            try {
+                AccountApi.deleteAccount(token)
+                signOut()
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                update { it.copy(accountMessage = "Could not delete the account. Check your connection and try again.") }
+            }
+        }
+    }
+
+    /** Opening the app or tapping Sync now: take what other devices added. */
+    fun refreshAccount() {
+        val token = tokens.read() ?: return
+        viewModelScope.launch { guarded { pull(token, pushLocal = false) } }
+    }
+
+    private suspend fun pull(token: String, pushLocal: Boolean) {
+        val me = AccountApi.me(token)
+        store.saveAccount(me.account)
+        val local = _state.value
+        val ids = (local.savedIds.toList() + me.savedStationIds).distinct().toSet()
+        val byId = (local.fillUps + me.fillUps.mapNotNull { it.toFillUp() }).associateBy { it.id }
+        val log = byId.values.sortedByDescending { it.epochMs }
+        val car = me.car?.toCar()?.takeIf { !pushLocal || local.car.isDefault } ?: local.car
+        val alerts = me.alerts.applyTo(local.alerts)
+        store.saveSavedIds(ids)
+        store.saveFillUps(log)
+        store.saveCar(car)
+        store.saveAlerts(alerts)
+        update {
+            it.copy(
+                account = me.account, savedIds = ids, fillUps = log, car = car, alerts = alerts,
+                accountStatus = AccountStatus.SignedIn, lastSynced = System.currentTimeMillis(),
+            )
+        }
+        loadSaved()
+        if (pushLocal) {
+            AccountApi.putSaved(token, ids.toList())
+            val remote = me.fillUps.map { it.id }.toSet()
+            AccountApi.putFillUps(token, log.filter { it.id !in remote }.map { it.toDto() })
+            if (!car.isDefault) AccountApi.putCar(token, car.toDto())
+            AccountApi.putAlerts(token, alerts.toDto())
+        }
+    }
+
+    /** Pushes one change to the account when signed in; offline failures are dropped, the next launch reconciles. */
+    private fun attempt(work: suspend (String) -> Unit) {
+        val token = tokens.read() ?: return
+        viewModelScope.launch {
+            guarded {
+                work(token)
+                update { it.copy(lastSynced = System.currentTimeMillis()) }
+            }
+        }
+    }
+
+    private suspend fun guarded(block: suspend () -> Unit) {
+        try {
+            block()
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: ApiFailure) {
+            if (e.code == 401) signOut()
+        } catch (e: Exception) {
+            // Offline: keep working locally.
         }
     }
 

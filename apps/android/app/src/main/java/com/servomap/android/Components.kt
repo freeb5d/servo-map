@@ -80,6 +80,7 @@ fun Note(text: String, modifier: Modifier = Modifier) {
 fun StationRow(s: Station, fuel: Fuel, tier: Tier?, onClick: () -> Unit) {
     val dark = LocalDark.current
     val p = s.price(fuel)
+    Column {
     Row(
         Modifier.fillMaxWidth().clickable(onClick = onClick).padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -98,6 +99,7 @@ fun StationRow(s: Station, fuel: Fuel, tier: Tier?, onClick: () -> Unit) {
         }
     }
     HorizontalDivider(Modifier.padding(start = 68.dp), color = MaterialTheme.colorScheme.outline.copy(alpha = 0.4f))
+    }
 }
 
 /** "Updated 3 h ago"-style age of a report; empty when the timestamp can't be read. */
@@ -277,4 +279,9 @@ fun Bars(values: List<Pair<String, Double?>>, cheapestIsLowest: Boolean = true, 
             }
         }
     }
+}
+
+/** One lazy item holding several stacked children; without the Column they would draw on top of each other. */
+fun androidx.compose.foundation.lazy.LazyListScope.sectionItem(content: @Composable androidx.compose.foundation.layout.ColumnScope.() -> Unit) {
+    item { Column(Modifier.fillMaxWidth(), content = content) }
 }

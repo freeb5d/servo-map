@@ -41,16 +41,17 @@ fun TrendsScreen(ui: UiState, vm: MainViewModel) {
     val cities = CityFacts.ranked(ui.cities[ui.fuel.code].orEmpty())
 
     LazyColumn(Modifier.fillMaxSize().statusBarsPadding()) {
-        item {
+        sectionItem {
             ScreenTitle("Trends")
             FuelChips(ui.fuel, vm::setFuel, Modifier.padding(horizontal = 16.dp))
             if (ui.trendsLoading) LinearProgressIndicator(Modifier.fillMaxWidth().padding(top = 8.dp))
             if (ui.trendsError) Note("Couldn't load price history. Pull up the tab again to retry.")
         }
-        item { Heading("STATES · AVERAGE ¢/L, CHEAPEST FIRST") }
+        sectionItem { Heading("STATES · AVERAGE ¢/L, CHEAPEST FIRST") }
         items(ordered, key = { it.key }) { (state, series) ->
             val latest = series.last()
             val week = TrendMath.change(series, 7)
+            Column {
             Row(
                 Modifier.fillMaxWidth().clickable { picked = state }.padding(horizontal = 16.dp, vertical = 12.dp),
                 verticalAlignment = Alignment.CenterVertically,
@@ -70,18 +71,19 @@ fun TrendsScreen(ui: UiState, vm: MainViewModel) {
                 Text("%.1f".format(latest.avg), fontSize = 20.sp, fontWeight = FontWeight.SemiBold)
             }
             HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.4f))
+            }
         }
         if (current != null) {
             val full = byState.getValue(current)
             val shown = TrendMath.window(full, rangeDays.takeIf { it > 0 })
-            item {
+            sectionItem {
                 Heading("${current.uppercase()} · ${ui.fuel.code}")
                 ChoiceChipsRow(rangeDays) { rangeDays = it }
                 LineChart(shown, Modifier.padding(16.dp))
                 TrendMath.verdict(shown)?.let { Note(it) }
                 Note("Line is the daily average; the band runs from the cheapest to the dearest station.")
             }
-            item {
+            sectionItem {
                 Heading("BEST DAY TO FILL · ${current.uppercase()} AVERAGE BY WEEKDAY")
                 Bars(TrendMath.weekdays(full))
                 val days = TrendMath.weekdays(full)
@@ -89,11 +91,12 @@ fun TrendsScreen(ui: UiState, vm: MainViewModel) {
                 if (cheapest != null) Note("${cheapest.first} has been the cheapest day on average.")
             }
         }
-        item {
+        sectionItem {
             Heading("CITIES · ${ui.fuel.code} TODAY")
             CityFacts.cheapestFact(cities)?.let { Note(it) }
         }
         items(cities, key = { it.id }) { c ->
+            Column {
             Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
                 Column(Modifier.weight(1f)) {
                     Text(c.name, fontWeight = FontWeight.Medium)
@@ -102,8 +105,9 @@ fun TrendsScreen(ui: UiState, vm: MainViewModel) {
                 Text("%.1f".format(c.average ?: 0.0), fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
             }
             HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.4f))
+            }
         }
-        item { Note("City figures use prices reported in the last 7 days, within each city's radius of its centre.", Modifier.padding(bottom = 24.dp)) }
+        sectionItem { Note("City figures use prices reported in the last 7 days, within each city's radius of its centre.", Modifier.padding(bottom = 24.dp)) }
     }
 }
 

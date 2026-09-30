@@ -51,13 +51,13 @@ fun YouScreen(ui: UiState, vm: MainViewModel, onSelect: (Station) -> Unit) {
     val average = ui.areaAverage(fuel)
 
     LazyColumn(Modifier.fillMaxSize().statusBarsPadding()) {
-        item { ScreenTitle("You") }
+        sectionItem { ScreenTitle("You") }
 
-        item { Heading("SAVED STATIONS") }
+        sectionItem { Heading("SAVED STATIONS") }
         if (ui.saved.isEmpty()) item { Note("Nothing saved yet. Open a station and tap Save.") }
         items(ui.saved, key = { "saved-" + it.id }) { s -> StationRow(s, ui.fuel, ui.tiers[s.id]) { onSelect(s) } }
 
-        item {
+        sectionItem {
             Heading("MY CAR")
             val car = ui.car
             Column(Modifier.fillMaxWidth().clickable { editCar = true }.padding(horizontal = 16.dp, vertical = 8.dp)) {
@@ -75,7 +75,7 @@ fun YouScreen(ui: UiState, vm: MainViewModel, onSelect: (Station) -> Unit) {
             }
         }
 
-        item {
+        sectionItem {
             Heading("FILL-UP LOG")
             Row(Modifier.padding(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedButton(onClick = { picking = true }) { Text("Add a fill-up") }
@@ -100,6 +100,7 @@ fun YouScreen(ui: UiState, vm: MainViewModel, onSelect: (Station) -> Unit) {
             }
         }
         items(ui.fillUps, key = { "log-" + it.id }) { f ->
+            Column {
             Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
                 Column(Modifier.weight(1f)) {
                     Text(f.stationName, fontWeight = FontWeight.Medium)
@@ -112,8 +113,9 @@ fun YouScreen(ui: UiState, vm: MainViewModel, onSelect: (Station) -> Unit) {
                 TextButton(onClick = { vm.deleteFillUp(f.id) }) { Text("Delete") }
             }
             HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.4f))
+            }
         }
-        item { Note("", Modifier.padding(bottom = 24.dp)) }
+        sectionItem { Note("", Modifier.padding(bottom = 24.dp)) }
     }
 
     if (editCar) CarDialog(ui.car, onDismiss = { editCar = false }) { vm.saveCar(it); editCar = false }
