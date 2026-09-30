@@ -7,7 +7,6 @@ import type {
   ApiResponse,
   PaginationMeta,
 } from "@servo-map/shared";
-import { normalizeStation } from "@/lib/place-names";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "";
 const DEBOUNCE_MS = 300;
@@ -75,7 +74,7 @@ export function useStations(opts: UseStationsOptions): UseStationsResult {
         setNoResults(isSearch && empty);
         // 搜索无结果时保留当前站点，不清空地图
         if (!(isSearch && empty)) {
-          setStations(json.data.map(normalizeStation));
+          setStations(json.data);
           setTotal(json.meta?.total ?? json.data.length);
         }
       }

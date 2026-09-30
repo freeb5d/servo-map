@@ -29,21 +29,18 @@ struct API: Sendable {
     }
 
     func stations(fuel: FuelType, lat: Double, lng: Double, radiusKm: Int) async throws -> [Station] {
-        let raw: [Station] = try await get("stations", [
+        try await get("stations", [
             "fuel": fuel.rawValue, "lat": "\(lat)", "lng": "\(lng)",
             "radius": "\(radiusKm)", "limit": "500", "sort": "price_asc",
         ])
-        return raw.map(\.displayCased)
     }
 
     func search(_ query: String, fuel: FuelType) async throws -> [Station] {
-        let raw: [Station] = try await get("stations", ["q": query, "fuel": fuel.rawValue, "limit": "100", "sort": "price_asc"])
-        return raw.map(\.displayCased)
+        try await get("stations", ["q": query, "fuel": fuel.rawValue, "limit": "100", "sort": "price_asc"])
     }
 
     func station(id: String) async throws -> Station {
-        let raw: Station = try await get("stations/\(id)", [:])
-        return raw.displayCased
+        try await get("stations/\(id)", [:])
     }
 
     private struct StateMeta: Decodable { let stationCount: Int
