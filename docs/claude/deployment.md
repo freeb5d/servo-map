@@ -80,7 +80,8 @@ Provisioned 2026-09-30.
 4. Budget: watch `SELECT run_at, state, rows_written FROM ingest_runs ORDER BY run_at DESC` against the free plan's 100,000 rows written a day, and the database size against 500 MB.
 5. Backfill: `scripts/backfill-daily-prices.py` (Python, run with `uv run`) rebuilds `daily_prices` from the states' published history files (NSW/ACT FuelCheck, QLD, WA FuelWatch) and writes them with `source = 'history'`, never over a `'live'` row unless `--replace`. `--kv` also merges them into KV `history:{state}` (90-day cap). Accuracy and method are in the script's docstring.
    - 2026-09-30: filled NSW 2026-08-02..08-30, ACT 06-01..08-30, QLD 06-01..08-31 (D1 only; QLD is not live), and replaced WA 06-01..09-28, whose `U98`/`E10` rows were LPG/E85 before #65.
-   - **Still missing: NSW and ACT 2026-08-31..09-17.** FuelCheck publishes September's file in early October; then run `rebuild nsw 2026-08-31 2026-09-17` and `rebuild act 2026-08-31 2026-09-29` with the June–September files, and `apply` them with `--kv`.
+   - 2026-09-30, from `github.com/jande425/aus-fuel-data-public@48c2521` (`aggregate` mode; NSW FuelCheck-derived, so NSW/ACT/TAS only): NSW 2025-12-25..05-31 and 08-31..09-17, ACT 2025-12-25..05-31 and 08-31..09-29, TAS 2025-12-25..09-29. `daily_prices.provenance` names each row's source. SA/VIC/NT aggregates exist there too but wait for our own licences.
+   - Holes left, all the aggregator's own: 2025-12-26, 2026-01-03, 2026-01-27..02-02 and 2026-02-10 (NSW, ACT, TAS), plus TAS 2026-07-22..08-25. NSW and ACT are continuous from 2026-02-11, and WA from 2026-06-01. Official files can still replace aggregate rows later: rebuild and `apply --replace`.
 
 ## Environment variable inventory
 

@@ -18,6 +18,12 @@ Accuracy, checked against 50 live NSW days and 5 live WA days on 2026-09-30:
   - A change log cannot say when a station stopped listing a fuel, so NSW/ACT/QLD min comes from
     prices updated in the last 14 days (median error 0), and max from every carried-forward price.
     Charts use avg, and iOS also uses min.
+A third source, for days no official file covers yet, is the daily state aggregates published by
+github.com/jande425/aus-fuel-data-public (data/history/<state>.json, per city since 2025-12-25),
+built from the same government feeds. Against 320 live NSW days its avg is within 0.2c (median)
+and min matches; its "samples" run ~14% below our station_count. Use it only for states whose
+feed licence allows it (NSW FuelCheck covers NSW, ACT and TAS), and pin the commit.
+
 Only stations in today's live feed are counted for NSW/ACT, since delisted stations would
 otherwise carry their last price for ever. QLD's 999.9c means "not available" and withdraws the
 station's price; prices outside PLAUSIBLE_CENTS (typos such as 28.8c) are skipped, and min ignores
@@ -25,7 +31,8 @@ placeholder-looking prices below LOW_OUTLIER x the day's median (QLD's 99.9c).
 
 Usage:
   uv run scripts/backfill-daily-prices.py rebuild STATE FROM TO FILE... > rows.json
-  uv run scripts/backfill-daily-prices.py apply rows.json [--replace] [--kv]
+  uv run scripts/backfill-daily-prices.py aggregate STATE FROM TO HISTORY_JSON > rows.json
+  uv run scripts/backfill-daily-prices.py apply rows.json [--replace] [--kv] [--provenance TEXT]
 apply upserts rows into D1 daily_prices with source='history'. It never overwrites a 'live' row
 unless --replace is given, which replaces whole days. --kv also merges the rows into KV
 history:{state}, capped at 90 days like the ingest. Env: CF_ACCOUNT_ID, CF_API_TOKEN,
@@ -192,6 +199,27 @@ def rebuild(state, start, end, paths):
     return rows
 
 
+def from_aggregate(state, start, end, path):
+    """Combines an aggregator's per-city daily figures into state rows (samples-weighted avg)."""
+    fuels = {"U91": "U91", "U95": "U95", "U98": "U98", "E10": "E10", "Diesel": "Diesel"}
+    combined = {}
+    for days in json.load(open(path))["history"].values():
+        for day, by_fuel in days.items():
+            if not start.isoformat() <= day <= end.isoformat():
+                continue
+            for name, v in by_fuel.items():
+                fuel = fuels.get(name)
+                if not fuel or not v.get("samples"):
+                    continue
+                c = combined.setdefault((day, fuel), {"sum": 0.0, "n": 0, "min": math.inf, "max": -math.inf})
+                c["sum"] += v["avg"] * v["samples"]
+                c["n"] += v["samples"]
+                c["min"] = min(c["min"], v["min"])
+                c["max"] = max(c["max"], v["max"])
+    return [{"state": state, "date": day, "fuel": fuel, "min": c["min"], "avg": js_round1(c["sum"] / c["n"]),
+             "max": c["max"], "station_count": c["n"]} for (day, fuel), c in sorted(combined.items())]
+
+
 # ── Writing ──
 
 def d1(sql, params):
@@ -207,7 +235,7 @@ def kv_url(key):
     return f"https://api.cloudflare.com/client/v4/accounts/{os.environ['CF_ACCOUNT_ID']}/storage/kv/namespaces/{os.environ['CF_KV_NAMESPACE_ID']}/values/{quote(key, safe='')}"
 
 
-def apply(rows, replace, kv):
+def apply(rows, replace, kv, provenance):
     by_state = {}
     for r in rows:
         by_state.setdefault(r["state"], []).append(r)
@@ -217,13 +245,13 @@ def apply(rows, replace, kv):
             d1("DELETE FROM daily_prices WHERE state = ?1 AND date IN (SELECT value FROM json_each(?2))",
                [state, json.dumps(dates)])
         packed = [[r["fuel"], r["date"], r["min"], r["avg"], r["max"], r["station_count"]] for r in state_rows]
-        res = d1("""INSERT INTO daily_prices (state, fuel, date, min, avg, max, station_count, source)
+        res = d1("""INSERT INTO daily_prices (state, fuel, date, min, avg, max, station_count, source, provenance)
 SELECT ?1, json_extract(value, '$[0]'), json_extract(value, '$[1]'), json_extract(value, '$[2]'),
-       json_extract(value, '$[3]'), json_extract(value, '$[4]'), json_extract(value, '$[5]'), 'history'
+       json_extract(value, '$[3]'), json_extract(value, '$[4]'), json_extract(value, '$[5]'), 'history', ?3
 FROM json_each(?2) WHERE true
 ON CONFLICT (state, fuel, date) DO UPDATE SET min = excluded.min, avg = excluded.avg, max = excluded.max,
-  station_count = excluded.station_count
-WHERE daily_prices.source = 'history'""", [state, json.dumps(packed)])
+  station_count = excluded.station_count, provenance = excluded.provenance
+WHERE daily_prices.source = 'history'""", [state, json.dumps(packed), provenance])
         print(f"{state}: D1 {len(dates)} days, rows_written={res['meta'].get('rows_written')}", file=sys.stderr)
         if kv:
             merge_kv(state, state_rows, replace)
@@ -262,7 +290,12 @@ if __name__ == "__main__":
     if command == "rebuild" and len(sys.argv) >= 6:
         state, start, end = sys.argv[2], date.fromisoformat(sys.argv[3]), date.fromisoformat(sys.argv[4])
         json.dump(rebuild(state, start, end, sys.argv[5:]), sys.stdout)
+    elif command == "aggregate" and len(sys.argv) == 6:
+        state, start, end = sys.argv[2], date.fromisoformat(sys.argv[3]), date.fromisoformat(sys.argv[4])
+        json.dump(from_aggregate(state, start, end, sys.argv[5]), sys.stdout)
     elif command == "apply" and len(sys.argv) >= 3:
-        apply(json.load(open(sys.argv[2])), "--replace" in sys.argv, "--kv" in sys.argv)
+        args = sys.argv[3:]
+        provenance = args[args.index("--provenance") + 1] if "--provenance" in args else None
+        apply(json.load(open(sys.argv[2])), "--replace" in args, "--kv" in args, provenance)
     else:
         raise SystemExit(__doc__)
