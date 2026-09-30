@@ -10,7 +10,7 @@ import { LedgerNotice } from "./LedgerNotices";
 import { LedgerRow } from "./LedgerRow";
 import { LedgerSkeleton } from "./LedgerSkeleton";
 import { Verdict } from "./Verdict";
-import { OLD_PRICE_HOURS, cheapestStation, rankStations } from "./rank";
+import { OLD_PRICE_HOURS, cheapestRankedId, cheapestStation, rankStations } from "./rank";
 
 interface LedgerProps {
   fuel: FuelType;
@@ -47,6 +47,7 @@ export function Ledger(props: LedgerProps) {
   const ranked = useMemo(() => rankStations(stations, fuel, sort, now), [stations, fuel, sort, now]);
   const spread = useMemo(() => priceSpread(stations, fuel), [stations, fuel]);
   const cheapest = useMemo(() => cheapestStation(stations, fuel, now), [stations, fuel, now]);
+  const cheapestId = useMemo(() => cheapestRankedId(stations, fuel, now), [stations, fuel, now]);
 
   const firstLoad = loading && props.loadedCount === 0;
 
@@ -106,7 +107,7 @@ export function Ledger(props: LedgerProps) {
               : "Try searching a different area."}
           </LedgerNotice>
         ) : (
-          <StationRows {...props} ranked={ranked} />
+          <StationRows {...props} ranked={ranked} cheapestId={cheapestId} />
         )}
       </div>
     </div>
@@ -115,18 +116,20 @@ export function Ledger(props: LedgerProps) {
 
 function StationRows({
   ranked,
+  cheapestId,
   fuel,
   activeId,
   onSelect,
   isFavourite,
   onToggleFavourite,
-}: LedgerProps & { ranked: ReturnType<typeof rankStations> }) {
+}: LedgerProps & { ranked: ReturnType<typeof rankStations>; cheapestId: string | null }) {
   const row = (station: StationWithDistance, rank: number | null) => (
     <LedgerRow
       key={station.id}
       station={station}
       fuel={fuel}
       rank={rank}
+      cheapest={station.id === cheapestId}
       active={activeId === station.id}
       favourite={isFavourite(station.id)}
       onSelect={onSelect}

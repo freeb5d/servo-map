@@ -12,6 +12,8 @@ interface LedgerRowProps {
   fuel: FuelType;
   /** 1-based rank; null for stations with an old price, which are not ranked. */
   rank: number | null;
+  /** The cheapest ranked station: its row takes the cheap tier's wash, matching its map tag. */
+  cheapest: boolean;
   active: boolean;
   favourite: boolean;
   onSelect: (station: StationWithDistance) => void;
@@ -23,6 +25,7 @@ export function LedgerRow({
   station,
   fuel,
   rank,
+  cheapest,
   active,
   favourite,
   onSelect,
@@ -46,11 +49,19 @@ export function LedgerRow({
         aria-current={active ? "true" : undefined}
         className={cn(
           "grid w-full grid-cols-[18px_30px_minmax(0,1fr)_auto] items-center gap-2.5 py-[11px] pl-5 pr-10 text-left outline-none transition-colors duration-(--duration-fast) hover:bg-wash/55 focus-visible:outline-[1.5px] focus-visible:-outline-offset-2 focus-visible:outline-accent",
+          cheapest && "bg-price-cheap-soft",
           active && "bg-wash hover:bg-wash",
         )}
       >
-        <span className="font-display text-[13px] tabular-nums text-ink-3">{rank ?? "–"}</span>
-        <BrandSeal brand={station.brand} />
+        <span
+          className={cn(
+            "font-display text-[13px] tabular-nums",
+            cheapest ? "font-semibold text-price-cheap" : "text-ink-3",
+          )}
+        >
+          {rank ?? "–"}
+        </span>
+        <BrandSeal brand={station.brand} size="md" />
         <span className="min-w-0">
           <span className="block truncate font-medium text-ink">{station.name}</span>
           <span className="block truncate text-[11.5px] text-ink-3">{where}</span>

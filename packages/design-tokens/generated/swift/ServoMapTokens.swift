@@ -26,6 +26,8 @@ public enum ServoMapColor {
     public static let priceCheapSoft = Color(light: 0xE3EAE3, dark: 0x243028)
     public static let priceMidSoft = Color(light: 0xEFE8DA, dark: 0x312B1F)
     public static let priceExpensiveSoft = Color(light: 0xF1E3DF, dark: 0x34241F)
+    public static let brandTile = Color(light: 0xFFFFFF, dark: 0xFFFFFF)
+    public static let brandTileLine = Color(light: 0xEBEBEB, dark: 0xEBEBEB)
     public static let mapLand = Color(light: 0xF2F1ED, dark: 0x1E1E1C)
     public static let mapWater = Color(light: 0xD9DFE2, dark: 0x182025)
 }

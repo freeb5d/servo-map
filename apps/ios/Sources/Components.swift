@@ -24,7 +24,7 @@ struct BrandSeal: View {
 
     private var shape: RoundedRectangle { RoundedRectangle(cornerRadius: size * 0.24, style: .continuous) }
 
-    /** The brand's own logo (Resources/Assets.xcassets/BrandLogos) on a white tile, as on a price sign. */
+    /** The brand's own logo (generated into Resources/Assets.xcassets/BrandLogos from design/brand-logos) on a white tile, as on a price sign. */
     private func logoTile(_ logo: UIImage) -> some View {
         Image(uiImage: logo)
             .resizable()
@@ -32,8 +32,8 @@ struct BrandSeal: View {
             .scaledToFit()
             .padding(size * 0.1)
             .frame(width: size, height: size)
-            .background(Color.white, in: shape)
-            .overlay(shape.strokeBorder(Color.black.opacity(0.08), lineWidth: 0.5))
+            .background(ServoMapColor.brandTile, in: shape)
+            .overlay(shape.strokeBorder(ServoMapColor.brandTileLine, lineWidth: 0.5))
             .overlay { membersRing }
     }
 

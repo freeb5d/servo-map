@@ -41,8 +41,8 @@ export function Verdict({
   return (
     <section aria-label="Price verdict" className="grid gap-[9px] border-b border-line px-5 pt-4 pb-3.5">
       <div className="flex items-baseline justify-between gap-3">
-        <h2 className="caption">
-          {fuel} near {place}
+        <h2 className="text-small font-semibold text-price-cheap">
+          Cheapest {fuel} near {place}
         </h2>
         {!stale && (updatedAt || refreshing) && (
           <span className="text-[10.5px] text-ink-3">

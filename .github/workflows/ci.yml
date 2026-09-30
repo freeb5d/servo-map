@@ -77,3 +77,4 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @servo-map/shared build
       - run: pnpm -r test
+      - run: pnpm brand-logos --check

@@ -41,6 +41,9 @@ export const color = {
   priceCheapSoft: { light: "#E3EAE3", dark: "#243028" },
   priceMidSoft: { light: "#EFE8DA", dark: "#312B1F" },
   priceExpensiveSoft: { light: "#F1E3DF", dark: "#34241F" },
+  // The brand logo's tile (decision 0003): white in both themes, like the price sign it comes from.
+  brandTile: { light: "#FFFFFF", dark: "#FFFFFF" },
+  brandTileLine: { light: "#EBEBEB", dark: "#EBEBEB" },
   // Map base overrides applied on top of the Mapbox style.
   mapLand: { light: "#F2F1ED", dark: "#1E1E1C" },
   mapWater: { light: "#D9DFE2", dark: "#182025" },

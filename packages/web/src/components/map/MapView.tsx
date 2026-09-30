@@ -29,15 +29,19 @@ import {
   CLUSTER_PROPERTIES,
   POINT_LAYER_ID,
   ACTIVE_LAYER_ID,
+  CHEAPEST_SOURCE_ID,
+  CHEAPEST_LAYER_ID,
   clusterLayer,
   clusterCountLayer,
   clusterLabelLayer,
   pointLayer,
   activeLayer,
+  cheapestLayer,
   mapStyleUrl,
   applyStyleOverrides,
 } from "./mapLayers";
-import { buildStationCollection } from "./mapData";
+import { buildStationCollection, splitCheapest } from "./mapData";
+import { preloadBrandImages, registerBrandImages } from "./brandImages";
 import { registerTagImages } from "./tagImages";
 import "mapbox-gl/dist/mapbox-gl.css";
 
@@ -56,6 +60,8 @@ interface MapViewProps {
   stations: StationWithDistance[];
   selectedFuel: FuelType;
   activeStationId: string | null;
+  /** The cheapest ranked station, tagged "Cheapest" (decision 0003); null when none is ranked. */
+  cheapestStationId: string | null;
   userLocation: { lat: number; lng: number } | null;
   searchQuery: string;
   onStationClick: (station: StationWithDistance) => void;
@@ -70,6 +76,7 @@ export function MapView({
   stations,
   selectedFuel,
   activeStationId,
+  cheapestStationId,
   userLocation,
   searchQuery,
   onStationClick,
@@ -92,15 +99,37 @@ export function MapView({
   // Mapbox also drops style images on a rebuild, so the tag images go back in before the layers.
   const handleStyleLoad = useCallback(() => {
     const map = mapRef.current?.getMap();
-    if (map) registerTagImages(map, themeRef.current);
+    if (map) {
+      registerTagImages(map, themeRef.current);
+      registerBrandImages(map);
+    }
     setStyleGen((g) => g + 1);
   }, []);
+
+  // Tags wait for the brand logos: Mapbox draws a tag with the tile it has and never redraws it.
+  const [brandsDrawn, setBrandsDrawn] = useState(false);
+  useEffect(() => {
+    void preloadBrandImages();
+  }, []);
+  useEffect(() => {
+    if (!ready) return;
+    let live = true;
+    void preloadBrandImages().then(() => {
+      const map = mapRef.current?.getMap();
+      if (!live || !map) return;
+      registerBrandImages(map);
+      setBrandsDrawn(true);
+    });
+    return () => {
+      live = false;
+    };
+  }, [ready]);
 
   const mapStyle = mapStyleUrl(theme);
 
   const data = useMemo(
-    () => buildStationCollection(stations, selectedFuel, range),
-    [stations, selectedFuel, range],
+    () => splitCheapest(buildStationCollection(stations, selectedFuel, range), cheapestStationId),
+    [stations, selectedFuel, range, cheapestStationId],
   );
 
   // id → station 映射，点击 unclustered point 时回查原始站点对象
@@ -243,7 +272,7 @@ export function MapView({
           onClick={handleClick}
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
-          interactiveLayerIds={[CLUSTER_LAYER_ID, CLUSTER_LABEL_LAYER_ID, POINT_LAYER_ID, ACTIVE_LAYER_ID]}
+          interactiveLayerIds={[CLUSTER_LAYER_ID, CLUSTER_LABEL_LAYER_ID, POINT_LAYER_ID, ACTIVE_LAYER_ID, CHEAPEST_LAYER_ID]}
           attributionControl={false}
           reuseMaps
         >
@@ -257,12 +286,12 @@ export function MapView({
           )}
 
           {/* 加油站聚类图层 — Mapbox 原生 GeoJSON clustering，取代逐个 DOM Marker */}
-          {ready && (
+          {ready && brandsDrawn && (
             <Source
               key={styleGen}
               id={SOURCE_ID}
               type="geojson"
-              data={data}
+              data={data.rest}
               cluster
               clusterMaxZoom={13}
               clusterRadius={56}
@@ -275,6 +304,12 @@ export function MapView({
               <Layer {...clusterLabelLayer(theme)} />
               <Layer {...pointLayer(theme, activeStationId)} />
               <Layer {...activeLayer(theme, activeStationId)} />
+            </Source>
+          )}
+          {/* Added after the stations, so the cheapest tag draws on top and neighbours give way. */}
+          {ready && brandsDrawn && (
+            <Source key={`cheapest-${styleGen}`} id={CHEAPEST_SOURCE_ID} type="geojson" data={data.cheapest}>
+              <Layer {...cheapestLayer(theme, activeStationId)} />
             </Source>
           )}
         </MapGL>
