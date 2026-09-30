@@ -103,8 +103,8 @@ export function TopBar({
 function Logo({ compact = false }: { compact?: boolean }) {
   return (
     <Link href="/" className="flex items-center gap-2.5 shrink-0" aria-label="ServoMap home">
-      {/* The generated fuel-gauge mark; the needle takes the red-earth tier colour so it follows the theme. */}
-      <BrandMark size={24} tile="var(--color-surface)" ink="var(--color-ink)" accent="var(--color-price-expensive)" />
+      {/* The tile takes the header's surface so the mark sits flush; ink and needle follow the theme. */}
+      <BrandMark size={24} tile="var(--color-surface)" ink="var(--color-ink)" accent="var(--color-brand)" />
       {!compact && (
         <span className="font-display text-lead font-semibold text-ink">ServoMap</span>
       )}

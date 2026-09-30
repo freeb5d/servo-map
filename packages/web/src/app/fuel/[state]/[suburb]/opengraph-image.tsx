@@ -1,7 +1,6 @@
 import { ImageResponse } from "next/og";
-import { color } from "@servo-map/design-tokens";
+import { color, markColor } from "@servo-map/design-tokens";
 import { BrandMark } from "@/components/brand/BrandMark";
-import { MARK_COLORS } from "@/components/brand/mark";
 
 export const alt = "Cheapest fuel prices by suburb — ServoMap";
 export const size = { width: 1200, height: 630 };
@@ -33,8 +32,13 @@ export default async function Image({ params }: Props) {
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
-          {/* The generated mark carries its own colours; the page is paper, so the light set. */}
-          <BrandMark size={72} {...MARK_COLORS.light} />
+          {/* The page is paper, so the mark takes its light colours. */}
+          <BrandMark
+            size={72}
+            tile={markColor.tile.light}
+            ink={markColor.ink.light}
+            accent={markColor.accent.light}
+          />
           <div style={{ display: "flex", fontSize: 32, color: color.ink.light, fontWeight: 700 }}>
             ServoMap
           </div>
