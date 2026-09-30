@@ -47,3 +47,28 @@ describe("BRAND_FAMILIES", () => {
     expect(brandFamilyById("nope")).toBeUndefined();
   });
 });
+
+/** WCAG 2.x contrast; kept here so shared stays free of other workspace packages. */
+function contrast(a: string, b: string): number {
+  const lum = (hex: string) => {
+    const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255)
+      .map((c) => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4));
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  };
+  const [hi, lo] = [lum(a), lum(b)].sort((x, y) => y - x);
+  return (hi + 0.05) / (lo + 0.05);
+}
+
+describe("brand marks", () => {
+  it.each(BRAND_FAMILIES.map((f) => [f.id, f.mark] as const))("%s monogram reaches WCAG AA", (_id, mark) => {
+    expect(contrast(mark.foreground, mark.background)).toBeGreaterThanOrEqual(4.5);
+  });
+
+  it("uses #RRGGBB colours only", () => {
+    for (const { mark } of BRAND_FAMILIES) {
+      for (const c of [mark.background, mark.foreground, mark.stripe].filter(Boolean)) {
+        expect(c).toMatch(/^#[0-9A-F]{6}$/);
+      }
+    }
+  });
+});

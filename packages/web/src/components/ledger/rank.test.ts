@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { StationWithDistance } from "@servo-map/shared";
-import { cheapestStation, rankStations } from "./rank";
+import { cheapestRankedId, cheapestStation, rankStations } from "./rank";
 import { dominantState, sourceLabel } from "./stationMeta";
 
 const NOW = Date.parse("2026-09-29T12:00:00Z");
@@ -47,8 +47,9 @@ describe("rankStations", () => {
 });
 
 describe("cheapestStation", () => {
-  it("prefers a current price over a cheaper old one", () => {
-    expect(cheapestStation(LIST, "U91", NOW)?.id).toBe("b");
+  it("prefers a current price over a cheaper old one, the nearer of two equal prices", () => {
+    // b and d both charge 210; d is nearer and is also rankStations' first row.
+    expect(cheapestStation(LIST, "U91", NOW)?.id).toBe("d");
   });
 
   it("falls back to an old price when nothing is current", () => {
@@ -57,6 +58,20 @@ describe("cheapestStation", () => {
 
   it("is null when nobody sells the fuel", () => {
     expect(cheapestStation(LIST, "Diesel", NOW)).toBeNull();
+  });
+});
+
+describe("cheapestRankedId", () => {
+  it("is the ledger's first row by price", () => {
+    expect(cheapestRankedId(LIST, "U91", NOW)).toBe(rankStations(LIST, "U91", "price", NOW).fresh[0].id);
+  });
+
+  it("is null when only old prices remain, since those are not ranked", () => {
+    expect(cheapestRankedId([LIST[2]], "U91", NOW)).toBeNull();
+  });
+
+  it("is null when nobody sells the fuel", () => {
+    expect(cheapestRankedId(LIST, "Diesel", NOW)).toBeNull();
   });
 });
 

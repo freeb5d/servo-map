@@ -18,6 +18,8 @@
   --color-price-cheap-soft: #E3EAE3;
   --color-price-mid-soft: #EFE8DA;
   --color-price-expensive-soft: #F1E3DF;
+  --color-brand-tile: #FFFFFF;
+  --color-brand-tile-line: #EBEBEB;
   --color-map-land: #F2F1ED;
   --color-map-water: #D9DFE2;
   --color-brand: #C25E3A;
@@ -81,6 +83,8 @@
   --color-price-cheap-soft: #243028;
   --color-price-mid-soft: #312B1F;
   --color-price-expensive-soft: #34241F;
+  --color-brand-tile: #FFFFFF;
+  --color-brand-tile-line: #EBEBEB;
   --color-map-land: #1E1E1C;
   --color-map-water: #182025;
   --color-brand: #D9764F;

@@ -25,7 +25,14 @@ final class Store {
     /** Where prices are fetched around; starts at Sydney CBD until the user shares a location. */
     private(set) var center = Store.sydney
     private(set) var placeName = "Sydney CBD"
-    var located: Bool { placeName == "you" }
+    /** Where the user is, once they have shared it. Kept when the map moves elsewhere. */
+    private(set) var userLocation: (lat: Double, lng: Double)?
+    var located: Bool { userLocation != nil }
+
+    /** The part of the map the user can see (not under the sheet); nil until the map reports it. */
+    var viewport: Viewport? { didSet { if viewport != oldValue { deriveInView() } } }
+    /** Ranked stations inside `viewport`, cheapest first: the map's "cheapest" follows what is on screen. */
+    private(set) var inView: [Station] = []
 
     var fuel: FuelType = .u91 {
         didSet { derive(); Task { await loadStations() } }
@@ -41,8 +48,12 @@ final class Store {
     // Derived once per change of stations, filters or fuel. Views read these on every redraw (the
     // map reads `range` for every annotation), and recomputing them each time cost ~110 ms a frame.
 
-    /** Stations after filters, cheapest first; prices older than a day are left out of the ranking. */
+    /** Stations after filters, cheapest first; prices more than a week old are left out (see `outdated`). */
     private(set) var ranked: [Station] = []
+    /** Stations with a price for the fuel that is too old to rank; the map still shows them. */
+    private(set) var outdated: [Station] = []
+    /** How far around `center` stations are fetched; follows the map's zoom. */
+    private(set) var radiusKm = 20
     /** Price tiers across every station nearby for the selected fuel. */
     private(set) var range = PriceRange([])
     /** Mean price nearby for the selected fuel. */
@@ -75,7 +86,7 @@ final class Store {
         loading = true
         defer { loading = false }
         do {
-            async let s = api.stations(fuel: fuel, lat: center.lat, lng: center.lng, radiusKm: 20)
+            async let s = api.stations(fuel: fuel, lat: center.lat, lng: center.lng, radiusKm: radiusKm)
             async let t = api.trends(state: "nsw")
             async let live = api.liveStates()
             (stations, history) = try await (s, t)
@@ -90,18 +101,31 @@ final class Store {
         loading = true
         defer { loading = false }
         do {
-            stations = try await api.stations(fuel: fuel, lat: center.lat, lng: center.lng, radiusKm: 20)
+            stations = try await api.stations(fuel: fuel, lat: center.lat, lng: center.lng, radiusKm: radiusKm)
             failed = false
         } catch {
             failed = true
         }
     }
 
+    private func deriveInView() {
+        guard let viewport else { inView = ranked; return }
+        inView = ranked.filter { viewport.contains(lat: $0.lat, lng: $0.lng) }
+    }
+
+    /** Records the user's position; the map keeps showing it however far they pan away. */
+    func setUserLocation(_ lat: Double, _ lng: Double) {
+        userLocation = (lat, lng)
+    }
+
     private func derive() {
         let prices = stations.compactMap { $0.price(fuel)?.price }
         ranked = matching(filters)
+        let now = Date()
+        outdated = stations.filter { $0.price(fuel) != nil && !$0.hasCurrentPrice(fuel, now: now) }
         range = PriceRange(prices)
         localAverage = prices.isEmpty ? nil : prices.reduce(0, +) / Double(prices.count)
+        deriveInView()
     }
 
     /** Stations passing `f`, cheapest first; the filter form uses it to preview counts. */
@@ -117,23 +141,29 @@ final class Store {
             if !filters.brands.isEmpty, filters.brands.contains(s.family.id) == filters.hideBrands { return false }
             if filters.alsoSells.contains(where: { s.price($0) == nil }) { return false }
             if filters.hideMembersOnly, s.family.group == .members { return false }
-            return p.updatedAt > now.addingTimeInterval(-86_400)
+            return s.hasCurrentPrice(fuel, now: now)
         }
         .map { ($0, $0.price(fuel)?.price ?? .infinity) }
         .sorted { $0.1 < $1.1 }
         .map(\.0)
     }
 
-    /** Where the cheapest price sits in recent history and against the local average, in one line. */
+    /** Where the cheapest price on the map sits in recent history and against the local average, in one line. */
     var verdictLine: String? {
-        guard let cheapest = ranked.first?.price(fuel)?.price else { return nil }
-        let parts = [TrendMath.verdict(trend),
-                     localAverage.map { "\(($0 - cheapest).formatted(.number.precision(.fractionLength(1))))¢ below the local average." }]
+        guard let cheapest = inView.first?.price(fuel)?.price else { return nil }
+        let againstAverage = localAverage.flatMap { avg -> String? in
+            let d = avg - cheapest
+            guard abs(d) >= 0.05 else { return nil }
+            return "\(abs(d).formatted(.number.precision(.fractionLength(1))))¢ \(d > 0 ? "below" : "above") the local average."
+        }
+        let parts = [TrendMath.verdict(trend), againstAverage]
         let text = parts.compactMap { $0 }.joined(separator: " ")
         return text.isEmpty ? nil : text
     }
 
-    func move(to lat: Double, _ lng: Double, name: String) async {
+    /** Moves the fetch area; a new radius (from the map's zoom) is clamped to what the list can use. */
+    func move(to lat: Double, _ lng: Double, name: String, radiusKm: Int? = nil) async {
+        if let radiusKm { self.radiusKm = min(max(radiusKm, 5), 50) }
         center = (lat, lng)
         placeName = name
         await loadStations()
@@ -142,5 +172,14 @@ final class Store {
     func isSaved(_ s: Station) -> Bool { savedIDs.contains(s.id) }
     func toggleSaved(_ s: Station) {
         if let i = savedIDs.firstIndex(of: s.id) { savedIDs.remove(at: i) } else { savedIDs.append(s.id) }
+    }
+}
+
+/** A latitude/longitude box, for what the map shows. */
+struct Viewport: Equatable, Sendable {
+    var minLat: Double, maxLat: Double, minLng: Double, maxLng: Double
+
+    func contains(lat: Double, lng: Double) -> Bool {
+        (minLat...maxLat).contains(lat) && (minLng...maxLng).contains(lng)
     }
 }

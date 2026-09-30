@@ -1,0 +1,220 @@
+<title>ServoMap Accounts Proposal</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;600&display=swap">
+<style>
+/* Layout: one reading column of decisions, with phone sketches set beside the text they illustrate. */
+:root {
+  --bg: #F8F7F4; --surface: #FDFDFB; --wash: #EFEEE9; --line: #D9D6CE;
+  --ink: #2A2927; --ink-2: #5A5750; --ink-3: #6F6B63;
+  --cheap: #3D6848; --cheap-soft: #E3EAE3; --mid: #85601C; --dear: #9A3B2B;
+  --serif: "Shippori Mincho", "Hiragino Mincho ProN", Georgia, serif;
+  --sans: -apple-system, "SF Pro Text", system-ui, "Helvetica Neue", sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --bg: #1A1A18; --surface: #21211F; --wash: #2A2927; --line: #3A3935; --ink: #E6E3DB; --ink-2: #ABA69B; --ink-3: #8F8A7F; --cheap: #93B597; --cheap-soft: #243028; --mid: #D2B271; --dear: #DE9A8A; color-scheme: dark; }
+}
+:root[data-theme="dark"] { --bg: #1A1A18; --surface: #21211F; --wash: #2A2927; --line: #3A3935; --ink: #E6E3DB; --ink-2: #ABA69B; --ink-3: #8F8A7F; --cheap: #93B597; --cheap-soft: #243028; --mid: #D2B271; --dear: #DE9A8A; color-scheme: dark; }
+
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--sans); font-size: 15px; line-height: 1.6; padding-inline: 20px; padding-block: 56px 96px; -webkit-font-smoothing: antialiased; }
+.page { max-width: 1040px; margin-inline: auto; display: grid; gap: 56px; }
+h1, h2, h3 { font-family: var(--serif); font-weight: 600; margin: 0; text-wrap: balance; }
+h1 { font-size: clamp(30px, 5vw, 40px); line-height: 1.2; }
+h2 { font-size: 22px; }
+h3 { font-size: 17px; }
+p { margin: 0; max-width: 40em; color: var(--ink-2); }
+header { display: grid; gap: 12px; }
+.status { font-size: 13px; color: var(--ink-3); }
+section { display: grid; gap: 20px; border-top: 1px solid var(--line); padding-top: 28px; }
+.split { display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 40px; align-items: start; }
+@media (max-width: 760px) { .split { grid-template-columns: minmax(0, 1fr); } }
+.text { display: grid; gap: 14px; min-width: 0; }
+ul, ol { margin: 0; padding-left: 1.2em; display: grid; gap: 6px; color: var(--ink-2); max-width: 42em; }
+b { color: var(--ink); font-weight: 600; }
+code { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 13px; }
+
+/* Options table */
+.table-wrap { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; min-width: 640px; font-size: 14px; }
+th, td { text-align: left; vertical-align: top; padding: 10px 12px; border-bottom: 1px solid var(--line); }
+th { font-weight: 600; color: var(--ink-3); font-size: 13px; }
+tr.pick td { background: var(--cheap-soft); }
+tr.pick td:first-child { font-weight: 600; color: var(--cheap); }
+.yes { color: var(--cheap); } .no { color: var(--dear); } .part { color: var(--mid); }
+
+/* Phone sketches */
+.phone { width: 100%; max-width: 280px; aspect-ratio: 9 / 19; border: 1px solid var(--line); border-radius: 36px; background: var(--wash); overflow: hidden; position: relative; justify-self: center; }
+.phone .map { position: absolute; inset: 0; background:
+  radial-gradient(circle at 30% 20%, var(--cheap-soft) 0 18%, transparent 19%),
+  radial-gradient(circle at 75% 35%, var(--wash) 0 22%, transparent 23%),
+  var(--bg); }
+.chip { position: absolute; top: 44px; display: flex; gap: 6px; align-items: center; }
+.chip span { background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 4px 10px; font-size: 11px; }
+.avatar { width: 30px; height: 30px; border-radius: 50%; background: var(--ink); color: var(--surface); display: grid; place-items: center; font-size: 12px; font-weight: 700; }
+.sheet { position: absolute; left: 6px; right: 6px; bottom: 6px; background: var(--surface); border-radius: 28px; padding: 14px 14px 10px; display: grid; gap: 8px; }
+.sheet .grab { width: 36px; height: 4px; border-radius: 2px; background: var(--line); justify-self: center; }
+.tabs { display: flex; justify-content: space-around; font-size: 10px; color: var(--ink-3); border-top: 1px solid var(--line); padding-top: 8px; }
+.tabs .on { color: var(--ink); font-weight: 700; }
+.row { display: flex; justify-content: space-between; align-items: baseline; font-size: 12px; }
+.price { font-family: var(--serif); font-size: 18px; font-variant-numeric: tabular-nums; }
+.big { font-family: var(--serif); font-size: 30px; line-height: 1; font-variant-numeric: tabular-nums; }
+.small { font-size: 10px; color: var(--ink-3); }
+.cheap { color: var(--cheap); }
+.screen { position: absolute; inset: 0; background: var(--bg); padding: 44px 14px 14px; display: grid; gap: 10px; align-content: start; }
+.seg { display: grid; grid-template-columns: repeat(4, 1fr); background: var(--wash); border-radius: 999px; padding: 3px; font-size: 10px; text-align: center; }
+.seg span { padding: 4px 0; border-radius: 999px; color: var(--ink-2); }
+.seg .on { background: var(--surface); color: var(--ink); font-weight: 600; }
+.card { background: var(--surface); border-radius: 16px; padding: 12px; display: grid; gap: 8px; }
+.field { border: 1px solid var(--line); border-radius: 10px; padding: 7px 10px; font-size: 12px; display: flex; justify-content: space-between; }
+.field .hint { color: var(--ink-3); }
+.menu { border: 1px solid var(--line); border-radius: 10px; font-size: 11px; overflow: hidden; }
+.menu div { padding: 6px 10px; border-bottom: 1px solid var(--line); }
+.menu div:last-child { border-bottom: 0; }
+.menu .on { background: var(--wash); font-weight: 600; }
+.car { width: 100%; height: auto; display: block; }
+.lock { position: absolute; inset: 0; background: linear-gradient(180deg, var(--ink-2), var(--ink)); padding: 60px 12px 12px; display: grid; gap: 8px; align-content: start; }
+.clock { color: var(--surface); font-size: 44px; font-weight: 300; text-align: center; font-variant-numeric: tabular-nums; }
+.note { background: var(--surface); border-radius: 18px; padding: 10px 12px; display: grid; gap: 2px; font-size: 11.5px; line-height: 1.4; }
+.note .head { display: flex; justify-content: space-between; font-size: 10px; color: var(--ink-3); }
+.note b { font-size: 12px; }
+
+.phases { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 16px; }
+.phase { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px; display: grid; gap: 8px; align-content: start; }
+.phase .when { font-size: 13px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.phase p { font-size: 14px; }
+.ask { display: grid; gap: 12px; }
+.ask li { max-width: 46em; }
+</style>
+
+<main class="page">
+  <header>
+    <p class="status">Proposal for decision · 30 September 2026 · recorded as decision 0004 (proposed)</p>
+    <h1>You, your car, and alerts that know you</h1>
+    <p>Saved stations and the fill-up log move behind an avatar. You can sign in with Apple or Google so they follow you between devices. Your car is picked from a shared catalogue that fills in the tank size, and notifications are written about your stations, your car and your habits. Four decisions below need your call before anything is built.</p>
+  </header>
+
+  <section aria-labelledby="h-nav">
+    <div class="split">
+      <div class="text">
+        <h2 id="h-nav">Navigation: three tabs and an avatar</h2>
+        <p>The sheet keeps the three things everyone uses: <b>Nearby</b>, <b>Trends</b> and <b>Search</b>. Everything that is yours moves to an avatar in the top-right of the map, as the App Store and Apple Maps do.</p>
+        <ul>
+          <li>The avatar shows your initials, or a fuel-pump glyph before you sign in. A dot on it means an alert is waiting.</li>
+          <li>Tapping it opens <b>You</b>, a full-height sheet with four pages under one segmented bar: <b>Saved · Log · Car · Alerts</b>.</li>
+          <li>Signing in is optional. Without it everything works and stays on this iPhone. Signing in later merges what is on the phone into your account.</li>
+        </ul>
+      </div>
+      <div class="phone" role="img" aria-label="Sketch: map with an avatar button top right and a sheet with three tabs">
+        <div class="map"></div>
+        <div class="chip" style="left:12px"><span><b>U91</b></span><span>E10</span><span>Diesel</span></div>
+        <div class="chip" style="right:12px"><div class="avatar">HC</div></div>
+        <div class="sheet">
+          <div class="grab"></div>
+          <div class="small cheap"><b>Cheapest U91 on the map</b></div>
+          <div class="row"><span class="big">223.7</span><span class="small">Greenacre</span></div>
+          <div class="row"><span>1 · TEMCO Petroleum</span><span class="price">223.7</span></div>
+          <div class="row"><span>2 · Metro Croydon</span><span class="price">223.9</span></div>
+          <div class="tabs"><span class="on">Nearby</span><span>Trends</span><span>Search</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="h-sync">
+    <h2 id="h-sync">Sign-in and sync</h2>
+    <p>CloudKit stores data against the iPhone's iCloud account. A Google sign-in cannot open that data, and the website cannot read it without a separate Apple sign-in. So "CloudKit" and "sign in with Google" pull in different directions. The three ways to square them:</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Option</th><th>Apple sign-in</th><th>Google sign-in</th><th>Syncs to the website</th><th>Server can send personal alerts</th><th>Cost</th><th>Work</th></tr></thead>
+        <tbody>
+          <tr><td>A. CloudKit only</td><td class="yes">Automatic (iCloud)</td><td class="no">Not possible</td><td class="no">No</td><td class="part">Only by also copying prices into CloudKit</td><td>Free</td><td>2 days</td></tr>
+          <tr class="pick"><td>B. ServoMap accounts (recommended)</td><td class="yes">Yes</td><td class="yes">Yes</td><td class="yes">Yes</td><td class="yes">Yes, it already knows your stations</td><td>Free tier (Cloudflare D1)</td><td>4–5 days</td></tr>
+          <tr><td>C. CloudKit + sign-in for alerts</td><td class="yes">Yes</td><td class="part">For alerts only</td><td class="no">No</td><td class="yes">Yes</td><td>Free</td><td>5–6 days, two stores to keep in step</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p><b>Recommendation: B.</b> The Worker gains <code>/api/v1/me/*</code> routes. It verifies the Apple or Google identity token itself and keeps your saved stations, fill-ups, car and alert settings in Cloudflare D1. The same account then works on the website, and the alert job already knows whose stations to watch. App Store rule 4.8 is met because Sign in with Apple is offered next to Google. Sign-in is optional, and an account can be deleted from the Alerts page, which rule 5.1.1 requires.</p>
+  </section>
+
+  <section aria-labelledby="h-car">
+    <div class="split">
+      <div class="text">
+        <h2 id="h-car">My car: pick it, don't type it</h2>
+        <p>A shared vehicle catalogue, the same for every user, served by the Worker at <code>/api/v1/vehicles</code> so the website can use it too.</p>
+        <ul>
+          <li><b>Search first</b>: type "corolla" or "ranger" and pick from make · model · years. Or step through Make → Model → Year → Variant menus.</li>
+          <li>The variant fills in the <b>tank size</b> and the <b>fuel it takes</b>. Both stay editable; an edited value shows "your value" with a link back to the catalogue figure.</li>
+          <li>A <b>side view</b> of the car sits at the top of the page. It is one of about eight body shapes (hatch, sedan, wagon, SUV, ute, van, coupe, people mover) that we draw, tinted in the colour you pick. Manufacturer photos are copyrighted and vary in style, so they are not used.</li>
+          <li>The car drives the app: the default fuel, the cost of a full tank on every station page, and the fill-up reminder.</li>
+        </ul>
+        <p><b>Catalogue data.</b> Australia's Green Vehicle Guide lists makes, models, variants and fuel types, but not tank size. Tank sizes would come from manufacturer spec sheets for the 150 or so best-selling models, each with its source recorded. Unlisted cars can still be entered by hand. The data source is decision 2 below.</p>
+      </div>
+      <div class="phone" role="img" aria-label="Sketch: the Car page with a side view, a model search and a tank size field">
+        <div class="screen">
+          <h3 style="font-size:22px">You</h3>
+          <div class="seg"><span>Saved</span><span>Log</span><span class="on">Car</span><span>Alerts</span></div>
+          <div class="card">
+            <svg class="car" viewBox="0 0 240 90" aria-hidden="true">
+              <path d="M18 62 Q16 50 30 47 L62 42 Q86 24 118 22 L160 22 Q180 23 196 40 L218 46 Q228 49 228 60 L228 66 L18 66 Z" fill="var(--ink-2)"/>
+              <path d="M78 42 Q96 29 118 28 L140 28 L144 42 Z M150 28 L162 28 Q176 30 186 42 L152 42 Z" fill="var(--wash)"/>
+              <circle cx="62" cy="66" r="14" fill="var(--ink)"/><circle cx="62" cy="66" r="6" fill="var(--line)"/>
+              <circle cx="184" cy="66" r="14" fill="var(--ink)"/><circle cx="184" cy="66" r="6" fill="var(--line)"/>
+            </svg>
+            <div class="field"><span>Toyota Corolla 2022 · Ascent Sport</span><span class="hint">▾</span></div>
+            <div class="menu"><div>Corolla 2019–2022 · Hatch</div><div class="on">Corolla 2022– · Ascent Sport</div><div>Corolla Cross 2022–</div></div>
+            <div class="field"><span>Tank</span><span><b>50 L</b> <span class="hint">catalogue</span></span></div>
+            <div class="field"><span>Fuel</span><span><b>U91</b></span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="h-alerts">
+    <div class="split">
+      <div class="text">
+        <h2 id="h-alerts">Alerts written for you</h2>
+        <p>Each alert names your station, your car or your habit, and says what to do. At most one a day, never during quiet hours (10 pm to 7 am by default), and each kind has its own switch.</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Alert</th><th>Fires when</th><th>Sent from</th></tr></thead>
+            <tbody>
+              <tr><td>Price drop</td><td>A saved station drops by 3¢ or more</td><td>Server, after each 15-minute ingest</td></tr>
+              <tr><td>Fill up soon</td><td>You usually fill every N days and it is day N − 1; names the cheapest station near home</td><td>iPhone, from your log</td></tr>
+              <tr><td>Cycle low</td><td>The average near home is in the bottom 15% of its 60-day range</td><td>Server, daily</td></tr>
+              <tr><td>Monthly summary</td><td>First day of the month: spent, saved, and litres</td><td>iPhone</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Price-drop and cycle alerts need the server to know your saved stations and home area, which is why they depend on option B or C. The other two work with no account.</p>
+      </div>
+      <div class="phone" role="img" aria-label="Sketch: lock screen with three ServoMap notifications">
+        <div class="lock">
+          <div class="clock">7:42</div>
+          <div class="note"><div class="head"><span>ServoMap</span><span>now</span></div><b>BP Bondi dropped 6.0¢</b><span>U91 is 235.9 — a full tank of your Corolla is $3.00 less than yesterday.</span></div>
+          <div class="note"><div class="head"><span>ServoMap</span><span>2h ago</span></div><b>Fill up by Friday</b><span>You usually fill every 11 days. Metro Croydon is cheapest near home at 223.9.</span></div>
+          <div class="note"><div class="head"><span>ServoMap</span><span>yesterday</span></div><b>Prices near home are at a low</b><span>U91 averages 224.1 around Bondi, near the bottom of the cycle.</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="h-plan">
+    <h2 id="h-plan">Build order</h2>
+    <div class="phases">
+      <div class="phase"><span class="when">Phase 1 · about 1 day</span><h3>The You sheet</h3><p>Avatar, three tabs, and Saved · Log · Car · Alerts as pages. Log gets Overview and Fill-ups sub-pages. Everything still on the phone.</p></div>
+      <div class="phase"><span class="when">Phase 2 · 2–3 days</span><h3>Car catalogue</h3><p>Vehicle data with sources, <code>/api/v1/vehicles</code> in the Worker and OpenAPI, search and menus, body-shape drawings, tank auto-fill with override.</p></div>
+      <div class="phase"><span class="when">Phase 3 · 4–5 days</span><h3>Accounts and sync</h3><p>Sign in with Apple and Google, D1 schema, <code>/api/v1/me</code> routes, merge on first sign-in, account deletion. Website sign-in follows.</p></div>
+      <div class="phase"><span class="when">Phase 4 · 2 days</span><h3>Alerts</h3><p>Device alerts first. Then the server job after ingest sends APNs pushes with the team key already in 1Password.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="h-ask">
+    <h2 id="h-ask">Decisions needed</h2>
+    <ol class="ask">
+      <li><b>Sync:</b> B (ServoMap accounts with Apple and Google), A (CloudKit only, no Google), or C (both)?</li>
+      <li><b>Car data:</b> curate tank sizes for about 150 models from manufacturer spec sheets, or buy a licensed vehicle dataset?</li>
+      <li><b>Car picture:</b> our body-shape drawings tinted by colour, or no picture?</li>
+      <li><b>Alerts:</b> which of the four to ship first?</li>
+    </ol>
+  </section>
+</main>

@@ -43,7 +43,10 @@ export function rankStations(
   return { fresh, old };
 }
 
-/** The cheapest station with a current price, falling back to any priced one. */
+/**
+ * The cheapest station with a current price, falling back to any priced one. Equal prices go to
+ * the nearer station, as in rankStations, so the verdict names the ledger's first row.
+ */
 export function cheapestStation(
   stations: readonly StationWithDistance[],
   fuel: FuelType,
@@ -55,14 +58,30 @@ export function cheapestStation(
     const price = priceOf(station, fuel);
     if (!Number.isFinite(price)) continue;
     const isFresh = priceAgeHours(station, fuel, now) <= OLD_PRICE_HOURS;
+    const bestPrice = best === null ? Infinity : priceOf(best, fuel);
     const better =
       best === null ||
       (isFresh && !bestIsFresh) ||
-      (isFresh === bestIsFresh && price < priceOf(best, fuel));
+      (isFresh === bestIsFresh &&
+        (price < bestPrice ||
+          (price === bestPrice && (station.distance ?? Infinity) < (best.distance ?? Infinity))));
     if (better) {
       best = station;
       bestIsFresh = isFresh;
     }
   }
   return best;
+}
+
+/**
+ * The id of the station the map tags "Cheapest" and the ledger tints: the cheapest one with a
+ * current price. Null when only old prices remain, since those are not ranked.
+ */
+export function cheapestRankedId(
+  stations: readonly StationWithDistance[],
+  fuel: FuelType,
+  now: number,
+): string | null {
+  const best = cheapestStation(stations, fuel, now);
+  return best && priceAgeHours(best, fuel, now) <= OLD_PRICE_HOURS ? best.id : null;
 }

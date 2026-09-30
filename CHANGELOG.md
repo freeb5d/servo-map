@@ -1,5 +1,31 @@
 # Changelog
 
+## [0.3.0](https://github.com/Misoto22/servo-map/compare/v0.2.2...v0.3.0) (2026-09-30)
+
+
+### Features
+
+* **ios:** audit fixes, brand logos, clearer cheapest station and finer trends ([#30](https://github.com/Misoto22/servo-map/issues/30)) ([5b0c009](https://github.com/Misoto22/servo-map/commit/5b0c009562dd238ced413ac68f7aa8771c605dbc))
+
+## [0.2.2](https://github.com/Misoto22/servo-map/compare/v0.2.1...v0.2.2) (2026-09-30)
+
+
+### Refactoring
+
+* **clients:** drop client-side place-name casing ([#32](https://github.com/Misoto22/servo-map/issues/32)) ([5acddad](https://github.com/Misoto22/servo-map/commit/5acddadb2a943ff8546edddca62c5ee8d36150f3))
+
+## [0.2.1](https://github.com/Misoto22/servo-map/compare/v0.2.0...v0.2.1) (2026-09-30)
+
+
+### Bug Fixes
+
+* **worker:** title-case place names at ingest ([#31](https://github.com/Misoto22/servo-map/issues/31)) ([5ef7b3f](https://github.com/Misoto22/servo-map/commit/5ef7b3fbefbd54f9c5cb50afd8bd84a95ae8dce2))
+
+
+### Performance
+
+* **ios:** make the map and trends redraw smoothly ([#28](https://github.com/Misoto22/servo-map/issues/28)) ([f844d4c](https://github.com/Misoto22/servo-map/commit/f844d4cf712568b40f09ff180712ef8b543fb248))
+
 ## [0.2.0](https://github.com/Misoto22/servo-map/compare/v0.1.0...v0.2.0) (2026-09-29)
 
 

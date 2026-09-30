@@ -2,15 +2,19 @@ import type { CircleLayer, SymbolLayer } from "react-map-gl";
 import type { ExpressionSpecification, Map as MapboxMap } from "mapbox-gl";
 import { color } from "@servo-map/design-tokens";
 import type { Theme } from "@/lib/theme";
+import { brandImage } from "./brandImages";
 import { TAG_IMAGE } from "./tagImages";
 
 // Source and layer ids, kept together so they cannot drift apart.
 export const SOURCE_ID = "stations";
+/** Unclustered source holding only the cheapest station (see splitCheapest). */
+export const CHEAPEST_SOURCE_ID = "cheapest";
 export const CLUSTER_LAYER_ID = "clusters";
 export const CLUSTER_COUNT_LAYER_ID = "cluster-count";
 export const CLUSTER_LABEL_LAYER_ID = "cluster-from";
 export const POINT_LAYER_ID = "unclustered-point";
 export const ACTIVE_LAYER_ID = "active-point";
+export const CHEAPEST_LAYER_ID = "cheapest-point";
 
 /** Cluster property holding the cheapest price inside it; give it to the source's clusterProperties. */
 export const CLUSTER_PROPERTIES = { minPrice: ["min", ["get", "price"]] } as const;
@@ -29,18 +33,8 @@ const TIER_IMAGE: ExpressionSpecification = [
   TAG_IMAGE.fair,
 ];
 
-/** "SEAL  225.9", the seal small and in secondary ink so the price leads. */
-function tagText(sealColor: string): ExpressionSpecification {
-  return [
-    "format",
-    ["get", "seal"],
-    { "font-scale": 0.72, "text-color": sealColor },
-    "  ",
-    {},
-    ["get", "label"],
-    {},
-  ] as unknown as ExpressionSpecification;
-}
+/** Brand tile, then the price: "[logo] 225.9". */
+const TAG_TEXT = ["format", brandImage("sm"), {}, " ", {}, ["get", "label"], {}] as unknown as ExpressionSpecification;
 
 export function clusterLayer(theme: Theme): CircleLayer {
   return {
@@ -102,7 +96,7 @@ export function clusterLabelLayer(theme: Theme): SymbolLayer {
 }
 
 /**
- * Price tag for a single station: paper label, seal, price and a tier square. Layout properties
+ * Price tag for a single station: paper label, brand tile, price and a tier square. Layout properties
  * cannot read feature-state, so the selected station is excluded here and drawn by activeLayer.
  */
 export function pointLayer(theme: Theme, activeId: string | null): SymbolLayer {
@@ -116,7 +110,7 @@ export function pointLayer(theme: Theme, activeId: string | null): SymbolLayer {
       "icon-text-fit": "both",
       "icon-text-fit-padding": [1, 3, 1, 3],
       "icon-allow-overlap": false,
-      "text-field": tagText(color.ink2[theme]),
+      "text-field": TAG_TEXT,
       "text-font": GLYPHS,
       "text-size": 12,
       "text-allow-overlap": false,
@@ -139,9 +133,47 @@ export function activeLayer(theme: Theme, activeId: string | null): SymbolLayer 
       "icon-text-fit": "both",
       "icon-text-fit-padding": [1, 3, 1, 3],
       "icon-allow-overlap": true,
-      "text-field": tagText(color.onAccent[theme]),
+      "text-field": TAG_TEXT,
       "text-font": GLYPHS,
       "text-size": 12,
+      "text-allow-overlap": true,
+    },
+    paint: { "text-color": color.onAccent[theme] },
+  };
+}
+
+/**
+ * The cheapest station's tag (decision 0003): larger, cheap tier fill with a halo, "Cheapest"
+ * over the brand tile and price. Always drawn, and placed first so neighbouring tags give way.
+ * When it is also the selected station it takes the selected fill and keeps its halo.
+ */
+export function cheapestLayer(theme: Theme, activeId: string | null): SymbolLayer {
+  return {
+    id: CHEAPEST_LAYER_ID,
+    type: "symbol",
+    source: CHEAPEST_SOURCE_ID,
+    layout: {
+      "icon-image": ["case", ["==", ["get", "id"], activeId ?? ""], TAG_IMAGE.cheapestActive, TAG_IMAGE.cheapest],
+      "icon-text-fit": "both",
+      "icon-text-fit-padding": [3, 6, 3, 4],
+      "icon-allow-overlap": true,
+      "text-field": [
+        "format",
+        "Cheapest",
+        { "font-scale": 0.72 },
+        "\n",
+        {},
+        brandImage("lg"),
+        {},
+        " ",
+        {},
+        ["get", "label"],
+        { "font-scale": 1.3 },
+      ] as unknown as ExpressionSpecification,
+      "text-font": GLYPHS,
+      "text-size": 13,
+      "text-justify": "left",
+      "text-line-height": 1.15,
       "text-allow-overlap": true,
     },
     paint: { "text-color": color.onAccent[theme] },

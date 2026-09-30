@@ -50,7 +50,7 @@ struct SavedScreen: View {
                     Text("\(saved.count) saved").font(ServoMapFont.small).foregroundStyle(ServoMapColor.ink3)
                     HStack(alignment: .firstTextBaseline, spacing: 8) {
                         PriceText(cents: p.price, font: ServoMapFont.display(.title))
-                        BrandSeal(family: best.family)
+                        BrandSeal(family: best.family, size: 22)
                         Text(best.suburb).foregroundStyle(ServoMapColor.ink2)
                     }
                     Text("is the cheapest of your stations for \(store.fuel.rawValue) right now.")
@@ -79,7 +79,7 @@ struct SavedScreen: View {
                     HStack {
                         StationRow(station: station, fuel: store.fuel, range: store.range)
                         Button { store.toggleSaved(station) } label: {
-                            Image(systemName: "bookmark")
+                            Image(systemName: "bookmark").actionFont()
                         }
                         .buttonStyle(.glass)
                         .accessibilityLabel("Save \(station.name)")

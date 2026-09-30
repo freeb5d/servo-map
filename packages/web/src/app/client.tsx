@@ -8,6 +8,7 @@ import { MapView } from "@/components/map/MapView";
 import { useMapViewport } from "@/components/map/useMapViewport";
 import { Ledger } from "@/components/ledger/Ledger";
 import { useNow } from "@/components/ledger/useNow";
+import { cheapestRankedId } from "@/components/ledger/rank";
 import { centroid, dominantState } from "@/components/ledger/stationMeta";
 import { FilterPanel } from "@/components/filters/FilterPanel";
 import { QuickFilters } from "@/components/filters/QuickFilters";
@@ -85,6 +86,7 @@ export default function HomeMap() {
     () => applyFilters(loaded, filters, fuel, origin, now),
     [loaded, filters, fuel, origin, now],
   );
+  const cheapestId = useMemo(() => cheapestRankedId(stations, fuel, now), [stations, fuel, now]);
   const filterCount = activeFilterCount(filters);
 
   const { metadata } = useMetadata();
@@ -246,6 +248,7 @@ export default function HomeMap() {
               stations={stations}
               selectedFuel={fuel}
               activeStationId={activeStation?.id ?? null}
+              cheapestStationId={cheapestId}
               userLocation={userLocation}
               searchQuery={filters.q}
               onStationClick={setActive}

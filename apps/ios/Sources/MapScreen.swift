@@ -34,6 +34,18 @@ struct MapScreen: View {
         MapReader { reader in
         Map(position: $camera, selection: $selected) {
             if store.located { UserAnnotation() }
+            // Stations whose price is more than a week old: hollow, so they read as "a station is here"
+            // without competing with current prices. Still selectable.
+            ForEach(store.outdated.filter { $0 != selected }) { station in
+                Annotation(station.name, coordinate: station.coordinate) {
+                    Circle()
+                        .stroke(ServoMapColor.ink3, lineWidth: 1.5)
+                        .background(Circle().fill(ServoMapColor.surface))
+                        .frame(width: 9, height: 9)
+                }
+                .annotationTitles(.hidden)
+                .tag(station)
+            }
             // Tags go to the cheapest stations that have room; the rest are dots, so the map reads at a glance.
             // Dots are added first and tags after, so a tag is never covered by a neighbour's dot.
             ForEach(store.ranked.filter { !showsTag($0) && !placement.hiddenDots.contains($0.id) }) { station in
@@ -48,10 +60,23 @@ struct MapScreen: View {
                     .tag(station)
                 }
             }
+            // A picked station that is not ranked (outdated, or filtered out) still gets its tag.
+            if let selected, !store.ranked.contains(selected), let p = selected.price(store.fuel) {
+                Annotation(selected.name, coordinate: selected.coordinate, anchor: .bottom) {
+                    PriceTag(family: selected.family, cents: p.price, tier: store.range.tier(p.price), active: true)
+                }
+                .annotationTitles(.hidden)
+                .tag(selected)
+            }
+            // Drawn last, so the cheapest tag sits on top of its neighbours.
             ForEach(store.ranked.filter(showsTag).reversed()) { station in
                 if let p = station.price(store.fuel) {
                     Annotation(station.name, coordinate: station.coordinate, anchor: .bottom) {
-                        PriceTag(family: station.family, cents: p.price, tier: store.range.tier(p.price), active: selected == station)
+                        if station == store.inView.first {
+                            CheapestTag(family: station.family, cents: p.price, active: selected == station)
+                        } else {
+                            PriceTag(family: station.family, cents: p.price, tier: store.range.tier(p.price), active: selected == station)
+                        }
                     }
                     .annotationTitles(.hidden)
                     .tag(station)
@@ -62,12 +87,15 @@ struct MapScreen: View {
         .onMapCameraChange(frequency: .onEnd) { context in
             proxy = reader
             lastRegion = context.region
+            store.viewport = viewport(reader)
             placeTags()
             Task { await followPan(to: context.region) }
         }
         .onGeometryChange(for: CGSize.self) { $0.size } action: { mapSize = $0 }
         }
         .safeAreaInset(edge: .top) { topControls }
+        // A new fuel or filter re-colours and re-ranks every dot; ease it like the design's list rows.
+        .animation(ServoMapMotion.standard, value: store.fuel)
         .onChange(of: store.stations) {
             if reframeOnLoad { reframeOnLoad = false; frameCheapest() }
             placeTags()
@@ -100,7 +128,12 @@ struct MapScreen: View {
                 }
             }
             .onChange(of: tab) { detent = tab == "map" ? .medium : .large }
-            .onChange(of: selected) { if selected != nil { tab = "map" } }
+            // Picking a station on the map shows its page: back to Nearby, and up from the bar.
+            .onChange(of: selected) {
+                guard selected != nil else { return }
+                tab = "map"
+                if detent == collapsed { detent = .medium }
+            }
                 .presentationDetents([collapsed, .medium, .large], selection: $detent)
                 .presentationBackgroundInteraction(.enabled(upThrough: .medium))
                 .interactiveDismissDisabled()
@@ -124,12 +157,36 @@ struct MapScreen: View {
         }
     }
 
-    private func showsTag(_ station: Station) -> Bool { placement.tagged.contains(station.id) || selected == station }
+    /** The cheapest station on screen always has its tag, whatever the placement pass chose. */
+    private func showsTag(_ station: Station) -> Bool {
+        placement.tagged.contains(station.id) || selected == station || station == store.inView.first
+    }
 
+    /**
+     * Centres the map on the user at street level and keeps their dot there whatever the map does
+     * next. Prices are fetched around them; the camera stays on them rather than reframing.
+     */
     private func locate() async {
         guard let here = await location.locate() else { return }
-        reframeOnLoad = true
-        await store.move(to: here.latitude, here.longitude, name: "you")
+        store.setUserLocation(here.latitude, here.longitude)
+        appMoved = true
+        withAnimation(.smooth(duration: 0.6)) {
+            camera = .region(MKCoordinateRegion(
+                center: CLLocationCoordinate2D(latitude: here.latitude - 0.012, longitude: here.longitude),
+                latitudinalMeters: 6_000, longitudinalMeters: 6_000))
+        }
+        await store.move(to: here.latitude, here.longitude, name: "you", radiusKm: 10)
+    }
+
+    /** The coordinates of the part of the map not under the sheet or the top controls. */
+    private func viewport(_ reader: MapProxy) -> Viewport? {
+        // Inset by half a cheapest-tag width, so the station it names has room for its whole tag.
+        let r = visibleMap.insetBy(dx: 56, dy: 0).offsetBy(dx: 0, dy: 30).insetBy(dx: 0, dy: 15)
+        guard r.width > 0, r.height > 0,
+              let a = reader.convert(CGPoint(x: r.minX, y: r.minY), from: .local),
+              let b = reader.convert(CGPoint(x: r.maxX, y: r.maxY), from: .local) else { return nil }
+        return Viewport(minLat: min(a.latitude, b.latitude), maxLat: max(a.latitude, b.latitude),
+                        minLng: min(a.longitude, b.longitude), maxLng: max(a.longitude, b.longitude))
     }
 
     /** The part of the map the sheet leaves uncovered at its current height, where tags are worth drawing. */
@@ -140,9 +197,12 @@ struct MapScreen: View {
 
     private func placeTags() {
         guard let proxy else { return }
-        placement = TagPlacement.choose(store.ranked, id: \.id, point: {
+        let next = TagPlacement.choose(store.ranked, id: \.id, point: {
             proxy.convert(CLLocationCoordinate2D(latitude: $0.lat, longitude: $0.lng), to: .local)
         }, visible: visibleMap)
+        guard next != placement else { return }
+        // Tags that change hands fade over the design system's 200 ms instead of popping.
+        withAnimation(ServoMapMotion.standard) { placement = next }
     }
 
     /**
@@ -153,8 +213,11 @@ struct MapScreen: View {
         if appMoved { appMoved = false; return }
         let here = CLLocation(latitude: store.center.lat, longitude: store.center.lng)
         let there = CLLocation(latitude: region.center.latitude, longitude: region.center.longitude)
-        guard here.distance(from: there) > 2_000 else { return }
-        await store.move(to: region.center.latitude, region.center.longitude, name: "this area")
+        // Fetch as far as the visible map reaches, so zooming out shows the stations it uncovers.
+        let reach = Int((max(region.span.latitudeDelta, region.span.longitudeDelta) * 111 / 2).rounded(.up))
+        let zoomedOut = reach > Int(Double(store.radiusKm) * 1.4)
+        guard here.distance(from: there) > 2_000 || zoomedOut else { return }
+        await store.move(to: region.center.latitude, region.center.longitude, name: "this area", radiusKm: reach)
     }
 
     /** Brings a picked station into the visible upper half of the map, keeping the zoom. */
@@ -201,12 +264,14 @@ struct MapScreen: View {
             .glassEffect(.regular, in: .capsule)
             Button { showFilters = true } label: {
                 Image(systemName: store.filters.activeCount > 0 ? "line.3.horizontal.decrease.circle.fill" : "line.3.horizontal.decrease")
+                    .mapControl()
             }
             .buttonStyle(.glass)
             .accessibilityLabel(store.filters.activeCount > 0 ? "Filters, \(store.filters.activeCount) on" : "Filters")
             Button { Task { await locate() } } label: {
                 Image(systemName: location.state == .denied ? "location.slash" : store.located ? "location.fill" : "location")
                     .symbolEffect(.pulse, isActive: location.state == .locating)
+                    .mapControl()
             }
             .buttonStyle(.glass)
             .accessibilityLabel(store.located ? "Showing prices near you" : "Use my location")
@@ -226,11 +291,8 @@ struct PriceTag: View {
 
     var body: some View {
         HStack(spacing: 0) {
-            Text(family.seal)
-                .font(ServoMapFont.body(.caption2, weight: 700, size: 8))
-                .padding(.horizontal, 3)
-                .frame(maxHeight: .infinity)
-                .background(active ? ServoMapColor.ink : ServoMapColor.bg)
+            BrandSeal(family: family, size: 16)
+                .padding(.leading, 2)
             HStack(spacing: 3) {
                 Text(cents, format: .number.precision(.fractionLength(1)))
                     .font(ServoMapFont.display(.caption, size: 12)).monospacedDigit()
@@ -246,6 +308,49 @@ struct PriceTag: View {
         .background(active ? ServoMapColor.ink : ServoMapColor.surface)
         .clipShape(RoundedRectangle(cornerRadius: ServoMapRadius.r1))
         .overlay(RoundedRectangle(cornerRadius: ServoMapRadius.r1).strokeBorder(active ? ServoMapColor.ink : ServoMapColor.line))
+        // Selection inverts the tag; the colour change eases rather than snapping.
+        .animation(ServoMapMotion.standard, value: active)
+        .accessibilityAddTraits(active ? .isSelected : [])
+    }
+}
+
+/**
+ * The cheapest station's tag: larger, filled in the cheap tier colour and labelled, so the answer
+ * to "where is cheapest" is the first thing on the map. A soft halo breathes (opacity only).
+ */
+struct CheapestTag: View {
+    let family: BrandFamily
+    let cents: Double
+    let active: Bool
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    var body: some View {
+        HStack(spacing: 6) {
+            BrandSeal(family: family, size: 22)
+            VStack(alignment: .leading, spacing: 0) {
+                Text("Cheapest").font(ServoMapFont.body(.caption2, weight: 700, size: 9))
+                Text(cents, format: .number.precision(.fractionLength(1)))
+                    .font(ServoMapFont.display(.body, size: 17)).monospacedDigit()
+            }
+        }
+        .padding(.leading, 4)
+        .padding(.trailing, 8)
+        .padding(.vertical, 4)
+        .fixedSize()
+        .dynamicTypeSize(...DynamicTypeSize.large)
+        .foregroundStyle(ServoMapColor.surface)
+        .background(active ? ServoMapColor.ink : ServoMapColor.priceCheap, in: RoundedRectangle(cornerRadius: ServoMapRadius.r3))
+        .background {
+            RoundedRectangle(cornerRadius: ServoMapRadius.r3 + 4)
+                .fill(ServoMapColor.priceCheap)
+                .padding(-4)
+                .phaseAnimator(reduceMotion ? [0.18] : [0.08, 0.3]) { halo, opacity in
+                    halo.opacity(opacity)
+                } animation: { _ in .easeInOut(duration: 1.4) }
+        }
+        .animation(ServoMapMotion.standard, value: active)
+        .accessibilityLabel("Cheapest, \(family.name), \(cents.formatted(.number.precision(.fractionLength(1)))) cents")
+        .accessibilityAddTraits(active ? .isSelected : [])
     }
 }
 
@@ -271,5 +376,12 @@ private struct TabBarHider: UIViewControllerRepresentable {
     func updateUIViewController(_ controller: UIViewController, context: Context) {
         // The controller joins its tab bar controller's hierarchy only after this pass.
         DispatchQueue.main.async { controller.tabBarController?.tabBar.isHidden = hidden }
+    }
+}
+
+private extension View {
+    /** Map control glyphs: semibold at body size in a 44 pt square, so they read over the map. */
+    func mapControl() -> some View {
+        font(ServoMapFont.body(.body, weight: 600)).frame(width: 30, height: 30)
     }
 }

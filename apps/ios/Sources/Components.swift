@@ -1,22 +1,77 @@
 import SwiftUI
+import UIKit
 
-/** Brand seal (判子): the family monogram in a hairline box. Dashed for members-only brands. */
+/**
+ * Brand mark (decision 0003): the brand's own logo on a white tile where the app bundles one, and
+ * otherwise its monogram on a tile in the brand colour with an optional second-colour stripe.
+ */
 struct BrandSeal: View {
     let family: BrandFamily
+    var size: CGFloat = 30
+
     var body: some View {
-        Text(family.seal)
-            .font(ServoMapFont.body(.caption2, weight: 700, size: 9))
-            .tracking(0.4)
-            .foregroundStyle(ServoMapColor.ink)
-            .frame(minWidth: 28, minHeight: 18)
+        Group {
+            if let logo = UIImage(named: "brand-\(family.id)") {
+                logoTile(logo)
+            } else {
+                monogram
+            }
+        }
+        .accessibilityLabel(family.name)
+        // A mark, not reading text: it keeps its size at every Dynamic Type setting.
+        .dynamicTypeSize(...DynamicTypeSize.large)
+    }
+
+    private var shape: RoundedRectangle { RoundedRectangle(cornerRadius: size * 0.24, style: .continuous) }
+
+    /** The brand's own logo (generated into Resources/Assets.xcassets/BrandLogos from design/brand-logos) on a white tile, as on a price sign. */
+    private func logoTile(_ logo: UIImage) -> some View {
+        Image(uiImage: logo)
+            .resizable()
+            .interpolation(.high)
+            .scaledToFit()
+            .padding(size * 0.1)
+            .frame(width: size, height: size)
+            .background(ServoMapColor.brandTile, in: shape)
+            .overlay(shape.strokeBorder(ServoMapColor.brandTileLine, lineWidth: 0.5))
+            .overlay { membersRing }
+    }
+
+    /** Brands without a logo file: the monogram on a tile in the brand colour. */
+    private var monogram: some View {
+        let mark = family.mark
+        return Text(family.seal)
+            .font(.system(size: size * (family.seal.count > 2 ? 0.3 : 0.38), weight: .heavy, design: .rounded))
+            .tracking(-0.2)
+            .minimumScaleFactor(0.6)
+            .lineLimit(1)
+            .foregroundStyle(Color(brand: mark.foreground))
             .padding(.horizontal, 2)
-            .overlay(
-                RoundedRectangle(cornerRadius: ServoMapRadius.r1)
-                    .strokeBorder(ServoMapColor.ink2, style: StrokeStyle(lineWidth: 1, dash: family.group == .members ? [2, 2] : []))
-            )
-            .accessibilityLabel(family.name)
-            // The seal is a mark, not reading text; past xLarge it would crowd the row.
-            .dynamicTypeSize(...DynamicTypeSize.xLarge)
+            .frame(width: size, height: size)
+            .background {
+                ZStack(alignment: .bottom) {
+                    Color(brand: mark.background)
+                    if let stripe = mark.stripe {
+                        Color(brand: stripe).frame(height: size * 0.14)
+                    }
+                }
+            }
+            .clipShape(shape)
+            .overlay { membersRing }
+    }
+
+    /** Members-only brands (Costco) get a dashed ring: you need a membership to fill up there. */
+    @ViewBuilder private var membersRing: some View {
+        if family.group == .members {
+            shape.inset(by: -2.5).stroke(ServoMapColor.ink3, style: StrokeStyle(lineWidth: 1, dash: [2, 2]))
+        }
+    }
+}
+
+extension Color {
+    /** A fixed brand colour: signs look the same by day and night. */
+    init(brand rgb: UInt32) {
+        self.init(light: rgb, dark: rgb)
     }
 }
 
@@ -58,6 +113,8 @@ struct StationRow: View {
     let station: Station
     let fuel: FuelType
     let range: PriceRange
+    /** Position in a cheapest-first list; shown before the mark when set. */
+    var rank: Int? = nil
     @Environment(\.dynamicTypeSize) private var typeSize
 
     var body: some View {
@@ -71,6 +128,12 @@ struct StationRow: View {
                 }
             } else {
                 HStack(spacing: 12) {
+                    if let rank {
+                        Text("\(rank)")
+                            .font(ServoMapFont.body(.footnote, weight: rank == 1 ? 700 : 500)).monospacedDigit()
+                            .foregroundStyle(rank == 1 ? ServoMapColor.priceCheap : ServoMapColor.ink3)
+                            .frame(minWidth: 18, alignment: .trailing)
+                    }
                     BrandSeal(family: station.family)
                     names(lineLimit: 1)
                     Spacer(minLength: 8)

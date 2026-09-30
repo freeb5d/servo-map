@@ -66,7 +66,7 @@ On iOS, Shippori Mincho is bundled for titles and prices, and interface text use
 
 Rules added after the owner found the first v2 build "too AI" (2026-09-29). They apply to web and iOS.
 
-- **No letter-spaced capitals.** Section names, table heads and captions are sentence case in `caption` (small, `ink-3`). Brand seals are the only capitals, because they are monograms.
+- **No letter-spaced capitals.** Section names, table heads and captions are sentence case in `caption` (small, `ink-3`). Brand monograms are the only capitals, because they are marks.
 - **No card soup.** Modules on a page are separated by space and one `line` hairline, not boxed. Boxes are for things you act on (inputs, buttons, floating chrome), not for groups of text.
 - **No KPI tile rows.** Headline figures sit unboxed in a ruled row, like a newspaper table.
 - **Facts, not advice.** Verdicts state where the price is ("Near the 90-day high.", "10.6¢ below the local average"), never what the reader should do.
@@ -90,11 +90,13 @@ Rules added after the owner found the first v2 build "too AI" (2026-09-29). They
 | FilterChip | ochre pill chip | surface, 1px line, `r-1`, 26px |
 | Freshness | coloured pill | neutral tag with a 6px tier square |
 | StaleBanner | glass banner | `price-mid-soft` fill, no border |
-| Ledger row | `StationCard` rounded card | rank, seal, name + suburb · distance, price + tier; hairline divider; selected = `accent-soft`; rows older than 24 h sit below a separator |
-| Verdict | list header "Nearby Stations" | cheapest price, one-sentence cycle verdict in Mincho, cycle bar |
+| Ledger row | `StationCard` rounded card | rank, brand mark, name + suburb · distance, price + tier; hairline divider; selected = `accent-soft`; rows older than 24 h sit below a separator. The cheapest ranked row sits on `price-cheap-soft` with its rank in semibold `price-cheap` (decision 0003) |
+| Map dot (iOS) | — | filled tier colour for a current price; hollow ink-3 ring for a price more than a week old, which shows on the map and its page but is not ranked or quoted as cheapest |
+| Verdict | list header "Nearby Stations" | "Cheapest {fuel} near {place}" in semibold `price-cheap`, cheapest price, one-sentence cycle verdict in Mincho, cycle bar |
 | PriceTag | Syne bold + coloured number | Mincho number in `ink`, tier shown by label + ■ in tier colour |
-| BrandSeal | brand as small ochre text | monogram of the brand family (`BRAND_FAMILIES` in `@servo-map/shared`), 1px `ink-2` border, `r-1`; dashed for members-only brands. Never a third-party logo |
-| Map tag | bare coloured price text | paper tag: seal cell, Mincho price, tier square; selected tag inverts to `accent`; clusters show "from {min}" |
+| BrandSeal | brand as small ochre text | Decision 0003, both platforms: the brand's logo on a `brand-tile` square (corner 24 % of its edge, 0.5px `brand-tile-line`), or, where no logo is bundled, the family monogram on a tile in `BRAND_FAMILIES[].mark` colours (`@servo-map/shared`) with the optional stripe along the bottom; members-only brands get a dashed `ink-3` ring. Web sizes 22 / 30 / 36px (inline and short lists / ledger / station header). Logos live once in `design/brand-logos` (see its `SOURCES.md`); `pnpm brand-logos` copies them into the iOS asset catalog and `packages/web/public/brand-logos`, and CI fails when a copy drifts |
+| Cheapest tag | — | the cheapest ranked station's map tag: larger, `price-cheap` fill with a `price-cheap` halo, "Cheapest" over the brand mark and price, text in `on-accent`; selected, it fills `accent` and keeps the halo. iOS breathes the halo by opacity; the web halo is still, so the map costs no work while idle. On the web it has its own unclustered source, so it shows at every zoom |
+| Map tag | bare coloured price text | paper tag: brand mark (16px), Mincho price, tier square; selected tag inverts to `accent`; clusters show "from {min}" |
 | Cluster | ochre circle | `ink` circle, count in `surface` |
 
 ## Map

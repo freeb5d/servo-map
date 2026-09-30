@@ -52,7 +52,7 @@ struct SearchScreen: View {
             HStack {
                 Text("Recent")
                 Spacer()
-                Button("Clear") { recentRaw = "" }.font(ServoMapFont.small).textCase(nil)
+                Button("Clear") { recentRaw = "" }.font(ServoMapFont.body(.footnote, weight: 600)).textCase(nil)
             }
         }
     }
@@ -91,7 +91,7 @@ struct SearchScreen: View {
                         VStack(alignment: .leading, spacing: 2) {
                             Text(row.suburb).foregroundStyle(ServoMapColor.ink)
                             HStack(spacing: 6) {
-                                BrandSeal(family: row.cheapest.family)
+                                BrandSeal(family: row.cheapest.family, size: 18)
                                 Text("\(row.count) station\(row.count == 1 ? "" : "s")")
                                     .font(ServoMapFont.small).foregroundStyle(ServoMapColor.ink3)
                             }

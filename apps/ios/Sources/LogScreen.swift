@@ -39,7 +39,7 @@ struct LogScreen: View {
             .navigationTitle("Log")
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("Log a fill-up", systemImage: "plus") { adding = true }.buttonStyle(.glassProminent)
+                    Button("Log a fill-up", systemImage: "plus") { adding = true }.buttonStyle(.glassProminent).actionFont()
                 }
             }
             .sheet(isPresented: $adding) { AddFillUpSheet(station: nil) }

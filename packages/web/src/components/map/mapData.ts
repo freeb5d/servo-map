@@ -5,8 +5,8 @@ import { computePriceRange, formatPriceCents, getFuelPrice, type PriceRange } fr
 export interface StationFeatureProps {
   id: string;
   brand: string;
-  /** Brand family monogram printed on the tag. */
-  seal: string;
+  /** Brand family id; the tag draws that family's tile (brandImages.ts). */
+  family: string;
   /** Selected fuel price in cents; clusters aggregate its minimum. */
   price: number;
   tier: number;
@@ -36,11 +36,28 @@ export function buildStationCollection(
       properties: {
         id: station.id,
         brand: station.brand,
-        seal: brandFamily(station.brand).seal,
+        family: brandFamily(station.brand).id,
         price,
         tier: price <= effective.cheapBelow ? 0 : price <= effective.midBelow ? 1 : 2,
         label: formatPriceCents(price),
       },
     })),
+  };
+}
+
+type StationCollection = GeoJSON.FeatureCollection<GeoJSON.Point, StationFeatureProps>;
+
+/**
+ * Takes the cheapest station out of the clustered collection. Its tag has its own unclustered
+ * source, so it stays on the map at every zoom instead of disappearing into a cluster.
+ */
+export function splitCheapest(
+  collection: StationCollection,
+  cheapestId: string | null,
+): { rest: StationCollection; cheapest: StationCollection } {
+  const isCheapest = (f: StationCollection["features"][number]) => f.properties.id === cheapestId;
+  return {
+    rest: { type: "FeatureCollection", features: collection.features.filter((f) => !isCheapest(f)) },
+    cheapest: { type: "FeatureCollection", features: collection.features.filter(isCheapest) },
   };
 }

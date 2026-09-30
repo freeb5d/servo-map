@@ -1,26 +1,49 @@
 import SwiftUI
 
 /**
- * Trends in the Health manner: the state average with its history at the top, then highlight cards
- * that each state one finding in a sentence and show the data behind it.
+ * Trends in three pages under one segmented bar, as in Health's detail views: the state average
+ * over time, prices nearby today, and what choosing well is worth over a year.
  */
 struct TrendsScreen: View {
+    enum Page: String, CaseIterable, Identifiable {
+        case state = "State", nearby = "Nearby", savings = "Savings"
+        var id: String { rawValue }
+    }
+
     @Environment(Store.self) private var store
-    @State private var rangeDays: Int? = 30
+    @State private var page: Page = .state
+    @State private var windowDays = 30
+    /** First day in the history chart's window; moved by scrolling it or dragging the brush. */
+    @State private var start = Date.distantPast
 
     var body: some View {
         NavigationStack {
             List {
-                hero
-                Section { weekdayCard } header: { GroupTitle("Highlights") }
-                Section { spreadCard }
-                if !brandRows.isEmpty { Section { brandCard } }
-                fuels
-                suburbs
-                SavingsSection(series: shown)
+                switch page {
+                case .state:
+                    hero
+                    historyCard
+                    Section { weekdayCard } header: { GroupTitle("Patterns") }
+                    fuels
+                case .nearby:
+                    Section { spreadCard }
+                    if !brandRows.isEmpty { Section { brandCard } }
+                    suburbs
+                case .savings:
+                    SavingsSection(series: shown)
+                }
             }
             .paperList()
+            .animation(ServoMapMotion.standard, value: page)
             .navigationTitle("Trends")
+            .safeAreaBar(edge: .top) {
+                Picker("Page", selection: $page) {
+                    ForEach(Page.allCases) { Text($0.rawValue).tag($0) }
+                }
+                .pickerStyle(.segmented)
+                .padding(.horizontal, 16)
+                .padding(.bottom, 8)
+            }
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     @Bindable var store = store
@@ -28,16 +51,34 @@ struct TrendsScreen: View {
                         ForEach(FuelType.allCases) { Text($0.rawValue).tag($0) }
                     }
                     .pickerStyle(.menu)
+                    .actionFont()
                 }
             }
+            .onAppear(perform: resetWindow)
+            .onChange(of: store.fuel) { resetWindow() }
+            .onChange(of: windowDays) { resetWindow() }
+            // History arrives after the screen may already be showing.
+            .onChange(of: store.trend.last?.date) { resetWindow() }
         }
     }
 
-    private var shown: [Snapshot] { TrendMath.window(store.trend, days: rangeDays) }
+    /** The days in the chart's window: what the verdict, gauge and weekday figures describe. */
+    private var shown: [Snapshot] {
+        let end = start.addingTimeInterval(Double(windowDays) * 86_400)
+        let inWindow = store.trend.filter { (start...end).contains(TrendMath.day($0.date)) }
+        return inWindow.isEmpty ? TrendMath.window(store.trend, days: windowDays) : inWindow
+    }
+
     /** E10 is what most U91 drivers could switch to; everyone else compares against U91. */
     private var compareFuel: FuelType { store.fuel == .u91 ? .e10 : .u91 }
 
-    // MARK: Hero
+    /** Puts the window on the most recent days. */
+    private func resetWindow() {
+        guard let last = store.trend.last.map({ TrendMath.day($0.date) }) else { return }
+        start = last.addingTimeInterval(-Double(windowDays) * 86_400 + 43_200)
+    }
+
+    // MARK: State
 
     private var hero: some View {
         Section {
@@ -47,44 +88,63 @@ struct TrendsScreen: View {
                     HStack(alignment: .firstTextBaseline, spacing: 10) {
                         PriceText(cents: latest.avg, font: ServoMapFont.priceXl)
                         if let week = TrendMath.change(store.trend, days: 7) {
-                            Text("\(week >= 0 ? "+" : "")\(fmt(week)) this week")
-                                .font(ServoMapFont.small).monospacedDigit().foregroundStyle(changeColor(week))
+                            Text("\(week >= 0 ? "▲" : "▼") \(fmt(abs(week))) this week")
+                                .font(ServoMapFont.body(.footnote, weight: 600)).monospacedDigit()
+                                .foregroundStyle(changeColor(week))
                         }
                     }
+                    Text(TrendMath.verdict(shown) ?? "Not enough history yet.").font(ServoMapFont.display(.body, weight: 500))
+                    if let lo = shown.map(\.avg).min(), let hi = shown.map(\.avg).max(), hi > lo {
+                        CycleGauge(low: lo, high: hi, today: latest.avg).padding(.top, 4)
+                    }
                 }
-                Text(TrendMath.verdict(shown) ?? "Not enough history yet.").font(ServoMapFont.display(.body, weight: 500))
-                Picker("Range", selection: $rangeDays) {
-                    Text("30 days").tag(Int?.some(30))
-                    Text("90 days").tag(Int?.some(90))
-                    Text("All").tag(Int?.none)
-                }
-                .pickerStyle(.segmented)
-                .padding(.top, 4)
-                HistoryChart(series: shown, fuel: store.fuel,
-                             compare: TrendMath.window(store.trend(for: compareFuel), days: rangeDays), compareFuel: compareFuel)
             }
             .padding(.vertical, 6)
             .paperRow()
         }
     }
 
-    // MARK: Highlights
+    private var historyCard: some View {
+        Section {
+            VStack(alignment: .leading, spacing: 10) {
+                HStack {
+                    CardHeader(title: "History", symbol: "calendar.day.timeline.left")
+                    Picker("Window", selection: $windowDays) {
+                        Text("30 d").tag(30)
+                        Text("90 d").tag(90)
+                    }
+                    .pickerStyle(.segmented)
+                    .frame(width: 120)
+                }
+                HistoryChart(series: store.trend, fuel: store.fuel,
+                             compare: store.trend(for: compareFuel), compareFuel: compareFuel,
+                             windowDays: windowDays, start: $start)
+                HistoryOverview(series: store.trend, windowDays: windowDays, start: $start)
+            }
+            .padding(.vertical, 6)
+            .paperRow()
+        } footer: {
+            Text("Scroll the chart or drag the strip under it to move through the history. Hatching marks days with no data. Touch and hold to read a day.")
+        }
+    }
 
     private var weekdayCard: some View {
         let days = TrendMath.weekdays(shown).compactMap { d in d.1.map { (d.0, $0) } }
         let cheapest = days.min { $0.1 < $1.1 }
         let dearest = days.max { $0.1 < $1.1 }
         return VStack(alignment: .leading, spacing: 10) {
-            CardHeader(title: "Cheapest day", symbol: "calendar", note: rangeNote)
+            CardHeader(title: "Cheapest day", symbol: "calendar", note: "In the window above")
             if let cheapest, let dearest, dearest.1 > cheapest.1 {
                 Text("\(fullDay(cheapest.0)) is usually the cheapest day, \(fmt(dearest.1 - cheapest.1))¢ under \(fullDay(dearest.0)).")
                     .font(ServoMapFont.display(.body, weight: 500))
             }
-            WeekdayChart(days: TrendMath.weekdays(shown))
+            WeekdayBars(days: TrendMath.weekdays(shown))
         }
         .padding(.vertical, 6)
         .paperRow()
     }
+
+    // MARK: Nearby
 
     private var spreadCard: some View {
         // The stations in the Nearby list, so the numbers here match what the map shows.
@@ -162,8 +222,6 @@ struct TrendsScreen: View {
     }
 
     // MARK: Data
-
-    private var rangeNote: String { rangeDays.map { "Last \($0) days" } ?? "All history" }
 
     private func fullDay(_ short: String) -> String {
         ["Mon": "Monday", "Tue": "Tuesday", "Wed": "Wednesday", "Thu": "Thursday", "Fri": "Friday", "Sat": "Saturday", "Sun": "Sunday"][short] ?? short

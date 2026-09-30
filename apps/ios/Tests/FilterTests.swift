@@ -9,13 +9,26 @@ struct FilterTests {
             Fixture.station("a", brand: "Metro Fuel", u91: 225.9, km: 2),
             Fixture.station("b", brand: "EG Ampol", u91: 238.6, diesel: 250.1, km: 6),
             Fixture.station("c", brand: "Costco", u91: 219.7, hoursOld: 3, km: 12),
-            Fixture.station("d", brand: "BP", u91: 241.5, hoursOld: 30, km: 1),
+            Fixture.station("d", brand: "BP", u91: 241.5, hoursOld: 8 * 24, km: 1),
             Fixture.station("e", brand: "Shell", u91: nil, diesel: 249.0),
         ])
     }
 
-    @Test func ranksCheapestFirstAndDropsDayOldPrices() {
+    @Test func ranksCheapestFirstAndDropsWeekOldPrices() {
         #expect(store().ranked.map(\.id) == ["c", "a", "b"])
+    }
+
+    @Test func weekOldPricesAreOutdatedNotHidden() {
+        let s = store()
+        #expect(s.outdated.map(\.id) == ["d"])
+        // A station with no price for the fuel is neither ranked nor outdated.
+        #expect(!s.outdated.contains { $0.id == "e" })
+    }
+
+    @Test func pricesUpToAWeekOldStillRank() {
+        let s = Store(stations: [Fixture.station("x", u91: 230, hoursOld: 6 * 24), Fixture.station("y", u91: 231, hoursOld: 7 * 24 + 1)])
+        #expect(s.ranked.map(\.id) == ["x"])
+        #expect(s.outdated.map(\.id) == ["y"])
     }
 
     @Test func maxPrice() {
@@ -72,5 +85,25 @@ struct FilterTests {
         let station = try JSONDecoder().decode(Station.self, from: Data(json.utf8))
         #expect(station.family == BrandFamily.resolve("Metro Fuel"))
         #expect(Fixture.station("y", brand: "Shell").family == BrandFamily.resolve("Shell"))
+    }
+
+    @Test func inViewFollowsTheViewport() {
+        let near = Fixture.station("n", u91: 230), far = Fixture.station("f", u91: 220)
+        let farAway = Station(id: far.id, name: far.name, brand: far.brand, address: far.address, suburb: far.suburb,
+                              state: far.state, postcode: far.postcode, lat: -34.5, lng: 150.5, prices: far.prices, distance: far.distance)
+        let s = Store(stations: [near, farAway])
+        #expect(s.inView.map(\.id) == ["f", "n"])
+        s.viewport = Viewport(minLat: -34, maxLat: -33.5, minLng: 151, maxLng: 151.3)
+        #expect(s.inView.map(\.id) == ["n"])
+        s.viewport = Viewport(minLat: -33, maxLat: -32, minLng: 151, maxLng: 151.3)
+        #expect(s.inView.isEmpty)
+    }
+
+    @Test func userLocationSurvivesMovingTheMap() async {
+        let s = Store(stations: [])
+        s.setUserLocation(-33.87, 151.2)
+        #expect(s.located)
+        s.viewport = Viewport(minLat: -34, maxLat: -33.5, minLng: 150, maxLng: 150.5)
+        #expect(s.located)
     }
 }
