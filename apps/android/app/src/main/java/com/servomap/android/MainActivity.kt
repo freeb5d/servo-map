@@ -120,8 +120,13 @@ fun App(vm: MainViewModel, locate: () -> Pair<Double, Double>?) {
         Box(Modifier.padding(pad).fillMaxSize()) {
             if (tab == 0) {
                 StationMap(ui.stations, ui.tiers, ui.fuel, ui.centre, onSelect = vm::select)
+            } else if (tab == 1) {
+                StationList(ui.stations, ui, onSelect = vm::select)
+            } else if (ui.saved.isEmpty()) {
+                Text("No saved stations yet. Open a station and tap Save.", color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.align(Alignment.Center).padding(24.dp))
             } else {
-                StationList(ui, onSelect = vm::select)
+                StationList(ui.saved, ui, onSelect = vm::select)
             }
             if (ui.loading) LinearProgressIndicator(Modifier.fillMaxWidth())
             ui.error?.let {
