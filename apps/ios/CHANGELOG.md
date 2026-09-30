@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.1](https://github.com/Misoto22/servo-map/compare/ios-v0.1.0...ios-v0.1.1) (2026-09-30)
+
+
+### Performance
+
+* **ios:** make the map and trends redraw smoothly ([#28](https://github.com/Misoto22/servo-map/issues/28)) ([f844d4c](https://github.com/Misoto22/servo-map/commit/f844d4cf712568b40f09ff180712ef8b543fb248))
+
 ## 0.1.0 (2026-09-29)
 
 
