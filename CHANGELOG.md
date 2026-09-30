@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.1](https://github.com/Misoto22/servo-map/compare/v0.4.0...v0.4.1) (2026-09-30)
+
+
+### Refactoring
+
+* **design:** read the app mark palette from design tokens ([#33](https://github.com/Misoto22/servo-map/issues/33)) ([3b9c3f9](https://github.com/Misoto22/servo-map/commit/3b9c3f9aed225819c3c62bcad9d6157673a494e5))
+
 ## [0.4.0](https://github.com/Misoto22/servo-map/compare/v0.3.0...v0.4.0) (2026-09-30)
 
 
