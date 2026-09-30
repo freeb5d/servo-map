@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.8.0](https://github.com/Misoto22/servo-map/compare/v0.7.1...v0.8.0) (2026-09-30)
+
+
+### Features
+
+* **design:** add generic car renders and the render pipeline ([#62](https://github.com/Misoto22/servo-map/issues/62)) ([4560d27](https://github.com/Misoto22/servo-map/commit/4560d27eca5494f668bc356797638cd349729f56))
+
+
+### Documentation
+
+* **decisions:** record the iOS redesign of You, Settings and Trends ([#60](https://github.com/Misoto22/servo-map/issues/60)) ([2bee583](https://github.com/Misoto22/servo-map/commit/2bee583e006566de08fe876d693a83827c51b371))
+
 ## [0.7.1](https://github.com/Misoto22/servo-map/compare/v0.7.0...v0.7.1) (2026-09-30)
 
 

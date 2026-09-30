@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.8.0](https://github.com/Misoto22/servo-map/compare/ios-v0.7.0...ios-v0.8.0) (2026-09-30)
+
+
+### Features
+
+* **ios:** redesign the filter sheet ([#64](https://github.com/Misoto22/servo-map/issues/64)) ([6d1ad7d](https://github.com/Misoto22/servo-map/commit/6d1ad7d2d3bf58d41ac1c3c556f596a91e1ea8b1))
+
+
+### Performance
+
+* **ios:** keep the map smooth while cheapest follows the view ([#61](https://github.com/Misoto22/servo-map/issues/61)) ([2311c15](https://github.com/Misoto22/servo-map/commit/2311c1574d8bf0b5ec548c0a351dfebad726aacd))
+
 ## [0.7.0](https://github.com/Misoto22/servo-map/compare/ios-v0.6.0...ios-v0.7.0) (2026-09-30)
 
 
