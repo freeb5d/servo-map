@@ -42,8 +42,8 @@ describe("nswAdapter", () => {
   it("produces normalised Station[]", async () => {
     const stations = await nswAdapter.fetchStations(baseEnv);
 
-    // 3 stations in fixture, one has 0,0 coords → 2 out
-    expect(stations.length).toBe(2);
+    // 4 stations in fixture, one has 0,0 coords → 3 out
+    expect(stations.length).toBe(3);
     expect(stations.every((s) => s.id.match(/^(nsw|tas|act)-\d+$/))).toBe(true);
     expect(stations.every((s) => s.lat !== 0 && s.lng !== 0)).toBe(true);
     expect(stations.every((s) => s.prices.length > 0)).toBe(true);
@@ -68,6 +68,24 @@ describe("nswAdapter", () => {
     const stations = await nswAdapter.fetchStations(baseEnv);
     const tasStation = stations.find((s) => s.id === "tas-1002");
     expect(tasStation?.state).toBe("tas");
+  });
+
+  it("title-cases all-caps names, addresses and suburbs", async () => {
+    const stations = await nswAdapter.fetchStations(baseEnv);
+    const act = stations.find((s) => s.id === "act-1004");
+    expect([act?.name, act?.address, act?.suburb, act?.brand]).toEqual([
+      "EG Ampol Braddon",
+      "97A Lonsdale St, Braddon ACT 2612",
+      "Braddon",
+      "EG Ampol",
+    ]);
+    // Mixed-case name and address stay as sent; the suburb parsed out of it is recased.
+    const sydney = stations.find((s) => s.id === "nsw-1001");
+    expect([sydney?.name, sydney?.address, sydney?.suburb]).toEqual([
+      "Caltex Sydney",
+      "1 Test St, SYDNEY NSW 2000",
+      "Sydney",
+    ]);
   });
 
   it("parses NSW date format to ISO 8601", async () => {

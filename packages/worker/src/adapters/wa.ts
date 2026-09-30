@@ -2,6 +2,7 @@ import type { Station, FuelPrice } from "@servo-map/shared";
 import type { Env } from "../env";
 import type { StateAdapter, WaFeedItem } from "./types";
 import { mapWaFuelType, WA_FUEL_PRODUCTS } from "../utils/fuel-map";
+import { titleCasePlace } from "../utils/place-names";
 
 // WA FuelWatch 是公开 RSS feed，无需认证 / API key。
 const BASE_URL = "https://www.fuelwatch.wa.gov.au/fuelwatch/fuelWatchRSS";
@@ -126,12 +127,13 @@ export const waAdapter: StateAdapter = {
           continue;
         }
 
+        // Recase only the stored copy: siteHash reads the raw feed text, so ids stay stable.
         byId.set(id, {
           id,
-          name: item.tradingName,
+          name: titleCasePlace(item.tradingName),
           brand: item.brand,
-          address: item.address,
-          suburb: item.location,
+          address: titleCasePlace(item.address),
+          suburb: titleCasePlace(item.location),
           state: "wa",
           postcode: "", // FuelWatch feed 不含邮编
           lat: item.lat,

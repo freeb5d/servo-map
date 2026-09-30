@@ -46,6 +46,7 @@ interface Station {
 - `prices[].updated_at` is ISO 8601 UTC.
 - `state` must be a literal `AustralianState`. No free strings.
 - `prices[].fuel` must map through `packages/worker/src/utils/fuel-map.ts` (one mapper per upstream).
+- `name`, `address` and `suburb` pass through `titleCasePlace` (`packages/worker/src/utils/place-names.ts`), so all-caps feed text ("REVESBY") is stored title-cased and clients display it as served. `brand` is left as sent. Derive ids from the raw upstream text, never the recased copy.
 
 ---
 
@@ -165,6 +166,7 @@ Confirm:
 - [ ] Adapter file follows QLD template
 - [ ] Stations have stable `{state}-{id}` ids
 - [ ] Prices in cents/L (not dollars, not 0.1-cent units)
+- [ ] `name` / `address` / `suburb` wrapped in `titleCasePlace`
 - [ ] Registered in `adapters/index.ts`
 - [ ] Smoke test with recorded fixture
 - [ ] `docs/openapi.yaml` state enum updated

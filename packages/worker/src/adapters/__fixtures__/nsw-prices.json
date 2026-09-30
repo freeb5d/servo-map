@@ -29,6 +29,16 @@
       "address": "3 Nowhere St, PARRAMATTA NSW 2150",
       "location": { "latitude": 0, "longitude": 0 },
       "state": "NSW"
+    },
+    {
+      "brandid": "4",
+      "stationid": "1004",
+      "brand": "EG Ampol",
+      "code": "1004",
+      "name": "EG AMPOL BRADDON",
+      "address": "97A LONSDALE ST, BRADDON ACT 2612",
+      "location": { "latitude": -35.2733, "longitude": 149.1336 },
+      "state": "ACT"
     }
   ],
   "prices": [
@@ -36,6 +46,7 @@
     { "stationcode": 1001, "state": "NSW", "fueltype": "DL",  "price": 205.0, "lastupdated": "28/03/2026 01:20:38" },
     { "stationcode": 1001, "state": "NSW", "fueltype": "LPG", "price": 95.0,  "lastupdated": "28/03/2026 01:20:38" },
     { "stationcode": 1002, "state": "TAS", "fueltype": "U91", "price": 192.9, "lastupdated": "28/03/2026 01:15:00" },
-    { "stationcode": 1003, "state": "NSW", "fueltype": "U91", "price": 190.0, "lastupdated": "28/03/2026 01:10:00" }
+    { "stationcode": 1003, "state": "NSW", "fueltype": "U91", "price": 190.0, "lastupdated": "28/03/2026 01:10:00" },
+    { "stationcode": 1004, "state": "ACT", "fueltype": "E10", "price": 187.9, "lastupdated": "28/03/2026 01:05:00" }
   ]
 }

@@ -43,6 +43,17 @@ describe("qldAdapter", () => {
     expect(stations.every((s) => s.id.startsWith("qld-"))).toBe(true);
   });
 
+  it("title-cases all-caps names and leaves mixed-case ones alone", async () => {
+    const stations = await qldAdapter.fetchStations(baseEnv);
+    const s2002 = stations.find((s) => s.id === "qld-2002");
+    expect([s2002?.name, s2002?.address, s2002?.suburb]).toEqual([
+      "Shell Gold Coast",
+      "2 Beach Rd",
+      "Surfers Paradise",
+    ]);
+    expect(stations.find((s) => s.id === "qld-2001")?.name).toBe("7-Eleven Brisbane");
+  });
+
   it("converts 0.1-cent units to cents/L", async () => {
     const stations = await qldAdapter.fetchStations(baseEnv);
     const s2001 = stations.find((s) => s.id === "qld-2001");
