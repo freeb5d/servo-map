@@ -42,7 +42,7 @@ permissions:
 
 jobs:
   release:
-    uses: Misoto22/ci/.github/workflows/release.yml@65443cf5cd7c65b978373aeb0a0e93127b0d6ede # v0.5.0
+    uses: Misoto22/ci/.github/workflows/release.yml@15e181fe060c385c48746de832f675f5c21c07b0 # v0.7.1
     with:
       app-client-id: ${{ vars.APP_CLIENT_ID }}
     secrets:
