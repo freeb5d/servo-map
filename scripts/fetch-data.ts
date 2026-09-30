@@ -95,6 +95,14 @@ async function kvGet(key: string): Promise<string | null> {
   return res.text();
 }
 
+/** 读取各州 KV 中现存的站点 chunk（缺失的州视为空） */
+async function readStoredStations(states: AustralianState[]): Promise<Station[]> {
+  const chunks = await Promise.all(
+    states.map((state) => kvGet(KV_KEYS.stationsByState(state))),
+  );
+  return chunks.flatMap((raw) => (raw ? (JSON.parse(raw) as Station[]) : []));
+}
+
 // ── 主流程 ──
 
 async function main() {
@@ -200,7 +208,14 @@ async function main() {
   }
 
   // 品牌列表 —— 取自全部抓取结果：品牌是 UI 过滤项，超集无害
-  const brands = [...new Set(allStations.map((s) => s.brand))].sort();
+  // 限频跳过的州本轮没抓，品牌取其 KV 中的上次结果，否则这些州独有的品牌会从列表里消失
+  const skippedStates = adapters
+    .filter((a) => !dueAdapters.includes(a))
+    .flatMap((a) => a.states);
+  const keptStations = await readStoredStations(skippedStates);
+  const brands = [
+    ...new Set([...allStations, ...keptStations].map((s) => s.brand)),
+  ].sort();
   await kvPut(KV_KEYS.brands, JSON.stringify(brands));
 
   // Metadata（合并已有数据，未更新/被护栏跳过的州保留上次记录）
