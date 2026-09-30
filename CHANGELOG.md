@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.1](https://github.com/Misoto22/servo-map/compare/v0.7.0...v0.7.1) (2026-09-30)
+
+
+### Bug Fixes
+
+* **web:** rank cheapest within the visible map ([#58](https://github.com/Misoto22/servo-map/issues/58)) ([18f58e4](https://github.com/Misoto22/servo-map/commit/18f58e4ea2adcf2a4ef3b361ded49e64e07682e7))
+
 ## [0.7.0](https://github.com/Misoto22/servo-map/compare/v0.6.1...v0.7.0) (2026-09-30)
 
 

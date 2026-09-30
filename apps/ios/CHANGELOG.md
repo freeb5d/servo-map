@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.0](https://github.com/Misoto22/servo-map/compare/ios-v0.6.0...ios-v0.7.0) (2026-09-30)
+
+
+### Features
+
+* **ios:** credit each state's price source and show licence notices ([#57](https://github.com/Misoto22/servo-map/issues/57)) ([98944ce](https://github.com/Misoto22/servo-map/commit/98944ce053d74dff7de774b0755bc0e1c924129b))
+
 ## [0.6.0](https://github.com/Misoto22/servo-map/compare/ios-v0.5.2...ios-v0.6.0) (2026-09-30)
 
 
