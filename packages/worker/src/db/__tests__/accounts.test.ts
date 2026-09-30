@@ -87,6 +87,15 @@ describe("/me", () => {
     expect(me.alerts).toEqual({ priceDrop: true, cycleLow: false, quietStart: 22, quietEnd: 7, home: { lat: -33.88, lng: 151.21 } });
   });
 
+  it("stores a car sent without paint, as the apps now send it", async () => {
+    const t = await signIn("s3");
+    const car = { name: "The family car", body: "suv", fuel: "U91", tankLitres: 56, catalogueTankLitres: 56, vehicleId: "mazda-cx-5-2017" };
+    expect((await call("/me/car", t, { method: "PUT", body: JSON.stringify(car) })).status).toBe(204);
+    const me = ((await (await call("/me", t)).json()) as ApiResponse<MeResponse>).data;
+    expect(me.car).toEqual(car);
+    expect((await call("/me/car", t, { method: "PUT", body: JSON.stringify({ ...car, paint: "" }) })).status).toBe(400);
+  });
+
   it("keeps each account's data to itself", async () => {
     const a = await signIn("alice");
     const b = await signIn("bob");

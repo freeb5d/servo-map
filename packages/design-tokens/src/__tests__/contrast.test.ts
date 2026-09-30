@@ -30,6 +30,10 @@ describe.each(["light", "dark"] as const)("%s theme meets WCAG AA", (theme) => {
     }
   });
 
+  it("a car make's mark and monogram read on the white brand tile", () => {
+    expect(contrastRatio(color.brandTileInk[theme], color.brandTile[theme])).toBeGreaterThanOrEqual(4.5);
+  });
+
   it("price tiers stay legible on their soft banner fills", () => {
     expect(contrastRatio(color.ink[theme], color.priceMidSoft[theme])).toBeGreaterThanOrEqual(4.5);
   });

@@ -41,11 +41,13 @@ struct AvatarImage: View {
     @Environment(AccountStore.self) private var account
     var size: CGFloat
     var version: Int = 0
+    /** On paper (the You header): a wash disc with Mincho initials, rather than the ink disc used on the map. */
+    var onPaper = false
 
     var body: some View {
         let photo = AvatarPhoto.load()
         ZStack {
-            Circle().fill(ServoMapColor.ink)
+            Circle().fill(onPaper ? ServoMapColor.wash : ServoMapColor.ink)
             if let photo {
                 Image(uiImage: photo).resizable().scaledToFill()
             } else if let picture = account.account?.picture, let url = URL(string: picture) {
@@ -56,15 +58,21 @@ struct AvatarImage: View {
         }
         .frame(width: size, height: size)
         .clipShape(Circle())
+        .overlay { if onPaper { Circle().strokeBorder(ServoMapColor.line, lineWidth: 0.5) } }
         .id(version)
         .accessibilityHidden(true)
     }
 
     @ViewBuilder private var fallback: some View {
         if let initials = account.initials {
-            Text(initials).font(.system(size: size * 0.36, weight: .bold)).foregroundStyle(ServoMapColor.surface)
+            if onPaper {
+                Text(initials).font(ServoMapFont.display(.title2, size: size * 0.375)).foregroundStyle(ServoMapColor.ink2)
+            } else {
+                Text(initials).font(.system(size: size * 0.36, weight: .bold)).foregroundStyle(ServoMapColor.surface)
+            }
         } else {
-            Image(systemName: "person.fill").font(.system(size: size * 0.42, weight: .semibold)).foregroundStyle(ServoMapColor.surface)
+            Image(systemName: "person.fill").font(.system(size: size * 0.42, weight: .semibold))
+                .foregroundStyle(onPaper ? ServoMapColor.ink2 : ServoMapColor.surface)
         }
     }
 }
@@ -84,13 +92,15 @@ struct EditableAvatar: View {
                 }
             }
         } label: {
-            AvatarImage(size: 64, version: version)
+            AvatarImage(size: 64, version: version, onPaper: true)
                 .overlay(alignment: .bottomTrailing) {
-                    Image(systemName: "camera.fill").font(.system(size: 10, weight: .bold))
-                        .foregroundStyle(ServoMapColor.ink)
-                        .frame(width: 22, height: 22)
-                        .background(ServoMapColor.surface, in: Circle())
-                        .overlay(Circle().strokeBorder(ServoMapColor.line))
+                    Image(systemName: "camera")
+                        .font(ServoMapFont.body(.caption2, weight: 600, size: 11))
+                        .foregroundStyle(ServoMapColor.onAccent)
+                        .frame(width: 26, height: 26)
+                        .background(ServoMapColor.accent, in: Circle())
+                        .overlay(Circle().strokeBorder(ServoMapColor.bg, lineWidth: 2))
+                        .offset(x: 2, y: 2)
                 }
         }
         .accessibilityLabel("Profile photo")

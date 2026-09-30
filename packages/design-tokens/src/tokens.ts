@@ -44,6 +44,8 @@ export const color = {
   // The brand logo's tile (decision 0003): white in both themes, like the price sign it comes from.
   brandTile: { light: "#FFFFFF", dark: "#FFFFFF" },
   brandTileLine: { light: "#EBEBEB", dark: "#EBEBEB" },
+  // A car make's mark and monogram on that tile (decision 0008): the paper theme's ink in both themes.
+  brandTileInk: { light: neutral.ink.light, dark: neutral.ink.light },
   // Map base overrides applied on top of the Mapbox style.
   mapLand: { light: "#F2F1ED", dark: "#1E1E1C" },
   mapWater: { light: "#D9DFE2", dark: "#182025" },

@@ -9,6 +9,8 @@ struct API: Sendable {
         #endif
         return URL(string: "https://api.servo-map.com/api/v1")!
     }()
+    /** The public website: station share links and the car pictures resolve against it. */
+    static let site = URL(string: "https://www.servo-map.com")!
 
     /** Most stations one nearby fetch returns; the cheapest come first, so a capped fetch drops the dearest. */
     static let stationLimit = 500

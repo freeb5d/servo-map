@@ -8,10 +8,20 @@ struct AccountTests {
         let json = #"[{"id":"toyota-corolla-2019","make":"Toyota","model":"Corolla","fromYear":2019,"body":"hatch","fuel":"U91","tankLitres":50,"source":"https://example.com"}]"#
         let v = try JSONDecoder().decode([Vehicle].self, from: Data(json.utf8))[0]
         #expect(v.name == "Toyota Corolla")
-        #expect(v.years == "2019–")
+        #expect(v.years == "2019 on")
+        #expect(v.yearRange == "2019 – now")
+        #expect(v.image == nil)
         #expect(v.bodyType == .hatch)
         #expect(v.fuelType == .u91)
         #expect(v.toYear == nil)
+    }
+
+    @Test func carFromTheServerIgnoresPaintAndIsSentWithout() throws {
+        let json = #"{"vehicleId":"mazda-cx-5-2017","name":"Mazda CX-5","body":"suv","paint":"silver","fuel":"U91","tankLitres":56}"#
+        let car = try JSONDecoder().decode(CarDTO.self, from: Data(json.utf8))
+        #expect(car.vehicleId == "mazda-cx-5-2017")
+        let sent = try #require(String(data: try JSONEncoder().encode(car), encoding: .utf8))
+        #expect(!sent.contains("paint"))
     }
 
     @Test func fillUpRoundTripsThroughTheWireFormat() throws {

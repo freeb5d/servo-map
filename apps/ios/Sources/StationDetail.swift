@@ -116,7 +116,7 @@ struct StationDetail: View {
             RoundAction(title: "Log fill-up", symbol: "fuelpump") { logging = true }
             RoundAction(title: store.isSaved(station) ? "Saved" : "Save",
                         symbol: store.isSaved(station) ? "bookmark.fill" : "bookmark") { store.toggleSaved(station) }
-            ShareLink(item: URL(string: "https://www.servo-map.com/station/\(station.id)")!) {
+            ShareLink(item: API.site.appending(path: "station/\(station.id)")) {
                 Image(systemName: "square.and.arrow.up").actionFont().frame(width: 36, height: 36)
             }
             .buttonStyle(.glass)

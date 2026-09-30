@@ -44,6 +44,7 @@ targets:
       - path: ../../packages/design-tokens/generated/swift/ServoMapTokens.swift
       - path: ../../packages/shared/generated/swift/ServoMapBrands.swift
       - path: ../../packages/shared/generated/swift/ServoMapDataSources.swift
+      - path: ../../packages/shared/generated/swift/ServoMapVehicleImages.swift
     # Push for price alerts. Release builds (TestFlight, App Store) use the production APNs gateway.
     entitlements:
       path: Config/ServoMap.entitlements

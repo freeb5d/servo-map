@@ -98,6 +98,11 @@ export function searchVehicles(vehicles: readonly Vehicle[], query: string, limi
     .slice(0, Math.max(1, Math.min(limit, 100)));
 }
 
+/** A make as a file name, e.g. `land-rover`: its mark is `design/car-logos/{slug}.svg`. */
+export function makeSlug(make: string): string {
+  return slug(make);
+}
+
 /** Makes in the catalogue, alphabetical. */
 export function vehicleMakes(vehicles: readonly Vehicle[]): string[] {
   return [...new Set(vehicles.map((v) => v.make))].sort((a, b) => a.localeCompare(b));

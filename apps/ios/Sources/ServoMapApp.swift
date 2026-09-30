@@ -3,12 +3,13 @@ import SwiftUI
 @main
 struct ServoMapApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
-    // Opens on the fuel from the car profile (CarForm writes "defaultFuel").
+    // Opens on the fuel from the car profile (MyCar writes "defaultFuel").
     @State private var store = Store(fuel: FuelType(rawValue: UserDefaults.standard.string(forKey: "defaultFuel") ?? "") ?? .u91)
     @State private var log = FillUpLog()
     @State private var account = AccountStore()
     // Launch arguments open a given screen, so design screenshots are reproducible:
     // -tab map|trends|search, you to open the You sheet, or saved|log|car|alerts|sources for one of its pages, -filters, -detail (opens the cheapest station), -widgets.
+    // With -tab you: -addCar make|model|years|details [-addCarModel Make/Model] opens the add-a-car flow on that step.
     private let args = ProcessInfo.processInfo.arguments
 
     init() {
@@ -65,7 +66,7 @@ private struct AccountSync: ViewModifier {
     @Environment(AccountStore.self) private var account
     @AppStorage("carName") private var carName = "My car"
     @AppStorage("carVehicleID") private var carVehicleID = ""
-    @AppStorage("carPaint") private var carPaint = ""
+    @AppStorage("carBody") private var carBody = ""
     @AppStorage("tankLitres") private var tankLitres = 50
     @AppStorage("defaultFuel") private var defaultFuel = ""
     @AppStorage("priceAlerts") private var priceAlerts = false
@@ -87,7 +88,7 @@ private struct AccountSync: ViewModifier {
                     for id in removed { await account.pushDeletedFillUp(id) }
                 }
             }
-            .onChange(of: "\(carName)|\(carVehicleID)|\(carPaint)|\(tankLitres)|\(defaultFuel)") { debounce { await account.pushCar() } }
+            .onChange(of: "\(carName)|\(carVehicleID)|\(carBody)|\(tankLitres)|\(defaultFuel)") { debounce { await account.pushCar() } }
             .onChange(of: "\(priceAlerts)|\(cycleLow)|\(quietStart)|\(quietEnd)") {
                 // "Near home" is where the user last located themselves, rounded to ~1 km on the server.
                 if cycleLow, let here = store.userLocation {

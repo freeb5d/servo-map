@@ -174,17 +174,20 @@ enum CarSettings {
         CarDTO(vehicleId: d.string(forKey: "carVehicleID").flatMap { $0.isEmpty ? nil : $0 },
                name: d.string(forKey: "carName") ?? "My car",
                body: d.string(forKey: "carBody") ?? BodyType.hatch.rawValue,
-               paint: d.string(forKey: "carPaint") ?? "silver",
                fuel: d.string(forKey: "defaultFuel") ?? FuelType.u91.rawValue,
                tankLitres: d.object(forKey: "tankLitres") as? Int ?? 50,
                catalogueTankLitres: (d.object(forKey: "catalogueTankLitres") as? Int).flatMap { $0 > 0 ? $0 : nil })
     }
 
     static func apply(_ car: CarDTO, store: Store) {
+        // A different car from another device: drop the stored generation; the car pages look the new id up.
+        if (car.vehicleId ?? "") != (d.string(forKey: MyCar.Key.vehicleID) ?? "") {
+            d.removeObject(forKey: MyCar.Key.vehicle)
+            d.set(Date.now.timeIntervalSince1970, forKey: MyCar.Key.since)
+        }
         d.set(car.vehicleId ?? "", forKey: "carVehicleID")
         d.set(car.name, forKey: "carName")
         d.set(car.body, forKey: "carBody")
-        d.set(car.paint, forKey: "carPaint")
         d.set(car.fuel, forKey: "defaultFuel")
         d.set(car.tankLitres, forKey: "tankLitres")
         d.set(car.catalogueTankLitres ?? 0, forKey: "catalogueTankLitres")

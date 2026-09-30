@@ -73,7 +73,7 @@ export async function loadMe(db: D1Database, account: Account): Promise<MeRespon
           vehicleId: (c.vehicle_id as string | null) ?? undefined,
           name: String(c.name),
           body: c.body as CarProfile["body"],
-          paint: String(c.paint),
+          paint: c.paint ? String(c.paint) : undefined,
           fuel: c.fuel as CarProfile["fuel"],
           tankLitres: Number(c.tank_litres),
           catalogueTankLitres: c.catalogue_tank_litres == null ? undefined : Number(c.catalogue_tank_litres),
@@ -149,7 +149,8 @@ export async function setCar(db: D1Database, userId: string, car: CarProfile): P
        ON CONFLICT (user_id) DO UPDATE SET vehicle_id = ?2, name = ?3, body = ?4, paint = ?5, fuel = ?6,
          tank_litres = ?7, catalogue_tank_litres = ?8, updated_at = ?9`,
     )
-    .bind(userId, car.vehicleId ?? null, car.name, car.body, car.paint, car.fuel, car.tankLitres, car.catalogueTankLitres ?? null, now())
+    // The paint column stays NOT NULL for older rows; a car saved without paint stores "".
+    .bind(userId, car.vehicleId ?? null, car.name, car.body, car.paint ?? "", car.fuel, car.tankLitres, car.catalogueTankLitres ?? null, now())
     .run();
 }
 

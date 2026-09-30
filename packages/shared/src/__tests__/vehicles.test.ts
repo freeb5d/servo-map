@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseVehicles, searchVehicles, vehicleMakes } from "../vehicles";
+import { makeSlug, parseVehicles, searchVehicles, vehicleMakes } from "../vehicles";
 
 const HEADER = "make,model,from_year,to_year,body,fuel,tank_litres,source";
 const CSV = [
@@ -54,5 +54,13 @@ describe("searchVehicles", () => {
 
   it("lists makes alphabetically", () => {
     expect(vehicleMakes(vehicles)).toEqual(["Mazda", "Toyota"]);
+  });
+});
+
+describe("makeSlug", () => {
+  it("names a make's mark file", () => {
+    expect(makeSlug("Mazda")).toBe("mazda");
+    expect(makeSlug("Land Rover")).toBe("land-rover");
+    expect(makeSlug("Mercedes-Benz")).toBe("mercedes-benz");
   });
 });

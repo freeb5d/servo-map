@@ -30,11 +30,11 @@ struct FillUpDTO: Codable, Equatable, Sendable {
     let areaAverage: Double?
 }
 
+/** The car as synced. `paint` is no longer sent (decision 0008); a server value is ignored. */
 struct CarDTO: Codable, Equatable, Sendable {
     var vehicleId: String?
     var name: String
     var body: String
-    var paint: String
     var fuel: String
     var tankLitres: Int
     var catalogueTankLitres: Int?

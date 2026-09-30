@@ -562,6 +562,9 @@ paths:
       operationId: putCar
       tags: [Accounts]
       summary: Set the car
+      description: |
+        A `CarProfile` (`@servo-map/shared`). `paint` is optional and no longer sent by the apps
+        (decision 0008); a value from an older app version is still accepted and stored.
       security:
         - session: []
       responses:
@@ -746,7 +749,7 @@ components:
           format: date-time
     Vehicle:
       type: object
-      required: [id, make, model, fromYear, body, fuel, tankLitres, source]
+      required: [id, make, model, fromYear, body, fuel, tankLitres, source, image]
       properties:
         id:
           type: string
@@ -775,6 +778,14 @@ components:
           type: string
           format: uri
           description: Where the tank capacity was read.
+        image:
+          type: string
+          example: /cars/generic-suv.jpg
+          description: |
+            Site-relative path of the car's picture on the website (resolve it against
+            https://www.servo-map.com): the generation's own render when it has one, otherwise the
+            unbranded stand-in for its body type, `/cars/generic-{body}.jpg`. An illustration, not a
+            photo of the actual vehicle. Owned by `vehicleImagePath` in `@servo-map/shared`.
     FuelType:
       type: string
       enum: [U91, U95, U98, E10, Diesel]

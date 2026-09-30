@@ -115,7 +115,8 @@ meRoute.put("/car", async (c) => {
   const errors: string[] = [];
   if (!isStr(car.name, 60)) errors.push("name");
   if (!BODY_TYPES.includes(car.body as never)) errors.push("body");
-  if (!isStr(car.paint, 20)) errors.push("paint");
+  // Retired with the car drawings (decision 0008); still accepted from older app versions.
+  if (car.paint !== undefined && !isStr(car.paint, 20)) errors.push("paint");
   if (!FUEL_TYPES.includes(car.fuel as never)) errors.push("fuel");
   if (!isNum(car.tankLitres, 20, 200) || !Number.isInteger(car.tankLitres)) errors.push("tankLitres");
   if (car.vehicleId !== undefined && !isStr(car.vehicleId, 80)) errors.push("vehicleId");

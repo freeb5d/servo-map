@@ -30,7 +30,11 @@ export interface CarProfile {
   vehicleId?: string;
   name: string;
   body: BodyType;
-  paint: string;
+  /**
+   * Retired with the car drawings (decision 0008): the apps no longer send it. The server keeps
+   * the column and accepts a value from older app versions.
+   */
+  paint?: string;
   fuel: FuelType;
   tankLitres: number;
   catalogueTankLitres?: number;

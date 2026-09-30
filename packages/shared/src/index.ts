@@ -30,7 +30,15 @@ export {
   parseVehicles,
   searchVehicles,
   vehicleMakes,
+  makeSlug,
 } from "./vehicles";
+export {
+  type VehicleWithImage,
+  CAR_IMAGE_DIR,
+  vehicleImagePath,
+  withImage,
+} from "./vehicle-images";
+export { RENDERED_VEHICLE_IDS } from "./generated/car-renders";
 export { VEHICLES } from "./generated/vehicles.data";
 export { type City, CITIES } from "./cities";
 export { type DataSource, DATA_SOURCES, dataAttribution } from "./data-sources";

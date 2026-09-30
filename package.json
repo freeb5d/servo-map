@@ -8,7 +8,8 @@
     "lint": "pnpm -r lint",
     "typecheck": "pnpm -r typecheck",
     "brand-logos": "tsx design/brand-logos/generate.ts",
-    "car-renders": "tsx design/car-renders/generate.ts"
+    "car-renders": "tsx design/car-renders/generate.ts",
+    "car-logos": "tsx design/car-logos/generate.ts"
   },
   "engines": {
     "node": ">=20"

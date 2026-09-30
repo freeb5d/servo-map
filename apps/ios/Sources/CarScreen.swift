@@ -1,203 +1,222 @@
 import SwiftUI
 
-/** Paint colours for the car drawing; everyday car colours, not brand or tier colours. */
-enum CarPaint: String, CaseIterable, Identifiable {
-    case white, silver, grey, black, red, blue, green, bronze
-    var id: String { rawValue }
-    var color: Color {
-        switch self {
-        case .white: Color(brand: 0xEDEBE6)
-        case .silver: Color(brand: 0xB8B8B4)
-        case .grey: Color(brand: 0x6E6E6A)
-        case .black: Color(brand: 0x2B2B2B)
-        case .red: Color(brand: 0xA8322D)
-        case .blue: Color(brand: 0x2F4F7F)
-        case .green: Color(brand: 0x3F5B4A)
-        case .bronze: Color(brand: 0x8A6A48)
+/**
+ * Your car (decision 0008): the picture, the make and model, the catalogue's figures with where
+ * they came from, what a full tank costs nearby today, and what has gone into this car.
+ */
+struct CarPage: View {
+    @Environment(Store.self) private var store
+    @Environment(FillUpLog.self) private var log
+    @Environment(VehicleCatalogue.self) private var catalogue
+    @State private var flow: AddCarFlow.Start?
+
+    var body: some View {
+        WithStoredCar { car in
+            ScrollView {
+                if car.exists { content(car) } else { empty }
+            }
+            .background(ServoMapColor.bg)
         }
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                Button("Change car") { flow = .make }.actionFont()
+            }
+        }
+        .sheet(item: $flow) { start in AddCarFlow(start: start, catalogue: catalogue) }
+    }
+
+    private func content(_ car: StoredCar) -> some View {
+        VStack(alignment: .leading, spacing: 0) {
+            CarPicture(path: car.imagePath, make: car.make, subject: car.title, labelled: true)
+                .frame(height: 197)
+                .padding(.top, 8)
+            identity(car).padding(.top, 8)
+            specs(car).padding(.top, 20)
+            FullTankToday(car: car).padding(.top, 28)
+            history(car).padding(.top, 28)
+            Button { flow = .edit } label: {
+                Text("Edit name and tank").frame(maxWidth: .infinity, minHeight: 36)
+            }
+            .buttonStyle(.glass)
+            .buttonBorderShape(.capsule)
+            .actionFont()
+            .padding(.top, 24)
+            .padding(.horizontal, 4)
+        }
+        .padding(.horizontal, 20)
+        .padding(.bottom, 32)
+    }
+
+    private func identity(_ car: StoredCar) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            if let make = car.make {
+                HStack(spacing: 10) {
+                    CarMark(make: make, size: 28)
+                    Text(make).font(ServoMapFont.body(.footnote)).foregroundStyle(ServoMapColor.ink2)
+                }
+            }
+            Text(car.vehicle?.model ?? car.title).font(ServoMapFont.display(.largeTitle, weight: 500))
+                .accessibilityAddTraits(.isHeader)
+            if let nickname = car.nickname {
+                Text("“\(nickname)”").font(ServoMapFont.body(.footnote)).foregroundStyle(ServoMapColor.ink3)
+            }
+        }
+    }
+
+    private func specs(_ car: StoredCar) -> some View {
+        VStack(spacing: 0) {
+            if let vehicle = car.vehicle {
+                SpecRow(label: "Generation") { Text("\(vehicle.years) · \(vehicle.bodyType.label)") }
+                SpecRow(label: "Recommended fuel") { Text(vehicle.fuel) }
+            } else {
+                SpecRow(label: "Body") { Text(car.body.label) }
+            }
+            SpecRow(label: "Tank") {
+                HStack(spacing: 8) {
+                    if car.catalogueTankLitres > 0 {
+                        Text(car.tankFromCatalogue ? "catalogue" : "your value")
+                            .font(ServoMapFont.label).foregroundStyle(ServoMapColor.ink3)
+                            .padding(.horizontal, 6).padding(.vertical, 1)
+                            .overlay(RoundedRectangle(cornerRadius: ServoMapRadius.r2).strokeBorder(ServoMapColor.line, lineWidth: 0.5))
+                    }
+                    Text("\(car.tankLitres) L").font(ServoMapFont.display(.body, size: 17)).monospacedDigit()
+                }
+            }
+            if let vehicle = car.vehicle, let url = URL(string: vehicle.source) {
+                SpecRow(label: "Source") {
+                    Link(vehicle.sourceHost ?? vehicle.source, destination: url)
+                        .font(ServoMapFont.body)
+                        .underline(color: ServoMapColor.line)
+                        .foregroundStyle(ServoMapColor.ink)
+                }
+            }
+        }
+        .overlay(alignment: .top) { Hairline() }
+    }
+
+    @ViewBuilder private func history(_ car: StoredCar) -> some View {
+        let history = CarHistory.of(log.entries, since: car.since)
+        VStack(alignment: .leading, spacing: 0) {
+            SectionHeading(title: "In this car") {
+                if let history {
+                    Text("since \(history.since.formatted(.dateTime.day().month()))").foregroundStyle(ServoMapColor.ink3)
+                        .font(ServoMapFont.body(.footnote))
+                }
+            }
+            .padding(.bottom, 6)
+            .overlay(alignment: .bottom) { if history == nil { Hairline() } }
+            if let history {
+                RuledFigures(figures: [
+                    RuledFigure(label: "Fill-ups", value: "\(history.count)"),
+                    RuledFigure(label: "Litres", value: history.litres.formatted(.number.precision(.fractionLength(1)))),
+                    RuledFigure(label: "Avg paid", value: "\(history.averagePaid.formatted(.number.precision(.fractionLength(1))))¢"),
+                ])
+                // RuledFigures (Trends/TrendsParts.swift) insets itself for a full-width page; this page already is.
+                .padding(.horizontal, -20)
+            } else {
+                Text("Fill-ups you log from now on add up here.")
+                    .font(ServoMapFont.body).foregroundStyle(ServoMapColor.ink2)
+                    .padding(.vertical, 10)
+            }
+        }
+    }
+
+    private var empty: some View {
+        VStack(spacing: 12) {
+            Image(systemName: "car.side").font(ServoMapFont.display(.largeTitle)).foregroundStyle(ServoMapColor.ink3)
+            Text("No car yet").font(ServoMapFont.display(.title3, weight: 500))
+            Text("Add your car to price a full tank nearby and start the log on its fuel.")
+                .font(ServoMapFont.body).foregroundStyle(ServoMapColor.ink2).multilineTextAlignment(.center)
+            Button("Add your car") { flow = .make }.buttonStyle(.glassProminent).buttonBorderShape(.capsule).actionFont()
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.horizontal, 24)
+        .padding(.top, 48)
+    }
+}
+
+extension AddCarFlow.Start: Identifiable {
+    var id: Self { self }
+}
+
+/** A spec line: label at the left, value at the right, a hairline under it. */
+private struct SpecRow<Value: View>: View {
+    let label: String
+    @ViewBuilder var value: Value
+
+    var body: some View {
+        HStack(alignment: .center) {
+            Text(label).font(ServoMapFont.body).foregroundStyle(ServoMapColor.ink2)
+            Spacer(minLength: 12)
+            value.font(ServoMapFont.body(.callout))
+        }
+        .frame(minHeight: 44)
+        .overlay(alignment: .bottom) { Hairline() }
+        .accessibilityElement(children: .combine)
     }
 }
 
 /**
- * My car: a drawing of it, the model picked from the shared catalogue (which fills in the tank
- * size and fuel), the tank size overridable, and a paint colour.
+ * "A full tank today": the tank at the cheapest, average and dearest current price nearby, as
+ * three dots on one scale (docs/design/system.md: dots on a scale, not bars).
  */
-struct CarForm: View {
+private struct FullTankToday: View {
+    let car: StoredCar
     @Environment(Store.self) private var store
-    @AppStorage("carName") private var name = "My car"
-    @AppStorage("carVehicleID") private var vehicleID = ""
-    @AppStorage("carBody") private var carBody = BodyType.hatch.rawValue
-    @AppStorage("carPaint") private var paint = CarPaint.silver.rawValue
-    @AppStorage("tankLitres") private var tankLitres = 50
-    @AppStorage("catalogueTankLitres") private var catalogueTank = 0
-    @AppStorage("defaultFuel") private var defaultFuel = FuelType.u91.rawValue
-    @State private var picking = false
 
     var body: some View {
-        List {
-            Section {
-                VStack(spacing: 14) {
-                    CarSilhouette(BodyType(rawValue: carBody) ?? .hatch, paint: (CarPaint(rawValue: paint) ?? .silver).color)
-                        .frame(maxWidth: 280)
-                        .animation(ServoMapMotion.standard, value: paint)
-                    Text(name).font(ServoMapFont.display(.title2, weight: 600))
-                    HStack(spacing: 10) {
-                        ForEach(CarPaint.allCases) { p in
-                            Button { paint = p.rawValue } label: {
-                                Circle().fill(p.color)
-                                    .overlay(Circle().strokeBorder(ServoMapColor.line))
-                                    .overlay(Circle().inset(by: -4).stroke(ServoMapColor.ink, lineWidth: paint == p.rawValue ? 2 : 0))
-                                    .frame(width: 24, height: 24)
-                            }
-                            .buttonStyle(.plain)
-                            .accessibilityLabel(p.rawValue.capitalized)
-                            .accessibilityAddTraits(paint == p.rawValue ? .isSelected : [])
-                        }
-                    }
-                    .padding(.bottom, 4)
-                }
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 8)
-                .paperRow()
+        let tank = FullTank.near(store.stations, fuel: car.fuel, litres: car.tankLitres, loadedKm: store.radiusKm)
+        VStack(alignment: .leading, spacing: 12) {
+            SectionHeading(title: "A full tank today") {
+                Text("\(car.fuel.rawValue) within \(tank?.withinKm ?? 5) km").font(ServoMapFont.body(.footnote)).foregroundStyle(ServoMapColor.ink3)
             }
-
-            Section {
-                Button { picking = true } label: {
-                    HStack {
-                        Text("Model").foregroundStyle(ServoMapColor.ink)
-                        Spacer()
-                        Text(vehicleID.isEmpty ? "Choose" : name).foregroundStyle(ServoMapColor.ink3).lineLimit(1)
-                        Image(systemName: "chevron.right").font(.footnote.weight(.semibold)).foregroundStyle(ServoMapColor.ink3)
-                    }
-                }
-                .paperRow()
-                Picker("Fuel", selection: $defaultFuel) {
-                    ForEach(FuelType.allCases) { Text($0.rawValue).tag($0.rawValue) }
-                }
-                .paperRow()
-                Stepper(value: $tankLitres, in: 20...200) {
-                    HStack(spacing: 6) {
-                        Text("Tank")
-                        Text("\(tankLitres) L").monospacedDigit().foregroundStyle(ServoMapColor.ink2)
-                        if catalogueTank > 0 {
-                            Text(tankLitres == catalogueTank ? "catalogue" : "your value")
-                                .font(ServoMapFont.label)
-                                .padding(.horizontal, 6).padding(.vertical, 2)
-                                .background(ServoMapColor.wash, in: Capsule())
-                                .foregroundStyle(ServoMapColor.ink3)
-                        }
-                    }
-                }
-                .paperRow()
-                if catalogueTank > 0 && tankLitres != catalogueTank {
-                    Button("Use the catalogue's \(catalogueTank) L") { tankLitres = catalogueTank }.paperRow()
-                }
-            } footer: {
-                Text("ServoMap opens on this fuel and prices a full tank at this size.")
-            }
-
-            Section {
-                TextField("Name", text: $name).paperRow()
-            } header: {
-                Text("Name")
+            if let tank {
+                TankScale(tank: tank).frame(height: 64)
+                Text("\(money(tank.spread)) between the cheapest and dearest tank near you.")
+                    .font(ServoMapFont.body(.footnote)).foregroundStyle(ServoMapColor.ink2)
+            } else {
+                Text(store.loading ? "Loading prices…" : "No current \(car.fuel.rawValue) prices near \(store.placeName).")
+                    .font(ServoMapFont.body).foregroundStyle(ServoMapColor.ink2)
             }
         }
-        .paperList()
-        .onChange(of: defaultFuel) { if let f = FuelType(rawValue: defaultFuel) { store.fuel = f } }
-        .sheet(isPresented: $picking) { VehiclePicker(onPick: choose) }
-    }
-
-    /** Takes a catalogue model: its name, drawing, fuel and tank size (which stays editable). */
-    private func choose(_ v: Vehicle) {
-        vehicleID = v.id
-        name = v.name
-        carBody = v.body
-        tankLitres = v.tankLitres
-        catalogueTank = v.tankLitres
-        if let f = v.fuelType { defaultFuel = f.rawValue }
     }
 }
 
-/** Search the catalogue as you type, or browse it by make. */
-struct VehiclePicker: View {
-    let onPick: (Vehicle) -> Void
-    @Environment(\.dismiss) private var dismiss
-    @State private var query = ""
-    @State private var results: [Vehicle] = []
-    @State private var makes: [String] = []
-    @State private var failed = false
+/** Three dots on one hairline: cheapest at the left, dearest at the right, the average between. */
+private struct TankScale: View {
+    let tank: FullTank
 
     var body: some View {
-        NavigationStack {
-            List {
-                if query.isEmpty {
-                    Section("Makes") {
-                        ForEach(makes, id: \.self) { make in
-                            Button { query = make } label: {
-                                HStack {
-                                    Text(make).foregroundStyle(ServoMapColor.ink)
-                                    Spacer()
-                                    Image(systemName: "chevron.right").font(.footnote.weight(.semibold)).foregroundStyle(ServoMapColor.ink3)
-                                }
-                            }
-                            .paperRow()
-                        }
-                    }
-                } else {
-                    Section {
-                        ForEach(results) { v in
-                            Button { onPick(v); dismiss() } label: { VehicleRow(vehicle: v) }.paperRow()
-                        }
-                    } footer: {
-                        Text("Not listed? Close this and enter the tank size yourself.")
-                    }
-                }
-            }
-            .paperList()
-            .overlay {
-                if failed { ContentUnavailableView("Couldn't load the catalogue", systemImage: "wifi.exclamationmark", description: Text("Check your connection and try again.")) }
-                else if !query.isEmpty && results.isEmpty { ContentUnavailableView.search(text: query) }
-            }
-            .navigationTitle("Choose your car")
-            .navigationBarTitleDisplayMode(.inline)
-            .searchable(text: $query, placement: .navigationBarDrawer(displayMode: .always), prompt: "Make, model or year")
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() }.actionFont() }
-            }
-            .task { await loadMakes() }
-            .task(id: query) { await search() }
-        }
-        .presentationBackground(ServoMapColor.bg)
-    }
-
-    private func loadMakes() async {
-        do { makes = try await API().vehicleMakes(); failed = false } catch { failed = true }
-    }
-
-    private func search() async {
-        guard !query.isEmpty else { results = []; return }
-        // Debounce: wait for a pause in typing before asking the server.
-        try? await Task.sleep(for: .milliseconds(250))
-        guard !Task.isCancelled else { return }
-        do { results = try await API().vehicles(query); failed = false } catch { failed = true }
-    }
-}
-
-private struct VehicleRow: View {
-    let vehicle: Vehicle
-    var body: some View {
-        HStack(spacing: 12) {
-            CarSilhouette(vehicle.bodyType).frame(width: 64)
-            VStack(alignment: .leading, spacing: 2) {
-                Text(vehicle.name).foregroundStyle(ServoMapColor.ink)
-                Text("\(vehicle.years) · \(vehicle.bodyType.label)").font(ServoMapFont.small).foregroundStyle(ServoMapColor.ink3)
-            }
-            Spacer()
-            VStack(alignment: .trailing, spacing: 2) {
-                Text("\(vehicle.tankLitres) L").font(ServoMapFont.display(.body)).monospacedDigit().foregroundStyle(ServoMapColor.ink)
-                Text(vehicle.fuel).font(ServoMapFont.label).foregroundStyle(ServoMapColor.ink3)
+        GeometryReader { g in
+            let w = g.size.width
+            let dot: CGFloat = 14
+            let x = dot / 2 + (w - dot) * tank.averagePosition
+            ZStack(alignment: .topLeading) {
+                Hairline().frame(width: w).offset(y: 30)
+                Circle().fill(ServoMapColor.priceCheap).frame(width: dot, height: dot).offset(y: 24)
+                Circle().fill(ServoMapColor.surface).overlay(Circle().strokeBorder(ServoMapColor.ink, lineWidth: 2))
+                    .frame(width: dot, height: dot).offset(x: x - dot / 2, y: 24)
+                Circle().fill(ServoMapColor.priceExpensive).frame(width: dot, height: dot).offset(x: w - dot, y: 24)
+                figure("Cheapest", tank.cheapest, ServoMapColor.priceCheap, weight: 600)
+                    .frame(width: w, alignment: .leading)
+                figure("Average", tank.average, ServoMapColor.ink2)
+                    .fixedSize()
+                    .position(x: min(max(x, 60), w - 60), y: 30)
+                figure("Dearest", tank.dearest, ServoMapColor.priceExpensive)
+                    .frame(width: w, alignment: .trailing)
             }
         }
-        .accessibilityElement(children: .combine)
+        .accessibilityElement()
+        .accessibilityLabel("A full tank costs \(money(tank.cheapest)) at the cheapest, \(money(tank.average)) on average and \(money(tank.dearest)) at the dearest")
+    }
+
+    /** A dot's caption above the line and its dollar figure below. */
+    private func figure(_ label: String, _ dollars: Double, _ tint: Color, weight: Int = 400) -> some View {
+        VStack(alignment: label == "Dearest" ? .trailing : .leading, spacing: 0) {
+            Text(label).font(ServoMapFont.body(.caption, weight: weight)).foregroundStyle(tint)
+            Spacer().frame(height: 24)
+            Text(money(dollars)).font(ServoMapFont.display(.callout, size: 16)).monospacedDigit()
+        }
     }
 }

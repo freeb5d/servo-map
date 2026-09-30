@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { parseVehicles, type ApiResponse, type Vehicle } from "@servo-map/shared";
+import { parseVehicles, type ApiResponse, type VehicleWithImage } from "@servo-map/shared";
 import { createVehiclesRoute } from "../vehicles";
 
 const catalogue = parseVehicles([
@@ -14,19 +14,31 @@ describe("GET /vehicles", () => {
   it("searches make and model", async () => {
     const res = await route.request("/?q=toyota");
     expect(res.status).toBe(200);
-    const body = (await res.json()) as ApiResponse<Vehicle[]>;
+    const body = (await res.json()) as ApiResponse<VehicleWithImage[]>;
     expect(body.data.map((v) => v.model)).toEqual(["Corolla", "HiLux"]);
     expect(body.data[0]).toMatchObject({ tankLitres: 50, fuel: "U91", body: "hatch" });
     expect(res.headers.get("Cache-Control")).toContain("s-maxage=86400");
   });
 
+  it("gives a generation without its own render the stand-in for its body", async () => {
+    const unrendered = createVehiclesRoute(catalogue, new Set());
+    const body = (await (await unrendered.request("/?q=toyota")).json()) as ApiResponse<VehicleWithImage[]>;
+    expect(body.data.map((v) => v.image)).toEqual(["/cars/generic-hatch.jpg", "/cars/generic-ute.jpg"]);
+  });
+
+  it("uses a generation's own render when it has one", async () => {
+    const rendered = createVehiclesRoute(catalogue, new Set(["mazda-cx-5-2017"]));
+    const body = (await (await rendered.request("/?q=cx-5")).json()) as ApiResponse<VehicleWithImage[]>;
+    expect(body.data[0].image).toBe("/cars/mazda-cx-5-2017.jpg");
+  });
+
   it("returns an empty list when nothing matches", async () => {
-    const body = (await (await route.request("/?q=tesla")).json()) as ApiResponse<Vehicle[]>;
+    const body = (await (await route.request("/?q=tesla")).json()) as ApiResponse<VehicleWithImage[]>;
     expect(body.data).toEqual([]);
   });
 
   it("clamps the limit", async () => {
-    const body = (await (await route.request("/?limit=1")).json()) as ApiResponse<Vehicle[]>;
+    const body = (await (await route.request("/?limit=1")).json()) as ApiResponse<VehicleWithImage[]>;
     expect(body.data).toHaveLength(1);
   });
 
