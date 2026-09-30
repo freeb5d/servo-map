@@ -13,7 +13,7 @@ Decision 0008 explains the choice.
   and `reviewed`. A person sets `reviewed` to `true` after checking that the render matches the
   generation (body, lights, grille, wheels) and shows no badge, text or plate number.
 - **What they are not:** AI-generated illustrations, not photographs of the vehicle or manufacturer
-  material. Badges are left off to keep trademarks out of the picture. The apps label them as illustrations.
+  material. The apps label them as illustrations.
 - **Where they go:** `pnpm car-renders` copies them to `packages/web/public/cars/`, and apps load them
   from `/cars/{id}.jpg` on the site. `pnpm car-renders --check` fails CI when a copy is stale or an
   image has no manifest entry.
@@ -21,6 +21,14 @@ Decision 0008 explains the choice.
 To replace one image, rerun with `--only={id} --force`, check it, and commit the image with its
 manifest entry.
 
-Known limit: the model draws the maker's badge on real models even when told not to (checked on a
-CX-5 and a HiLux on 2026-09-30), so per-model renders need the badge removed, or a decision to keep
-it, before they are added. The generic stand-ins were each checked for badges and lettering.
+Badges: per-model renders keep the maker's badge, as on the real car (owner's decision,
+2026-09-30); the badge identifies the vehicle and implies no endorsement. Door decals and model
+lettering are prompted away and checked in review. The generic stand-ins carry no badge or lettering.
+
+Review of the first catalogue run (2026-09-30): every render was checked on labelled contact
+sheets (256 × 144). 16 were dropped and fall back to their body type's stand-in: 15 generations from
+2021 on that the model drew as the previous generation (Everest, Ranger, Civic, CR-V, Kona, Santa Fe,
+Carnival, MG ZS, Outlander, Triton, X-Trail, Swift, LandCruiser 300, Prado) or with another maker's
+grille (Tank 300), and one with lettering on the plate (Crosstrek). Four grey studio backgrounds were
+flood-filled to white. Ten Volkswagen generations were not rendered because the fal balance ran out;
+rerun `generate --only=…` for them after a top-up.

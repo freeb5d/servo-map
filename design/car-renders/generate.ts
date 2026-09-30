@@ -59,7 +59,7 @@ export function genericPromptFor(body: Vehicle["body"]): string {
   ].join(", ");
 }
 
-/** The prompt for one generation. Badges are left off to keep trademarks out of the picture. */
+/** The prompt for one generation. The maker's badge stays, as on the real car (decision 0008). */
 export function promptFor(v: Vehicle): string {
   const until = v.toYear ?? "today";
   const year = v.toYear ? Math.round((v.fromYear + v.toYear) / 2) : v.fromYear + 2;
@@ -69,7 +69,7 @@ export function promptFor(v: Vehicle): string {
     "front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image)",
     "seen from slightly above eye level, full vehicle in frame, pure white seamless background",
     "soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels",
-    "blank number plates, no badges or logos on the vehicle, no text, no watermark, no people",
+    "blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
   ].join(", ");
 }
 

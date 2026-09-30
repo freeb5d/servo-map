@@ -1,4 +1,116 @@
 {
+  "audi-q5-2015": {
+    "prompt": "Studio catalogue render of a white 2016 Audi Q5 SUV, (the generation sold in Australia from 2015 to 2017), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 392678132,
+    "generatedAt": "2026-09-30T06:03:30.624Z",
+    "reviewed": true
+  },
+  "audi-q5-2018": {
+    "prompt": "Studio catalogue render of a white 2020 Audi Q5 SUV, (the generation sold in Australia from 2018 to today), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 1426191955,
+    "generatedAt": "2026-09-30T06:03:18.558Z",
+    "reviewed": true
+  },
+  "bmw-3-series-2015": {
+    "prompt": "Studio catalogue render of a white 2017 BMW 3 Series sedan, (the generation sold in Australia from 2015 to today), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 1175578834,
+    "generatedAt": "2026-09-30T06:03:16.053Z",
+    "reviewed": true
+  },
+  "bmw-x1-2015": {
+    "prompt": "Studio catalogue render of a white 2017 BMW X1 SUV, (the generation sold in Australia from 2015 to today), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 1592165199,
+    "generatedAt": "2026-09-30T06:03:18.434Z",
+    "reviewed": true
+  },
+  "bmw-x3-2015": {
+    "prompt": "Studio catalogue render of a white 2016 BMW X3 SUV, (the generation sold in Australia from 2015 to 2017), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 1517825426,
+    "generatedAt": "2026-09-30T06:03:44.347Z",
+    "reviewed": true
+  },
+  "bmw-x3-2018": {
+    "prompt": "Studio catalogue render of a white 2020 BMW X3 SUV, (the generation sold in Australia from 2018 to today), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 1879527434,
+    "generatedAt": "2026-09-30T06:03:44.276Z",
+    "reviewed": true
+  },
+  "byd-sealion-6-2025": {
+    "prompt": "Studio catalogue render of a white 2027 BYD Sealion 6 SUV, (the generation sold in Australia from 2025 to today), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 1899492983,
+    "generatedAt": "2026-09-30T06:03:46.097Z",
+    "reviewed": true
+  },
+  "byd-shark-6-2024": {
+    "prompt": "Studio catalogue render of a white 2026 BYD Shark 6 ute, (the generation sold in Australia from 2024 to today), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 1534651057,
+    "generatedAt": "2026-09-30T06:03:56.156Z",
+    "reviewed": true
+  },
+  "ford-ecosport-2015": {
+    "prompt": "Studio catalogue render of a white 2019 Ford EcoSport SUV, (the generation sold in Australia from 2015 to 2023), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 997916813,
+    "generatedAt": "2026-09-30T06:04:07.708Z",
+    "reviewed": true
+  },
+  "ford-escape-2020": {
+    "prompt": "Studio catalogue render of a white 2022 Ford Escape SUV, (the generation sold in Australia from 2020 to today), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 149793113,
+    "generatedAt": "2026-09-30T06:04:06.423Z",
+    "reviewed": true
+  },
+  "ford-everest-2015": {
+    "prompt": "Studio catalogue render of a white 2019 Ford Everest SUV, (the generation sold in Australia from 2015 to 2022), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 2027073448,
+    "generatedAt": "2026-09-30T06:04:06.353Z",
+    "reviewed": true
+  },
+  "ford-fiesta-2015": {
+    "prompt": "Studio catalogue render of a white 2019 Ford Fiesta hatchback, (the generation sold in Australia from 2015 to 2022), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 404320433,
+    "generatedAt": "2026-09-30T06:04:37.756Z",
+    "reviewed": true
+  },
+  "ford-focus-2015": {
+    "prompt": "Studio catalogue render of a white 2019 Ford Focus hatchback, (the generation sold in Australia from 2015 to 2022), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 2037214539,
+    "generatedAt": "2026-09-30T06:04:31.720Z",
+    "reviewed": true
+  },
+  "ford-puma-2020": {
+    "prompt": "Studio catalogue render of a white 2022 Ford Puma SUV, (the generation sold in Australia from 2020 to today), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 1342421245,
+    "generatedAt": "2026-09-30T06:04:29.369Z",
+    "reviewed": true
+  },
+  "ford-ranger-2015": {
+    "prompt": "Studio catalogue render of a white 2019 Ford Ranger ute, (the generation sold in Australia from 2015 to 2022), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 604111594,
+    "generatedAt": "2026-09-30T06:04:50.539Z",
+    "reviewed": true
+  },
+  "ford-territory-2015": {
+    "prompt": "Studio catalogue render of a white 2016 Ford Territory SUV, (the generation sold in Australia from 2015 to 2016), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 1052883131,
+    "generatedAt": "2026-09-30T06:04:58.460Z",
+    "reviewed": true
+  },
   "generic-hatch": {
     "prompt": "Studio catalogue render of a white modern generic hatchback of no real brand, an original unbranded design, front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, simple five-spoke wheels, blank number plates, no badges, no emblems, no logos, no lettering anywhere on the vehicle, no watermark, no people",
     "model": "fal-ai/flux-2-max",
@@ -39,6 +151,965 @@
     "model": "fal-ai/flux-2-max",
     "seed": 1928011319,
     "generatedAt": "2026-09-30T05:54:44.215Z",
+    "reviewed": true
+  },
+  "gwm-haval-h6-2021": {
+    "prompt": "Studio catalogue render of a white 2023 GWM Haval H6 SUV, (the generation sold in Australia from 2021 to today), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 800684586,
+    "generatedAt": "2026-09-30T06:04:58.976Z",
+    "reviewed": true
+  },
+  "gwm-haval-jolion-2021": {
+    "prompt": "Studio catalogue render of a white 2023 GWM Haval Jolion SUV, (the generation sold in Australia from 2021 to today), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 1438760023,
+    "generatedAt": "2026-09-30T06:05:11.967Z",
+    "reviewed": true
+  },
+  "holden-astra-2016": {
+    "prompt": "Studio catalogue render of a white 2018 Holden Astra hatchback, (the generation sold in Australia from 2016 to 2020), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 826754118,
+    "generatedAt": "2026-09-30T06:05:26.000Z",
+    "reviewed": true
+  },
+  "holden-barina-2015": {
+    "prompt": "Studio catalogue render of a white 2017 Holden Barina hatchback, (the generation sold in Australia from 2015 to 2018), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 2034114547,
+    "generatedAt": "2026-09-30T06:05:24.402Z",
+    "reviewed": true
+  },
+  "holden-captiva-2015": {
+    "prompt": "Studio catalogue render of a white 2017 Holden Captiva SUV, (the generation sold in Australia from 2015 to 2018), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 960340538,
+    "generatedAt": "2026-09-30T06:05:34.268Z",
+    "reviewed": true
+  },
+  "holden-colorado-2015": {
+    "prompt": "Studio catalogue render of a white 2018 Holden Colorado ute, (the generation sold in Australia from 2015 to 2020), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 1024855734,
+    "generatedAt": "2026-09-30T06:05:35.369Z",
+    "reviewed": true
+  },
+  "holden-commodore-2015": {
+    "prompt": "Studio catalogue render of a white 2016 Holden Commodore sedan, (the generation sold in Australia from 2015 to 2017), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 1823046472,
+    "generatedAt": "2026-09-30T06:05:46.480Z",
+    "reviewed": true
+  },
+  "holden-commodore-2018": {
+    "prompt": "Studio catalogue render of a white 2019 Holden Commodore sedan, (the generation sold in Australia from 2018 to 2020), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 1841626409,
+    "generatedAt": "2026-09-30T06:05:48.834Z",
+    "reviewed": true
+  },
+  "holden-cruze-2015": {
+    "prompt": "Studio catalogue render of a white 2016 Holden Cruze hatchback, (the generation sold in Australia from 2015 to 2016), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 802006224,
+    "generatedAt": "2026-09-30T06:05:53.584Z",
+    "reviewed": true
+  },
+  "holden-trax-2015": {
+    "prompt": "Studio catalogue render of a white 2018 Holden Trax SUV, (the generation sold in Australia from 2015 to 2020), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 1472369271,
+    "generatedAt": "2026-09-30T06:05:59.894Z",
+    "reviewed": true
+  },
+  "honda-accord-2015": {
+    "prompt": "Studio catalogue render of a white 2019 Honda Accord sedan, (the generation sold in Australia from 2015 to 2022), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 2028012218,
+    "generatedAt": "2026-09-30T06:06:06.702Z",
+    "reviewed": true
+  },
+  "honda-civic-2016": {
+    "prompt": "Studio catalogue render of a white 2019 Honda Civic hatchback, (the generation sold in Australia from 2016 to 2021), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 448068792,
+    "generatedAt": "2026-09-30T06:06:29.033Z",
+    "reviewed": true
+  },
+  "honda-cr-v-2015": {
+    "prompt": "Studio catalogue render of a white 2016 Honda CR-V SUV, (the generation sold in Australia from 2015 to 2017), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 853780878,
+    "generatedAt": "2026-09-30T06:06:17.934Z",
+    "reviewed": true
+  },
+  "honda-cr-v-2018": {
+    "prompt": "Studio catalogue render of a white 2020 Honda CR-V SUV, (the generation sold in Australia from 2018 to 2022), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 445565377,
+    "generatedAt": "2026-09-30T06:06:13.720Z",
+    "reviewed": true
+  },
+  "honda-hr-v-2015": {
+    "prompt": "Studio catalogue render of a white 2018 Honda HR-V SUV, (the generation sold in Australia from 2015 to 2021), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 2045790246,
+    "generatedAt": "2026-09-30T06:06:38.909Z",
+    "reviewed": true
+  },
+  "honda-hr-v-2022": {
+    "prompt": "Studio catalogue render of a white 2024 Honda HR-V SUV, (the generation sold in Australia from 2022 to today), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 1289610438,
+    "generatedAt": "2026-09-30T06:06:43.312Z",
+    "reviewed": true
+  },
+  "honda-jazz-2015": {
+    "prompt": "Studio catalogue render of a white 2018 Honda Jazz hatchback, (the generation sold in Australia from 2015 to 2020), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 823406278,
+    "generatedAt": "2026-09-30T06:06:52.802Z",
+    "reviewed": true
+  },
+  "honda-odyssey-2015": {
+    "prompt": "Studio catalogue render of a white 2018 Honda Odyssey van, (the generation sold in Australia from 2015 to 2020), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 1921488907,
+    "generatedAt": "2026-09-30T06:06:57.311Z",
+    "reviewed": true
+  },
+  "hyundai-accent-2015": {
+    "prompt": "Studio catalogue render of a white 2019 Hyundai Accent hatchback, (the generation sold in Australia from 2015 to 2023), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 153759422,
+    "generatedAt": "2026-09-30T06:07:04.877Z",
+    "reviewed": true
+  },
+  "hyundai-elantra-2016": {
+    "prompt": "Studio catalogue render of a white 2018 Hyundai Elantra sedan, (the generation sold in Australia from 2016 to 2020), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 881271914,
+    "generatedAt": "2026-09-30T06:07:04.822Z",
+    "reviewed": true
+  },
+  "hyundai-elantra-2021": {
+    "prompt": "Studio catalogue render of a white 2023 Hyundai Elantra sedan, (the generation sold in Australia from 2021 to today), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 496126096,
+    "generatedAt": "2026-09-30T06:07:17.558Z",
+    "reviewed": true
+  },
+  "hyundai-i20-2015": {
+    "prompt": "Studio catalogue render of a white 2017 Hyundai i20 hatchback, (the generation sold in Australia from 2015 to 2019), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 700200812,
+    "generatedAt": "2026-09-30T06:08:23.268Z",
+    "reviewed": true
+  },
+  "hyundai-i30-2015": {
+    "prompt": "Studio catalogue render of a white 2016 Hyundai i30 hatchback, (the generation sold in Australia from 2015 to 2016), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 1886371621,
+    "generatedAt": "2026-09-30T06:08:24.827Z",
+    "reviewed": true
+  },
+  "hyundai-i30-2017": {
+    "prompt": "Studio catalogue render of a white 2019 Hyundai i30 hatchback, (the generation sold in Australia from 2017 to today), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 1522500618,
+    "generatedAt": "2026-09-30T06:08:37.678Z",
+    "reviewed": true
+  },
+  "hyundai-iload-2015": {
+    "prompt": "Studio catalogue render of a white 2017 Hyundai iLoad van, (the generation sold in Australia from 2015 to today), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 805871032,
+    "generatedAt": "2026-09-30T06:08:34.928Z",
+    "reviewed": true
+  },
+  "hyundai-imax-2015": {
+    "prompt": "Studio catalogue render of a white 2018 Hyundai iMax van, (the generation sold in Australia from 2015 to 2021), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 393623254,
+    "generatedAt": "2026-09-30T06:08:54.415Z",
+    "reviewed": true
+  },
+  "hyundai-kona-2018": {
+    "prompt": "Studio catalogue render of a white 2021 Hyundai Kona SUV, (the generation sold in Australia from 2018 to 2023), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 1104408430,
+    "generatedAt": "2026-09-30T06:07:27.561Z",
+    "reviewed": true
+  },
+  "hyundai-palisade-2019": {
+    "prompt": "Studio catalogue render of a white 2021 Hyundai Palisade SUV, (the generation sold in Australia from 2019 to today), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 1787430130,
+    "generatedAt": "2026-09-30T06:07:27.684Z",
+    "reviewed": true
+  },
+  "hyundai-santa-fe-2015": {
+    "prompt": "Studio catalogue render of a white 2017 Hyundai Santa Fe SUV, (the generation sold in Australia from 2015 to 2018), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 879076072,
+    "generatedAt": "2026-09-30T06:07:37.576Z",
+    "reviewed": true
+  },
+  "hyundai-santa-fe-2019": {
+    "prompt": "Studio catalogue render of a white 2021 Hyundai Santa Fe SUV, (the generation sold in Australia from 2019 to 2023), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 1015667085,
+    "generatedAt": "2026-09-30T06:08:00.004Z",
+    "reviewed": true
+  },
+  "hyundai-staria-2022": {
+    "prompt": "Studio catalogue render of a white 2024 Hyundai Staria van, (the generation sold in Australia from 2022 to today), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 539716547,
+    "generatedAt": "2026-09-30T06:07:59.949Z",
+    "reviewed": true
+  },
+  "hyundai-tucson-2016": {
+    "prompt": "Studio catalogue render of a white 2018 Hyundai Tucson SUV, (the generation sold in Australia from 2016 to 2020), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 489625474,
+    "generatedAt": "2026-09-30T06:07:57.359Z",
+    "reviewed": true
+  },
+  "hyundai-tucson-2021": {
+    "prompt": "Studio catalogue render of a white 2023 Hyundai Tucson SUV, (the generation sold in Australia from 2021 to today), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 1335400241,
+    "generatedAt": "2026-09-30T06:08:14.728Z",
+    "reviewed": true
+  },
+  "hyundai-venue-2020": {
+    "prompt": "Studio catalogue render of a white 2022 Hyundai Venue SUV, (the generation sold in Australia from 2020 to today), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 1504706925,
+    "generatedAt": "2026-09-30T06:08:15.672Z",
+    "reviewed": true
+  },
+  "isuzu-d-max-2015": {
+    "prompt": "Studio catalogue render of a white 2018 Isuzu D-Max ute, (the generation sold in Australia from 2015 to 2020), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 1907208811,
+    "generatedAt": "2026-09-30T06:08:50.609Z",
+    "reviewed": true
+  },
+  "isuzu-d-max-2021": {
+    "prompt": "Studio catalogue render of a white 2023 Isuzu D-Max ute, (the generation sold in Australia from 2021 to today), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 96428462,
+    "generatedAt": "2026-09-30T06:08:53.114Z",
+    "reviewed": true
+  },
+  "isuzu-mu-x-2015": {
+    "prompt": "Studio catalogue render of a white 2018 Isuzu MU-X SUV, (the generation sold in Australia from 2015 to 2020), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 1646878264,
+    "generatedAt": "2026-09-30T06:08:56.235Z",
+    "reviewed": true
+  },
+  "isuzu-mu-x-2021": {
+    "prompt": "Studio catalogue render of a white 2023 Isuzu MU-X SUV, (the generation sold in Australia from 2021 to today), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 1999447523,
+    "generatedAt": "2026-09-30T06:09:17.455Z",
+    "reviewed": true
+  },
+  "jeep-compass-2017": {
+    "prompt": "Studio catalogue render of a white 2019 Jeep Compass SUV, (the generation sold in Australia from 2017 to today), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 1270136570,
+    "generatedAt": "2026-09-30T06:09:14.096Z",
+    "reviewed": true
+  },
+  "kia-carnival-2015": {
+    "prompt": "Studio catalogue render of a white 2018 Kia Carnival van, (the generation sold in Australia from 2015 to 2020), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 2075570945,
+    "generatedAt": "2026-09-30T06:09:14.181Z",
+    "reviewed": true
+  },
+  "kia-cerato-2015": {
+    "prompt": "Studio catalogue render of a white 2017 Kia Cerato hatchback, (the generation sold in Australia from 2015 to 2018), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 696450506,
+    "generatedAt": "2026-09-30T06:09:41.068Z",
+    "reviewed": true
+  },
+  "kia-cerato-2019": {
+    "prompt": "Studio catalogue render of a white 2021 Kia Cerato hatchback, (the generation sold in Australia from 2019 to today), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 1986813955,
+    "generatedAt": "2026-09-30T06:09:36.967Z",
+    "reviewed": true
+  },
+  "kia-niro-2017": {
+    "prompt": "Studio catalogue render of a white 2019 Kia Niro SUV, (the generation sold in Australia from 2017 to 2021), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 929165246,
+    "generatedAt": "2026-09-30T06:09:36.634Z",
+    "reviewed": true
+  },
+  "kia-picanto-2015": {
+    "prompt": "Studio catalogue render of a white 2017 Kia Picanto hatchback, (the generation sold in Australia from 2015 to today), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 341721964,
+    "generatedAt": "2026-09-30T06:09:47.808Z",
+    "reviewed": true
+  },
+  "kia-rio-2015": {
+    "prompt": "Studio catalogue render of a white 2016 Kia Rio hatchback, (the generation sold in Australia from 2015 to 2017), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 1213657088,
+    "generatedAt": "2026-09-30T06:09:58.231Z",
+    "reviewed": true
+  },
+  "kia-rio-2018": {
+    "prompt": "Studio catalogue render of a white 2021 Kia Rio hatchback, (the generation sold in Australia from 2018 to 2023), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 1233294788,
+    "generatedAt": "2026-09-30T06:09:58.347Z",
+    "reviewed": true
+  },
+  "kia-seltos-2020": {
+    "prompt": "Studio catalogue render of a white 2022 Kia Seltos SUV, (the generation sold in Australia from 2020 to today), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 1458199166,
+    "generatedAt": "2026-09-30T06:10:03.760Z",
+    "reviewed": true
+  },
+  "kia-sorento-2015": {
+    "prompt": "Studio catalogue render of a white 2018 Kia Sorento SUV, (the generation sold in Australia from 2015 to 2020), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 496194975,
+    "generatedAt": "2026-09-30T06:10:08.858Z",
+    "reviewed": true
+  },
+  "kia-sorento-2021": {
+    "prompt": "Studio catalogue render of a white 2023 Kia Sorento SUV, (the generation sold in Australia from 2021 to today), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 955235550,
+    "generatedAt": "2026-09-30T06:10:20.044Z",
+    "reviewed": true
+  },
+  "kia-sportage-2016": {
+    "prompt": "Studio catalogue render of a white 2019 Kia Sportage SUV, (the generation sold in Australia from 2016 to 2021), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 266659056,
+    "generatedAt": "2026-09-30T06:10:21.221Z",
+    "reviewed": true
+  },
+  "kia-sportage-2022": {
+    "prompt": "Studio catalogue render of a white 2024 Kia Sportage SUV, (the generation sold in Australia from 2022 to today), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 503659876,
+    "generatedAt": "2026-09-30T06:10:23.033Z",
+    "reviewed": true
+  },
+  "kia-stinger-2018": {
+    "prompt": "Studio catalogue render of a white 2021 Kia Stinger sedan, (the generation sold in Australia from 2018 to 2023), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 1120156492,
+    "generatedAt": "2026-09-30T06:10:31.033Z",
+    "reviewed": true
+  },
+  "kia-stonic-2020": {
+    "prompt": "Studio catalogue render of a white 2022 Kia Stonic SUV, (the generation sold in Australia from 2020 to today), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 911307515,
+    "generatedAt": "2026-09-30T06:10:43.295Z",
+    "reviewed": true
+  },
+  "land-rover-defender-2020": {
+    "prompt": "Studio catalogue render of a white 2022 Land Rover Defender SUV, (the generation sold in Australia from 2020 to today), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 408544424,
+    "generatedAt": "2026-09-30T06:10:55.384Z",
+    "reviewed": true
+  },
+  "ldv-g10-2015": {
+    "prompt": "Studio catalogue render of a white 2018 LDV G10 van, (the generation sold in Australia from 2015 to 2021), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 584284957,
+    "generatedAt": "2026-09-30T06:10:44.435Z",
+    "reviewed": true
+  },
+  "ldv-t60-2017": {
+    "prompt": "Studio catalogue render of a white 2019 LDV T60 ute, (the generation sold in Australia from 2017 to today), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 1097229532,
+    "generatedAt": "2026-09-30T06:10:46.384Z",
+    "reviewed": true
+  },
+  "lexus-nx-2015": {
+    "prompt": "Studio catalogue render of a white 2017 Lexus NX SUV, (the generation sold in Australia from 2015 to today), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 1927875653,
+    "generatedAt": "2026-09-30T06:11:08.362Z",
+    "reviewed": true
+  },
+  "mazda-bt-50-2015": {
+    "prompt": "Studio catalogue render of a white 2018 Mazda BT-50 ute, (the generation sold in Australia from 2015 to 2020), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 1062556956,
+    "generatedAt": "2026-09-30T06:11:29.058Z",
+    "reviewed": true
+  },
+  "mazda-bt-50-2021": {
+    "prompt": "Studio catalogue render of a white 2023 Mazda BT-50 ute, (the generation sold in Australia from 2021 to today), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 769987116,
+    "generatedAt": "2026-09-30T06:11:52.283Z",
+    "reviewed": true
+  },
+  "mazda-cx-3-2015": {
+    "prompt": "Studio catalogue render of a white 2017 Mazda CX-3 SUV, (the generation sold in Australia from 2015 to today), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 343335639,
+    "generatedAt": "2026-09-30T06:11:52.476Z",
+    "reviewed": true
+  },
+  "mazda-cx-30-2020": {
+    "prompt": "Studio catalogue render of a white 2022 Mazda CX-30 SUV, (the generation sold in Australia from 2020 to today), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 13274953,
+    "generatedAt": "2026-09-30T06:11:52.335Z",
+    "reviewed": true
+  },
+  "mazda-cx-5-2015": {
+    "prompt": "Studio catalogue render of a white 2016 Mazda CX-5 SUV, (the generation sold in Australia from 2015 to 2016), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 1121905904,
+    "generatedAt": "2026-09-30T06:12:01.753Z",
+    "reviewed": true
+  },
+  "mazda-cx-5-2017": {
+    "prompt": "Studio catalogue render of a white 2019 Mazda CX-5 SUV, (the generation sold in Australia from 2017 to today), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 1042063906,
+    "generatedAt": "2026-09-30T06:12:08.913Z",
+    "reviewed": true
+  },
+  "mazda-cx-8-2018": {
+    "prompt": "Studio catalogue render of a white 2021 Mazda CX-8 SUV, (the generation sold in Australia from 2018 to 2023), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 943744331,
+    "generatedAt": "2026-09-30T06:12:10.353Z",
+    "reviewed": true
+  },
+  "mazda-cx-9-2016": {
+    "prompt": "Studio catalogue render of a white 2017 Mazda CX-9 SUV, (the generation sold in Australia from 2016 to 2017), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 1016896013,
+    "generatedAt": "2026-09-30T06:12:18.735Z",
+    "reviewed": true
+  },
+  "mazda-cx-9-2018": {
+    "prompt": "Studio catalogue render of a white 2020 Mazda CX-9 SUV, (the generation sold in Australia from 2018 to today), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 2130513458,
+    "generatedAt": "2026-09-30T06:12:22.554Z",
+    "reviewed": true
+  },
+  "mazda-mazda2-2015": {
+    "prompt": "Studio catalogue render of a white 2019 Mazda Mazda2 hatchback, (the generation sold in Australia from 2015 to 2023), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 2044455500,
+    "generatedAt": "2026-09-30T06:12:33.058Z",
+    "reviewed": true
+  },
+  "mazda-mazda3-2015": {
+    "prompt": "Studio catalogue render of a white 2017 Mazda Mazda3 hatchback, (the generation sold in Australia from 2015 to 2018), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 515086391,
+    "generatedAt": "2026-09-30T06:12:36.368Z",
+    "reviewed": true
+  },
+  "mazda-mazda3-2019": {
+    "prompt": "Studio catalogue render of a white 2021 Mazda Mazda3 hatchback, (the generation sold in Australia from 2019 to today), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 2015997708,
+    "generatedAt": "2026-09-30T06:12:38.644Z",
+    "reviewed": true
+  },
+  "mercedes-benz-a-class-2018": {
+    "prompt": "Studio catalogue render of a white 2020 Mercedes-Benz A-Class hatchback, (the generation sold in Australia from 2018 to today), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 630668731,
+    "generatedAt": "2026-09-30T06:12:49.670Z",
+    "reviewed": true
+  },
+  "mercedes-benz-glc-2016": {
+    "prompt": "Studio catalogue render of a white 2018 Mercedes-Benz GLC SUV, (the generation sold in Australia from 2016 to today), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 632921186,
+    "generatedAt": "2026-09-30T06:12:59.314Z",
+    "reviewed": true
+  },
+  "mg-hs-2019": {
+    "prompt": "Studio catalogue render of a white 2021 MG HS SUV, (the generation sold in Australia from 2019 to today), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 42632819,
+    "generatedAt": "2026-09-30T06:11:08.520Z",
+    "reviewed": true
+  },
+  "mg-mg3-2015": {
+    "prompt": "Studio catalogue render of a white 2017 MG MG3 hatchback, (the generation sold in Australia from 2015 to today), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 1275196527,
+    "generatedAt": "2026-09-30T06:11:08.273Z",
+    "reviewed": true
+  },
+  "mg-zs-2018": {
+    "prompt": "Studio catalogue render of a white 2021 MG ZS SUV, (the generation sold in Australia from 2018 to 2023), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 2388403,
+    "generatedAt": "2026-09-30T06:11:17.000Z",
+    "reviewed": true
+  },
+  "mg-zst-2023": {
+    "prompt": "Studio catalogue render of a white 2025 MG ZST SUV, (the generation sold in Australia from 2023 to today), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 2107382340,
+    "generatedAt": "2026-09-30T06:11:27.587Z",
+    "reviewed": true
+  },
+  "mitsubishi-asx-2015": {
+    "prompt": "Studio catalogue render of a white 2017 Mitsubishi ASX SUV, (the generation sold in Australia from 2015 to today), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 1980292777,
+    "generatedAt": "2026-09-30T06:13:01.898Z",
+    "reviewed": true
+  },
+  "mitsubishi-eclipse-cross-2018": {
+    "prompt": "Studio catalogue render of a white 2020 Mitsubishi Eclipse Cross SUV, (the generation sold in Australia from 2018 to today), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 204804682,
+    "generatedAt": "2026-09-30T06:12:58.479Z",
+    "reviewed": true
+  },
+  "mitsubishi-mirage-2015": {
+    "prompt": "Studio catalogue render of a white 2019 Mitsubishi Mirage hatchback, (the generation sold in Australia from 2015 to 2023), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 87979997,
+    "generatedAt": "2026-09-30T06:13:20.778Z",
+    "reviewed": true
+  },
+  "mitsubishi-outlander-2015": {
+    "prompt": "Studio catalogue render of a white 2018 Mitsubishi Outlander SUV, (the generation sold in Australia from 2015 to 2021), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 1872702009,
+    "generatedAt": "2026-09-30T06:13:20.622Z",
+    "reviewed": true
+  },
+  "mitsubishi-pajero-2015": {
+    "prompt": "Studio catalogue render of a white 2018 Mitsubishi Pajero SUV, (the generation sold in Australia from 2015 to 2021), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 1643764002,
+    "generatedAt": "2026-09-30T06:13:20.861Z",
+    "reviewed": true
+  },
+  "mitsubishi-pajero-sport-2016": {
+    "prompt": "Studio catalogue render of a white 2018 Mitsubishi Pajero Sport SUV, (the generation sold in Australia from 2016 to today), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 1502867106,
+    "generatedAt": "2026-09-30T06:13:41.274Z",
+    "reviewed": true
+  },
+  "mitsubishi-triton-2015": {
+    "prompt": "Studio catalogue render of a white 2017 Mitsubishi Triton ute, (the generation sold in Australia from 2015 to 2018), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 243706928,
+    "generatedAt": "2026-09-30T06:13:47.070Z",
+    "reviewed": true
+  },
+  "mitsubishi-triton-2019": {
+    "prompt": "Studio catalogue render of a white 2021 Mitsubishi Triton ute, (the generation sold in Australia from 2019 to 2023), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 1107267848,
+    "generatedAt": "2026-09-30T06:13:44.852Z",
+    "reviewed": true
+  },
+  "nissan-juke-2015": {
+    "prompt": "Studio catalogue render of a white 2017 Nissan Juke SUV, (the generation sold in Australia from 2015 to 2019), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 95622240,
+    "generatedAt": "2026-09-30T06:14:02.688Z",
+    "reviewed": true
+  },
+  "nissan-navara-2015": {
+    "prompt": "Studio catalogue render of a white 2018 Nissan Navara ute, (the generation sold in Australia from 2015 to 2020), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 1156159253,
+    "generatedAt": "2026-09-30T06:14:20.950Z",
+    "reviewed": true
+  },
+  "nissan-navara-2021": {
+    "prompt": "Studio catalogue render of a white 2023 Nissan Navara ute, (the generation sold in Australia from 2021 to today), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 2014603874,
+    "generatedAt": "2026-09-30T06:14:12.452Z",
+    "reviewed": true
+  },
+  "nissan-pathfinder-2015": {
+    "prompt": "Studio catalogue render of a white 2018 Nissan Pathfinder SUV, (the generation sold in Australia from 2015 to 2021), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 1782989162,
+    "generatedAt": "2026-09-30T06:14:24.388Z",
+    "reviewed": true
+  },
+  "nissan-patrol-2015": {
+    "prompt": "Studio catalogue render of a white 2017 Nissan Patrol SUV, (the generation sold in Australia from 2015 to today), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 283528380,
+    "generatedAt": "2026-09-30T06:14:28.995Z",
+    "reviewed": true
+  },
+  "nissan-pulsar-2015": {
+    "prompt": "Studio catalogue render of a white 2016 Nissan Pulsar sedan, (the generation sold in Australia from 2015 to 2017), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 1704075116,
+    "generatedAt": "2026-09-30T06:14:37.390Z",
+    "reviewed": true
+  },
+  "nissan-qashqai-2015": {
+    "prompt": "Studio catalogue render of a white 2018 Nissan Qashqai SUV, (the generation sold in Australia from 2015 to 2021), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 1309112914,
+    "generatedAt": "2026-09-30T06:14:46.551Z",
+    "reviewed": true
+  },
+  "nissan-qashqai-2022": {
+    "prompt": "Studio catalogue render of a white 2024 Nissan Qashqai SUV, (the generation sold in Australia from 2022 to today), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 659131110,
+    "generatedAt": "2026-09-30T06:14:48.085Z",
+    "reviewed": true
+  },
+  "nissan-x-trail-2015": {
+    "prompt": "Studio catalogue render of a white 2018 Nissan X-Trail SUV, (the generation sold in Australia from 2015 to 2021), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 1675155724,
+    "generatedAt": "2026-09-30T06:14:48.344Z",
+    "reviewed": true
+  },
+  "renault-koleos-2017": {
+    "prompt": "Studio catalogue render of a white 2019 Renault Koleos SUV, (the generation sold in Australia from 2017 to today), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 372014371,
+    "generatedAt": "2026-09-30T06:15:09.916Z",
+    "reviewed": true
+  },
+  "renault-trafic-2015": {
+    "prompt": "Studio catalogue render of a white 2017 Renault Trafic van, (the generation sold in Australia from 2015 to today), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 1155879283,
+    "generatedAt": "2026-09-30T06:15:06.789Z",
+    "reviewed": true
+  },
+  "skoda-karoq-2018": {
+    "prompt": "Studio catalogue render of a white 2020 Skoda Karoq SUV, (the generation sold in Australia from 2018 to today), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 588292465,
+    "generatedAt": "2026-09-30T06:15:11.605Z",
+    "reviewed": true
+  },
+  "skoda-kodiaq-2017": {
+    "prompt": "Studio catalogue render of a white 2019 Skoda Kodiaq SUV, (the generation sold in Australia from 2017 to today), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 1515974695,
+    "generatedAt": "2026-09-30T06:15:19.895Z",
+    "reviewed": true
+  },
+  "skoda-octavia-2015": {
+    "prompt": "Studio catalogue render of a white 2017 Skoda Octavia hatchback, (the generation sold in Australia from 2015 to today), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 1369028317,
+    "generatedAt": "2026-09-30T06:15:27.754Z",
+    "reviewed": true
+  },
+  "subaru-forester-2015": {
+    "prompt": "Studio catalogue render of a white 2017 Subaru Forester SUV, (the generation sold in Australia from 2015 to 2018), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 1948936816,
+    "generatedAt": "2026-09-30T06:15:32.383Z",
+    "reviewed": true
+  },
+  "subaru-forester-2019": {
+    "prompt": "Studio catalogue render of a white 2022 Subaru Forester SUV, (the generation sold in Australia from 2019 to 2024), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 870407022,
+    "generatedAt": "2026-09-30T06:15:43.930Z",
+    "reviewed": true
+  },
+  "subaru-impreza-2017": {
+    "prompt": "Studio catalogue render of a white 2019 Subaru Impreza hatchback, (the generation sold in Australia from 2017 to today), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 1573325094,
+    "generatedAt": "2026-09-30T06:15:48.821Z",
+    "reviewed": true
+  },
+  "subaru-liberty-2015": {
+    "prompt": "Studio catalogue render of a white 2018 Subaru Liberty sedan, (the generation sold in Australia from 2015 to 2020), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 1307721351,
+    "generatedAt": "2026-09-30T06:15:53.478Z",
+    "reviewed": true
+  },
+  "subaru-outback-2015": {
+    "prompt": "Studio catalogue render of a white 2018 Subaru Outback station wagon, (the generation sold in Australia from 2015 to 2020), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 757880253,
+    "generatedAt": "2026-09-30T06:15:53.406Z",
+    "reviewed": true
+  },
+  "subaru-outback-2021": {
+    "prompt": "Studio catalogue render of a white 2023 Subaru Outback station wagon, (the generation sold in Australia from 2021 to today), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 2106678214,
+    "generatedAt": "2026-09-30T06:15:58.603Z",
+    "reviewed": true
+  },
+  "subaru-wrx-2015": {
+    "prompt": "Studio catalogue render of a white 2018 Subaru WRX sedan, (the generation sold in Australia from 2015 to 2021), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 1627364143,
+    "generatedAt": "2026-09-30T06:16:08.814Z",
+    "reviewed": true
+  },
+  "subaru-xv-2015": {
+    "prompt": "Studio catalogue render of a white 2019 Subaru XV SUV, (the generation sold in Australia from 2015 to 2022), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 777875258,
+    "generatedAt": "2026-09-30T06:16:10.114Z",
+    "reviewed": true
+  },
+  "suzuki-baleno-2016": {
+    "prompt": "Studio catalogue render of a white 2019 Suzuki Baleno hatchback, (the generation sold in Australia from 2016 to 2022), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 431711839,
+    "generatedAt": "2026-09-30T06:16:14.358Z",
+    "reviewed": true
+  },
+  "suzuki-ignis-2017": {
+    "prompt": "Studio catalogue render of a white 2019 Suzuki Ignis hatchback, (the generation sold in Australia from 2017 to today), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 1901744952,
+    "generatedAt": "2026-09-30T06:16:19.553Z",
+    "reviewed": true
+  },
+  "suzuki-jimny-2019": {
+    "prompt": "Studio catalogue render of a white 2021 Suzuki Jimny SUV, (the generation sold in Australia from 2019 to today), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 771225179,
+    "generatedAt": "2026-09-30T06:16:32.197Z",
+    "reviewed": true
+  },
+  "suzuki-s-cross-2017": {
+    "prompt": "Studio catalogue render of a white 2019 Suzuki S-Cross SUV, (the generation sold in Australia from 2017 to today), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 731357567,
+    "generatedAt": "2026-09-30T06:16:30.351Z",
+    "reviewed": true
+  },
+  "suzuki-swift-2017": {
+    "prompt": "Studio catalogue render of a white 2020 Suzuki Swift hatchback, (the generation sold in Australia from 2017 to 2023), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 1606504321,
+    "generatedAt": "2026-09-30T06:16:33.494Z",
+    "reviewed": true
+  },
+  "suzuki-vitara-2015": {
+    "prompt": "Studio catalogue render of a white 2017 Suzuki Vitara SUV, (the generation sold in Australia from 2015 to today), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 1370386650,
+    "generatedAt": "2026-09-30T06:16:54.511Z",
+    "reviewed": true
+  },
+  "toyota-c-hr-2017": {
+    "prompt": "Studio catalogue render of a white 2020 Toyota C-HR SUV, (the generation sold in Australia from 2017 to 2023), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 1912852095,
+    "generatedAt": "2026-09-30T06:16:57.697Z",
+    "reviewed": true
+  },
+  "toyota-camry-2015": {
+    "prompt": "Studio catalogue render of a white 2016 Toyota Camry sedan, (the generation sold in Australia from 2015 to 2017), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 500778362,
+    "generatedAt": "2026-09-30T06:17:01.622Z",
+    "reviewed": true
+  },
+  "toyota-camry-2018": {
+    "prompt": "Studio catalogue render of a white 2021 Toyota Camry sedan, (the generation sold in Australia from 2018 to 2024), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 774945237,
+    "generatedAt": "2026-09-30T06:17:05.397Z",
+    "reviewed": true
+  },
+  "toyota-camry-hybrid-2015": {
+    "prompt": "Studio catalogue render of a white 2016 Toyota Camry Hybrid sedan, (the generation sold in Australia from 2015 to 2017), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 2028735351,
+    "generatedAt": "2026-09-30T06:17:23.289Z",
+    "reviewed": true
+  },
+  "toyota-camry-hybrid-2018": {
+    "prompt": "Studio catalogue render of a white 2021 Toyota Camry Hybrid sedan, (the generation sold in Australia from 2018 to 2024), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 1127895885,
+    "generatedAt": "2026-09-30T06:17:23.495Z",
+    "reviewed": true
+  },
+  "toyota-corolla-2015": {
+    "prompt": "Studio catalogue render of a white 2017 Toyota Corolla hatchback, (the generation sold in Australia from 2015 to 2018), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 1288182329,
+    "generatedAt": "2026-09-30T06:17:21.997Z",
+    "reviewed": true
+  },
+  "toyota-corolla-2019": {
+    "prompt": "Studio catalogue render of a white 2021 Toyota Corolla hatchback, (the generation sold in Australia from 2019 to today), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 735575276,
+    "generatedAt": "2026-09-30T06:17:26.630Z",
+    "reviewed": true
+  },
+  "toyota-corolla-cross-2022": {
+    "prompt": "Studio catalogue render of a white 2024 Toyota Corolla Cross SUV, (the generation sold in Australia from 2022 to today), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 2103301500,
+    "generatedAt": "2026-09-30T06:17:45.286Z",
+    "reviewed": true
+  },
+  "toyota-corolla-cross-hybrid-2022": {
+    "prompt": "Studio catalogue render of a white 2024 Toyota Corolla Cross Hybrid SUV, (the generation sold in Australia from 2022 to today), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 2113649979,
+    "generatedAt": "2026-09-30T06:17:48.969Z",
+    "reviewed": true
+  },
+  "toyota-corolla-hybrid-2019": {
+    "prompt": "Studio catalogue render of a white 2021 Toyota Corolla Hybrid hatchback, (the generation sold in Australia from 2019 to today), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 1089045132,
+    "generatedAt": "2026-09-30T06:17:49.027Z",
+    "reviewed": true
+  },
+  "toyota-fortuner-2015": {
+    "prompt": "Studio catalogue render of a white 2017 Toyota Fortuner SUV, (the generation sold in Australia from 2015 to today), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 1850753464,
+    "generatedAt": "2026-09-30T06:17:44.774Z",
+    "reviewed": true
+  },
+  "toyota-hiace-2015": {
+    "prompt": "Studio catalogue render of a white 2017 Toyota HiAce van, (the generation sold in Australia from 2015 to today), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 987239525,
+    "generatedAt": "2026-09-30T06:18:10.704Z",
+    "reviewed": true
+  },
+  "toyota-hilux-2015": {
+    "prompt": "Studio catalogue render of a white 2017 Toyota HiLux ute, (the generation sold in Australia from 2015 to today), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 161843943,
+    "generatedAt": "2026-09-30T06:18:09.006Z",
+    "reviewed": true
+  },
+  "toyota-kluger-2015": {
+    "prompt": "Studio catalogue render of a white 2018 Toyota Kluger SUV, (the generation sold in Australia from 2015 to 2020), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 261313408,
+    "generatedAt": "2026-09-30T06:18:06.505Z",
+    "reviewed": true
+  },
+  "toyota-kluger-2021": {
+    "prompt": "Studio catalogue render of a white 2023 Toyota Kluger SUV, (the generation sold in Australia from 2021 to today), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 852948814,
+    "generatedAt": "2026-09-30T06:18:08.702Z",
+    "reviewed": true
+  },
+  "toyota-kluger-hybrid-2021": {
+    "prompt": "Studio catalogue render of a white 2023 Toyota Kluger Hybrid SUV, (the generation sold in Australia from 2021 to today), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 1521301007,
+    "generatedAt": "2026-09-30T06:18:44.097Z",
+    "reviewed": true
+  },
+  "toyota-landcruiser-200-series-2015": {
+    "prompt": "Studio catalogue render of a white 2018 Toyota LandCruiser 200 Series SUV, (the generation sold in Australia from 2015 to 2021), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 66058716,
+    "generatedAt": "2026-09-30T06:18:28.609Z",
+    "reviewed": true
+  },
+  "toyota-landcruiser-70-series-2015": {
+    "prompt": "Studio catalogue render of a white 2017 Toyota LandCruiser 70 Series SUV, (the generation sold in Australia from 2015 to today), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 1214064204,
+    "generatedAt": "2026-09-30T06:18:31.643Z",
+    "reviewed": true
+  },
+  "toyota-prado-2015": {
+    "prompt": "Studio catalogue render of a white 2019 Toyota Prado SUV, (the generation sold in Australia from 2015 to 2023), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 1550748599,
+    "generatedAt": "2026-09-30T06:18:49.669Z",
+    "reviewed": true
+  },
+  "toyota-rav4-2015": {
+    "prompt": "Studio catalogue render of a white 2017 Toyota RAV4 SUV, (the generation sold in Australia from 2015 to 2018), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 665354896,
+    "generatedAt": "2026-09-30T06:18:56.341Z",
+    "reviewed": true
+  },
+  "toyota-rav4-2019": {
+    "prompt": "Studio catalogue render of a white 2021 Toyota RAV4 SUV, (the generation sold in Australia from 2019 to today), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 1581628848,
+    "generatedAt": "2026-09-30T06:19:03.601Z",
+    "reviewed": true
+  },
+  "toyota-tarago-2015": {
+    "prompt": "Studio catalogue render of a white 2017 Toyota Tarago van, (the generation sold in Australia from 2015 to 2019), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 1435186859,
+    "generatedAt": "2026-09-30T06:19:11.776Z",
+    "reviewed": true
+  },
+  "toyota-yaris-2015": {
+    "prompt": "Studio catalogue render of a white 2017 Toyota Yaris hatchback, (the generation sold in Australia from 2015 to 2019), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 568260416,
+    "generatedAt": "2026-09-30T06:19:22.089Z",
+    "reviewed": true
+  },
+  "toyota-yaris-2020": {
+    "prompt": "Studio catalogue render of a white 2022 Toyota Yaris hatchback, (the generation sold in Australia from 2020 to today), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 492752549,
+    "generatedAt": "2026-09-30T06:19:21.733Z",
+    "reviewed": true
+  },
+  "toyota-yaris-cross-2020": {
+    "prompt": "Studio catalogue render of a white 2022 Toyota Yaris Cross SUV, (the generation sold in Australia from 2020 to today), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 267087861,
+    "generatedAt": "2026-09-30T06:19:21.790Z",
+    "reviewed": true
+  },
+  "toyota-yaris-hybrid-2020": {
+    "prompt": "Studio catalogue render of a white 2022 Toyota Yaris Hybrid hatchback, (the generation sold in Australia from 2020 to today), front three-quarter view, vehicle facing left (front of the vehicle on the left side of the image), seen from slightly above eye level, full vehicle in frame, pure white seamless background, soft grey contact shadow under the tyres, crisp realistic reflections, factory wheels, blank number plates, no lettering or model names on the doors, no text, no watermark, no people",
+    "model": "fal-ai/flux-2-max",
+    "seed": 312076862,
+    "generatedAt": "2026-09-30T06:19:35.191Z",
     "reviewed": true
   }
 }
