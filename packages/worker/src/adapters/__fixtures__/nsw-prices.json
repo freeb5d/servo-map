@@ -1,52 +1,14 @@
 {
   "stations": [
-    {
-      "brandid": "1",
-      "stationid": "1001",
-      "brand": "Caltex",
-      "code": "1001",
-      "name": "Caltex Sydney",
-      "address": "1 Test St, SYDNEY NSW 2000",
-      "location": { "latitude": -33.8688, "longitude": 151.2093 },
-      "state": "NSW"
-    },
-    {
-      "brandid": "2",
-      "stationid": "1002",
-      "brand": "BP",
-      "code": "1002",
-      "name": "BP Hobart",
-      "address": "2 Test Rd, HOBART TAS 7000",
-      "location": { "latitude": -42.8821, "longitude": 147.3272 },
-      "state": "TAS"
-    },
-    {
-      "brandid": "3",
-      "stationid": "1003",
-      "brand": "Shell",
-      "code": "1003",
-      "name": "Shell No Coords",
-      "address": "3 Nowhere St, PARRAMATTA NSW 2150",
-      "location": { "latitude": 0, "longitude": 0 },
-      "state": "NSW"
-    },
-    {
-      "brandid": "4",
-      "stationid": "1004",
-      "brand": "EG Ampol",
-      "code": "1004",
-      "name": "EG AMPOL BRADDON",
-      "address": "97A LONSDALE ST, BRADDON ACT 2612",
-      "location": { "latitude": -35.2733, "longitude": 149.1336 },
-      "state": "ACT"
-    }
+    {"brandid": "1", "stationid": "1001", "brand": "Caltex", "code": "1001", "name": "Caltex Sydney", "address": "1 Test St, SYDNEY NSW 2000", "location": {"latitude": -33.8688, "longitude": 151.2093}, "state": "NSW"},
+    {"brandid": "3", "stationid": "1003", "brand": "Shell", "code": "1003", "name": "Shell No Coords", "address": "3 Nowhere St, PARRAMATTA NSW 2150", "location": {"latitude": 0, "longitude": 0}, "state": "NSW"},
+    {"brandid": "4", "stationid": "1004", "brand": "EG Ampol", "code": "1004", "name": "EG AMPOL BRADDON", "address": "97A LONSDALE ST, BRADDON ACT 2612", "location": {"latitude": -35.2733, "longitude": 149.1336}, "state": "NSW"}
   ],
   "prices": [
-    { "stationcode": 1001, "state": "NSW", "fueltype": "U91", "price": 189.5, "lastupdated": "28/03/2026 01:20:38" },
-    { "stationcode": 1001, "state": "NSW", "fueltype": "DL",  "price": 205.0, "lastupdated": "28/03/2026 01:20:38" },
-    { "stationcode": 1001, "state": "NSW", "fueltype": "LPG", "price": 95.0,  "lastupdated": "28/03/2026 01:20:38" },
-    { "stationcode": 1002, "state": "TAS", "fueltype": "U91", "price": 192.9, "lastupdated": "28/03/2026 01:15:00" },
-    { "stationcode": 1003, "state": "NSW", "fueltype": "U91", "price": 190.0, "lastupdated": "28/03/2026 01:10:00" },
-    { "stationcode": 1004, "state": "ACT", "fueltype": "E10", "price": 187.9, "lastupdated": "28/03/2026 01:05:00" }
+    {"stationcode": 1001, "state": "NSW", "fueltype": "U91", "price": 189.5, "lastupdated": "28/03/2026 01:20:38"},
+    {"stationcode": 1001, "state": "NSW", "fueltype": "DL", "price": 205.0, "lastupdated": "28/03/2026 01:20:38"},
+    {"stationcode": 1001, "state": "NSW", "fueltype": "LPG", "price": 95.0, "lastupdated": "28/03/2026 01:20:38"},
+    {"stationcode": 1003, "state": "NSW", "fueltype": "U91", "price": 190.0, "lastupdated": "28/03/2026 01:10:00"},
+    {"stationcode": 1004, "state": "NSW", "fueltype": "E10", "price": 187.9, "lastupdated": "28/03/2026 01:05:00"}
   ]
 }

@@ -35,16 +35,25 @@ describe("nswAdapter", () => {
     vi.unstubAllGlobals();
   });
 
-  it("covers NSW, TAS, ACT states", () => {
-    expect(nswAdapter.states).toEqual(["nsw", "tas", "act"]);
+  it("covers NSW and ACT; TAS has its own adapter", () => {
+    expect(nswAdapter.states).toEqual(["nsw", "act"]);
+    expect(nswAdapter.minIntervalMinutes).toBeUndefined();
+  });
+
+  it("requests the default NSW feed without a states parameter", async () => {
+    await nswAdapter.fetchStations(baseEnv);
+    const urls = vi.mocked(fetch).mock.calls.map(([url]) => String(url));
+    expect(urls.filter((u) => u.includes("/fuel/prices"))).toEqual([
+      "https://api.onegov.nsw.gov.au/FuelPriceCheck/v2/fuel/prices",
+    ]);
   });
 
   it("produces normalised Station[]", async () => {
     const stations = await nswAdapter.fetchStations(baseEnv);
 
-    // 4 stations in fixture, one has 0,0 coords → 3 out
-    expect(stations.length).toBe(3);
-    expect(stations.every((s) => s.id.match(/^(nsw|tas|act)-\d+$/))).toBe(true);
+    // 3 stations in fixture, one has 0,0 coords → 2 out
+    expect(stations.length).toBe(2);
+    expect(stations.every((s) => s.id.match(/^(nsw|act)-\d+$/))).toBe(true);
     expect(stations.every((s) => s.lat !== 0 && s.lng !== 0)).toBe(true);
     expect(stations.every((s) => s.prices.length > 0)).toBe(true);
   });
@@ -64,10 +73,28 @@ describe("nswAdapter", () => {
     expect(fuels.every((f) => (FUEL_TYPES as readonly string[]).includes(f))).toBe(true);
   });
 
-  it("maps NSW state string to shared AustralianState", async () => {
+  it("files ACT stations under ACT although the feed labels them NSW", async () => {
     const stations = await nswAdapter.fetchStations(baseEnv);
-    const tasStation = stations.find((s) => s.id === "tas-1002");
-    expect(tasStation?.state).toBe("tas");
+    const act = stations.find((s) => s.name === "EG Ampol Braddon");
+    expect([act?.id, act?.state, act?.postcode]).toEqual(["act-1004", "act", "2612"]);
+    expect(stations.find((s) => s.id === "nsw-1001")?.state).toBe("nsw");
+  });
+
+  it("drops stations outside its states if the feed ever includes them", async () => {
+    const withTas = {
+      stations: [
+        ...fixture.stations,
+        { ...fixture.stations[0], code: "2001", address: "2 Test Rd, HOBART TAS 7000", state: "TAS" },
+      ],
+      prices: [...fixture.prices, { ...fixture.prices[0], stationcode: 2001, state: "TAS" }],
+    };
+    vi.mocked(fetch).mockImplementation(async (url) =>
+      String(url).includes("oauth")
+        ? new Response(JSON.stringify({ access_token: "t", expires_in: "43199", token_type: "BearerToken" }))
+        : new Response(JSON.stringify(withTas)),
+    );
+    const stations = await nswAdapter.fetchStations(baseEnv);
+    expect(stations.some((s) => s.state === "tas")).toBe(false);
   });
 
   it("title-cases all-caps names, addresses and suburbs", async () => {

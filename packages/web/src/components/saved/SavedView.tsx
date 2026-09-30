@@ -17,9 +17,9 @@ const MIN_FOR_TIERS = 3;
 
 /** The /saved page: bookmarked stations ranked by today's price, with change since the last visit. */
 export function SavedView() {
-  const { favouriteIds, toggle, ready } = useFavourites();
+  const { favouriteIds, toggle, rename, ready } = useFavourites();
   const [fuel, setFuel] = useFuelPreference();
-  const { entries, baseline, loading } = useSavedStations(favouriteIds, ready);
+  const { entries, baseline, loading } = useSavedStations(favouriteIds, ready, rename);
 
   const loaded = favouriteIds.flatMap((id) => {
     const entry = entries[id];

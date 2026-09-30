@@ -112,7 +112,12 @@ paths:
       operationId: getStation
       tags: [Stations]
       summary: Get a single station
-      description: Returns a single fuel station with all current fuel prices.
+      description: |
+        Returns a single fuel station with all current fuel prices.
+
+        A retired id resolves to the station under its current id, so `data.id` can differ from
+        the requested id; clients that store ids should replace theirs with `data.id`. ACT
+        stations were served as `nsw-<code>` until 2026-10 and are now `act-<code>`.
       parameters:
         - name: id
           in: path

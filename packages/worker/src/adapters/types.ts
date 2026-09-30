@@ -5,6 +5,13 @@ export interface StateAdapter {
   /** Which states this adapter covers */
   readonly states: readonly AustralianState[];
 
+  /**
+   * Minimum minutes between fetches, for upstreams with a call quota. The ingest skips the
+   * adapter while every state it covers was updated more recently than this. Omit to fetch
+   * on every run.
+   */
+  readonly minIntervalMinutes?: number;
+
   /** Fetch all stations with current prices. Throws on failure. */
   fetchStations(env: Env): Promise<Station[]>;
 }

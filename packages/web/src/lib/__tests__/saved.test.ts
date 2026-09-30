@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import type { Station } from "@servo-map/shared";
-import { changeLine, rankByPrice, recordVisit, sinceLabel, type MarksById } from "@/lib/saved";
+import { changeLine, movedIds, rankByPrice, recordVisit, replaceId, sinceLabel, type MarksById } from "@/lib/saved";
 
 function station(id: string, prices: Record<string, number>): Station {
   return {
@@ -105,5 +105,28 @@ describe("rankByPrice", () => {
 
   it("returns an empty list for no stations", () => {
     expect(rankByPrice([], "U91")).toEqual([]);
+  });
+});
+
+describe("movedIds", () => {
+  it("lists stations the API returned under a different id", () => {
+    const act = { ...station("act-18711", { U91: 180 }), state: "act" as const };
+    expect(movedIds([["nsw-18711", act], ["nsw-1", station("nsw-1", {})], ["nsw-2", null]])).toEqual([
+      ["nsw-18711", "act-18711"],
+    ]);
+  });
+});
+
+describe("replaceId", () => {
+  it("replaces the old id where it stood", () => {
+    expect(replaceId(["a", "nsw-1", "b"], "nsw-1", "act-1")).toEqual(["a", "act-1", "b"]);
+  });
+
+  it("drops the old id when the new one is already saved", () => {
+    expect(replaceId(["act-1", "nsw-1"], "nsw-1", "act-1")).toEqual(["act-1"]);
+  });
+
+  it("leaves the list alone when the old id is not saved", () => {
+    expect(replaceId(["a"], "nsw-1", "act-1")).toEqual(["a"]);
   });
 });

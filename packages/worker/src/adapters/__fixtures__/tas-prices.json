@@ -1,0 +1,10 @@
+{
+  "stations": [
+    {"brandid": "2", "stationid": "1002", "brand": "BP", "code": "1002", "name": "BP Hobart", "address": "2 Test Rd, HOBART TAS 7000", "location": {"latitude": -42.8821, "longitude": 147.3272}, "state": "TAS"},
+    {"brandid": "5", "stationid": "1005", "brand": "Ampol", "code": "1005", "name": "AMPOL LAUNCESTON", "address": "10 WELLINGTON ST, LAUNCESTON TAS 7250", "location": {"latitude": -41.4388, "longitude": 147.1347}, "state": "TAS"}
+  ],
+  "prices": [
+    {"stationcode": 1002, "state": "TAS", "fueltype": "U91", "price": 192.9, "lastupdated": "28/03/2026 01:15:00"},
+    {"stationcode": 1005, "state": "TAS", "fueltype": "P98", "price": 214.9, "lastupdated": "28/03/2026 01:00:00"}
+  ]
+}

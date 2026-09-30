@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import type { Station, AustralianState } from "@servo-map/shared";
 import { getStation, getMetadata } from "@/lib/api";
 import { latestUpdatedAt } from "@/lib/coverage";
@@ -48,7 +48,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: `${station.name} Fuel Prices — ServoMap`,
     description: `Live fuel prices at ${station.name}, ${station.suburb} ${station.state.toUpperCase()}. Compare petrol and diesel prices.`,
-    alternates: { canonical: `/station/${id}` },
+    alternates: { canonical: `/station/${station.id}` },
     openGraph: {
       title: `${station.name} — ServoMap`,
       description: `Live fuel prices at ${station.name}, ${station.suburb}.`,
@@ -60,6 +60,8 @@ export default async function StationPage({ params }: Props) {
   const { id } = await params;
   const station = await loadStation(id);
   if (!station) notFound();
+  // A retired id (ACT stations were "nsw-<code>") answers with the current one; move the URL too.
+  if (station.id !== id) permanentRedirect(`/station/${station.id}`);
 
   const lastUpdated = await loadStateUpdatedAt(station.state);
 
