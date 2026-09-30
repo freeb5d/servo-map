@@ -47,9 +47,21 @@ export const color = {
   // Map base overrides applied on top of the Mapbox style.
   mapLand: { light: "#F2F1ED", dark: "#1E1E1C" },
   mapWater: { light: "#D9DFE2", dark: "#182025" },
+  // 朱 Shu: the ServoMap mark's needle and nothing else (decision 0005), so price tiers stay the only UI chroma.
+  markAccent: { light: "#C25E3A", dark: "#D9764F" },
 } as const satisfies Record<string, ThemeColor>;
 
 export type ColorToken = keyof typeof color;
+
+/**
+ * The fuel-gauge mark's colours: app icon, favicon, header logo and OG images.
+ * design/app-icon/generate.py reads them from the generated `generated/tokens.json`.
+ */
+export const markColor = {
+  tile: color.bg,
+  ink: color.ink,
+  accent: color.markAccent,
+} as const satisfies Record<string, ThemeColor>;
 
 /** A font family plus the per-platform names that load it. */
 export interface FontFamily {

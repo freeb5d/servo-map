@@ -40,6 +40,7 @@ Every value below passes WCAG AA (≥ 4.5:1) for text on `bg` and `surface` in i
 | `price-expensive` 弁柄 | `#9A3B2B` | `#DE9A8A` | Top third |
 | `*-soft` tiers | `#E3EAE3` / `#EFE8DA` / `#F1E3DF` | `#243028` / `#312B1F` / `#34241F` | Banner fills |
 | `map-land` / `map-water` | `#F2F1ED` / `#D9DFE2` | `#1E1E1C` / `#182025` | Web map base overrides |
+| `mark-accent` 朱 | `#C25E3A` | `#D9764F` | The ServoMap mark's needle only ([decision 0005](../decisions/0005-mark-colour.md)) |
 
 Variant A 藍 (indigo accent) was the alternative; it was not chosen.
 
@@ -70,7 +71,7 @@ Rules added after the owner found the first v2 build "too AI" (2026-09-29). They
 - **No KPI tile rows.** Headline figures sit unboxed in a ruled row, like a newspaper table.
 - **Facts, not advice.** Verdicts state where the price is ("Near the 90-day high.", "10.6¢ below the local average"), never what the reader should do.
 - **No explaining the chart.** If a chart needs a caption to be honest (a bar axis that does not start at zero), change the chart: use dots on a scale or a row of figures.
-- **No decorative colour.** No gradients; the cycle position is a hairline with one ink tick. Colour marks price tier, freshness and selection only.
+- **No decorative colour.** No gradients; the cycle position is a hairline with one ink tick. Colour marks price tier, freshness and selection only; the one exception is the `mark-accent` needle of the ServoMap mark.
 - **Fewer separators.** Use a comma or space; `·` chains are out.
 
 ## Space, shape, elevation
@@ -124,8 +125,11 @@ Rules added after the owner found the first v2 build "too AI" (2026-09-29). They
 
 - `packages/design-tokens/src/tokens.ts` owns every value.
 - `pnpm --filter @servo-map/design-tokens generate` writes `generated/tokens.css` (imported by
-  `packages/web/src/app/globals.css`) and `generated/swift/ServoMapTokens.swift` (vendored into the iOS app).
-- A vitest drift check fails when either generated file differs from `tokens.ts`; another checks
+  `packages/web/src/app/globals.css`), `generated/swift/ServoMapTokens.swift` (vendored into the iOS app)
+  and `generated/tokens.json` (read by `design/app-icon/generate.py` for the mark's colours, `markColor`).
+- `python3 design/app-icon/generate.py --check` fails when the favicon, `mark.ts` or the app icon bundle
+  differ from a fresh render from `tokens.json`; CI runs it in the Test job.
+- A vitest drift check fails when any generated file differs from `tokens.ts`; another checks
   WCAG AA contrast for every text colour in both themes.
 - TypeScript that cannot read CSS (Mapbox paint, OG images) imports `@servo-map/design-tokens` directly.
 

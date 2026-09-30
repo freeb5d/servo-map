@@ -2,10 +2,14 @@
 import { writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { emitCss } from "../src/emit-css";
+import { emitJson } from "../src/emit-json";
 import { emitSwift } from "../src/emit-swift";
 
 const out = (path: string) => fileURLToPath(new URL(`../generated/${path}`, import.meta.url));
 
 writeFileSync(out("tokens.css"), emitCss());
+writeFileSync(out("tokens.json"), emitJson());
 writeFileSync(out("swift/ServoMapTokens.swift"), emitSwift());
-console.log("design-tokens: wrote generated/tokens.css and generated/swift/ServoMapTokens.swift");
+console.log(
+  "design-tokens: wrote generated/tokens.css, generated/tokens.json and generated/swift/ServoMapTokens.swift",
+);

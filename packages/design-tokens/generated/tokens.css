@@ -22,6 +22,7 @@
   --color-brand-tile-line: #EBEBEB;
   --color-map-land: #F2F1ED;
   --color-map-water: #D9DFE2;
+  --color-mark-accent: #C25E3A;
 
   --font-display: var(--font-loaded-display, "Shippori Mincho"), "Hiragino Mincho ProN", "Yu Mincho", Georgia, serif;
   --font-body: var(--font-loaded-body, "Zen Kaku Gothic New"), "Hiragino Sans", "Yu Gothic", system-ui, sans-serif;
@@ -86,5 +87,6 @@
   --color-brand-tile-line: #EBEBEB;
   --color-map-land: #1E1E1C;
   --color-map-water: #182025;
+  --color-mark-accent: #D9764F;
   --shadow-float: 0 1px 2px rgb(0 0 0 / 0.3), 0 6px 20px rgb(0 0 0 / 0.25);
 }

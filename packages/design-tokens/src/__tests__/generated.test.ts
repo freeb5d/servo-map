@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { emitCss } from "../emit-css";
+import { emitJson } from "../emit-json";
 import { emitSwift } from "../emit-swift";
 
 const committed = (path: string) =>
@@ -11,6 +12,10 @@ const committed = (path: string) =>
 describe("generated outputs", () => {
   it("tokens.css matches src/tokens.ts (run `pnpm --filter @servo-map/design-tokens generate`)", () => {
     expect(committed("tokens.css")).toBe(emitCss());
+  });
+
+  it("tokens.json matches src/tokens.ts", () => {
+    expect(committed("tokens.json")).toBe(emitJson());
   });
 
   it("ServoMapTokens.swift matches src/tokens.ts", () => {
