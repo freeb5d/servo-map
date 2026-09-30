@@ -18,8 +18,6 @@ Run from the repository root, after `pnpm --filter @servo-map/design-tokens gene
 import json
 import math
 import pathlib
-import re
-import subprocess
 import sys
 from dataclasses import dataclass
 
@@ -72,6 +70,19 @@ class Geometry:
     drop: str
     needle: str
     pivot: tuple[float, float, float]  # cx, cy, r
+    bounds: tuple[float, float, float, float]  # x0, y0, x1, y1 of everything drawn
+
+
+def _bounds(
+    discs: list[tuple[float, float, float]],
+) -> tuple[float, float, float, float]:
+    """Box around discs (x, y, r); a round-capped stroke is covered by discs at its two ends."""
+    return (
+        min(x - r for x, _, r in discs),
+        min(y - r for _, y, r in discs),
+        max(x + r for x, _, r in discs),
+        max(y + r for _, y, r in discs),
+    )
 
 
 def _drop_path(cx: float, cy: float, s: float) -> str:
@@ -87,6 +98,7 @@ def geometry() -> Geometry:
     """Build the gauge; fails loudly if any two ticks' inner ends crowd each other."""
     step = math.pi / (TICKS - 1)
     ticks: dict[float, list[str]] = {}
+    discs: list[tuple[float, float, float]] = []
     for i in range(TICKS):
         length, width = MAJOR if i % MAJOR_EVERY == 0 else MINOR
         if (RADIUS - length) * step - width < width:
@@ -94,18 +106,29 @@ def geometry() -> Geometry:
         a = math.pi - step * i
         cos_a, sin_a = math.cos(a), math.sin(a)
         inner = RADIUS - length
+        for r in (RADIUS, inner):
+            discs.append((CX + r * cos_a, CY - r * sin_a, width / 2))
         ticks.setdefault(width, []).append(
             f"M{CX + RADIUS * cos_a:.1f} {CY - RADIUS * sin_a:.1f}"
             f"L{CX + inner * cos_a:.1f} {CY - inner * sin_a:.1f}"
         )
     a = math.pi * (1 - LEVEL)
     reach = RADIUS - MAJOR[0] - 48  # clear of the longest tick
-    needle = f"M{CX} {CY}L{CX + reach * math.cos(a):.1f} {CY - reach * math.sin(a):.1f}"
+    tip = (CX + reach * math.cos(a), CY - reach * math.sin(a))
+    needle = f"M{CX} {CY}L{tip[0]:.1f} {tip[1]:.1f}"
+    drop_y, drop_r = CY + DROP_OFFSET, 7 * DROP_SCALE
+    discs += [
+        (*tip, NEEDLE_WIDTH / 2),
+        (CX, CY, PIVOT),
+        (CX, drop_y, drop_r),  # the drop's round part
+        (CX, drop_y - 13.9 * DROP_SCALE, 0),  # the drop's point
+    ]
     return Geometry(
         ticks={w: "".join(d) for w, d in ticks.items()},
         drop=_drop_path(CX, CY + DROP_OFFSET, DROP_SCALE),
         needle=needle,
         pivot=(CX, CY, PIVOT),
+        bounds=_bounds(discs),
     )
 
 
@@ -133,34 +156,14 @@ def _canvas(inner: str, shift: tuple[float, float]) -> str:
     )
 
 
-def committed_shift() -> tuple[float, float]:
-    """The shift in the committed mark.ts, so --check runs without rsvg-convert and magick."""
-    found = re.search(
-        r'MARK_TRANSFORM = "translate\(([-\d.]+) ([-\d.]+)\)"', MARK_TS.read_text()
-    )
-    if found is None:
-        raise ValueError(f"{MARK_TS}: no MARK_TRANSFORM to check against")
-    return float(found[1]), float(found[2])
-
-
 def centring_shift(g: Geometry) -> tuple[float, float]:
-    """Optically centre the whole mark: rasterise it in white and measure its bounding box."""
-    probe = HERE / ".probe.svg"
-    png = probe.with_suffix(".png")
-    probe.write_text(_canvas(gauge_svg(g) + needle_svg(g), (0, 0)))
-    try:
-        subprocess.run(["rsvg-convert", "-b", "black", probe, "-o", png], check=True)
-        box = subprocess.run(
-            ["magick", png, "-trim", "-format", "%w %h %X %Y", "info:"],
-            capture_output=True,
-            text=True,
-            check=True,
-        ).stdout.split()
-    finally:
-        probe.unlink(missing_ok=True)
-        png.unlink(missing_ok=True)
-    w, h, x, y = map(int, box)
-    return round(512 - (x + w / 2), 1), round(512 - (y + h / 2), 1)
+    """Centre the whole mark's exact bounding box on the canvas.
+
+    Measured from the geometry rather than a rasterisation, so --check recomputes it with
+    no external tools and a change to the geometry or to this function shows up as drift.
+    """
+    x0, y0, x1, y1 = g.bounds
+    return round(512 - (x0 + x1) / 2, 1), round(512 - (y0 + y1) / 2, 1)
 
 
 def _colour(hex_: str, alpha: float = 1.0) -> str:
@@ -247,11 +250,10 @@ def mark_ts(g: Geometry, shift: tuple[float, float]) -> str:
     )
 
 
-def outputs(shift: tuple[float, float] | None = None) -> dict[pathlib.Path, str]:
-    """Every generated file and its content; measures the centring unless given a shift."""
+def outputs() -> dict[pathlib.Path, str]:
+    """Every generated file and its content."""
     g = geometry()
-    if shift is None:
-        shift = centring_shift(g)
+    shift = centring_shift(g)
     palette = load_palette()
     return {
         **app_icon_files(g, shift, palette),
@@ -264,7 +266,7 @@ def check() -> int:
     """Exit status 1, naming each file, when a committed output differs from a fresh render."""
     stale = [
         path
-        for path, content in outputs(committed_shift()).items()
+        for path, content in outputs().items()
         if not path.exists() or path.read_text() != content
     ]
     for path in stale:

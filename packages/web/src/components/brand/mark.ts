@@ -4,7 +4,7 @@
 
 export const MARK_VIEWBOX = "0 0 1024 1024";
 export const MARK_TILE_RADIUS = 224;
-export const MARK_TRANSFORM = "translate(0.0 5.0)";
+export const MARK_TRANSFORM = "translate(0.0 5.4)";
 
 export const MARK_TICKS = [
   { d: "M182.0 600.0L244.0 600.0M278.7 366.7L322.5 410.5M512.0 270.0L512.0 332.0M745.3 366.7L701.5 410.5M842.0 600.0L780.0 600.0", width: 14 },
