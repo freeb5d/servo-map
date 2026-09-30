@@ -8,7 +8,7 @@ import SwiftUI
  */
 struct YouScreen: View {
     enum Page: String, CaseIterable, Identifiable, Hashable {
-        case saved = "Saved", log = "Log", car = "Car", alerts = "Alerts"
+        case saved = "Saved", log = "Log", car = "Car", alerts = "Alerts", sources = "Data sources"
         var id: String { rawValue }
     }
 
@@ -42,6 +42,7 @@ struct YouScreen: View {
                     logCard
                     alertsCard
                     if account.account != nil { accountCard }
+                    sourcesLink
                 }
                 .padding(.horizontal, 16)
                 .padding(.bottom, 32)
@@ -69,6 +70,7 @@ struct YouScreen: View {
         case .log: LogScreen()
         case .car: CarForm()
         case .alerts: AlertsScreen()
+        case .sources: DataSourcesScreen()
         }
     }
 
@@ -262,6 +264,19 @@ struct YouScreen: View {
                 Image(systemName: "chevron.right").font(.footnote.weight(.semibold)).foregroundStyle(ServoMapColor.ink3)
             }
             .card()
+        }
+        .buttonStyle(.plain)
+    }
+
+    /** Credits the states' price schemes; their licences ask for it wherever prices appear. */
+    private var sourcesLink: some View {
+        NavigationLink(value: Page.sources) {
+            HStack {
+                Label("Data sources", systemImage: "info.circle").font(ServoMapFont.body(.footnote, weight: 600))
+                Spacer()
+                Image(systemName: "chevron.right").font(.footnote.weight(.semibold)).foregroundStyle(ServoMapColor.ink3)
+            }
+            .padding(.horizontal, 4)
         }
         .buttonStyle(.plain)
     }

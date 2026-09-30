@@ -27,6 +27,10 @@ struct StationDetail: View {
             fuels
             cheaperNearby
             yourFillUps
+            // The licence statement and report link (decision 0007), at the foot so the price stays on top.
+            if DataSource.forState(station.state)?.hasNotice == true {
+                Section { SourceNotice(state: station.state) }.paperRow()
+            }
         }
         .paperList()
         // The back button floats over the list; no inline title bar above the station's name.
@@ -68,6 +72,7 @@ struct StationDetail: View {
             } else {
                 Text("No \(store.fuel.rawValue) price reported here.").font(ServoMapFont.body).foregroundStyle(ServoMapColor.ink2)
             }
+            SourceCredit(state: station.state)
         }
         .padding(.vertical, 4)
     }

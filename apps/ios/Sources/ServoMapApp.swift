@@ -8,7 +8,7 @@ struct ServoMapApp: App {
     @State private var log = FillUpLog()
     @State private var account = AccountStore()
     // Launch arguments open a given screen, so design screenshots are reproducible:
-    // -tab map|trends|search, you to open the You sheet, or saved|log|car|alerts for one of its pages, -filters, -detail (opens the cheapest station), -widgets.
+    // -tab map|trends|search, you to open the You sheet, or saved|log|car|alerts|sources for one of its pages, -filters, -detail (opens the cheapest station), -widgets.
     private let args = ProcessInfo.processInfo.arguments
 
     init() {

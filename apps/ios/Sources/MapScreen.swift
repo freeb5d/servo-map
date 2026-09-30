@@ -29,9 +29,10 @@ struct MapScreen: View {
     init(tab: String = "map", openFilters: Bool = false, openDetail: Bool = false) {
         self.openDetail = openDetail
         // Saved and Log moved into the You sheet; their launch names open it on that page.
-        if tab == "you" || YouScreen.Page(rawValue: tab.capitalized) != nil {
+        let page = YouScreen.Page.allCases.first { "\($0)" == tab }
+        if tab == "you" || page != nil {
             _showYou = State(initialValue: true)
-            _youPage = State(initialValue: YouScreen.Page(rawValue: tab.capitalized))
+            _youPage = State(initialValue: page)
         }
         let tab = ["trends", "search"].contains(tab) ? tab : "map"
         _tab = State(initialValue: tab)
