@@ -78,6 +78,9 @@ Provisioned 2026-09-30.
 2. GitHub variable `D1_PRICES_DATABASE_ID` feeds the ingest step. It uses the same `CLOUDFLARE_API_TOKEN` (D1 Write).
 3. Seeded 2026-09-30 with the live NSW and WA stations and the KV `history:{nsw,wa}` series (2026-06-01 to 2026-09-30, 75 days).
 4. Budget: watch `SELECT run_at, state, rows_written FROM ingest_runs ORDER BY run_at DESC` against the free plan's 100,000 rows written a day, and the database size against 500 MB.
+5. Backfill: `scripts/backfill-daily-prices.py` (Python, run with `uv run`) rebuilds `daily_prices` from the states' published history files (NSW/ACT FuelCheck, QLD, WA FuelWatch) and writes them with `source = 'history'`, never over a `'live'` row unless `--replace`. `--kv` also merges them into KV `history:{state}` (90-day cap). Accuracy and method are in the script's docstring.
+   - 2026-09-30: filled NSW 2026-08-02..08-30, ACT 06-01..08-30, QLD 06-01..08-31 (D1 only; QLD is not live), and replaced WA 06-01..09-28, whose `U98`/`E10` rows were LPG/E85 before #65.
+   - **Still missing: NSW and ACT 2026-08-31..09-17.** FuelCheck publishes September's file in early October; then run `rebuild nsw 2026-08-31 2026-09-17` and `rebuild act 2026-08-31 2026-09-29` with the June–September files, and `apply` them with `--kv`.
 
 ## Environment variable inventory
 
