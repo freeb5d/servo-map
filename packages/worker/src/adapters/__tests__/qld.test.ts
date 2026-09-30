@@ -72,4 +72,10 @@ describe("qldAdapter", () => {
     // FuelId 99 is not mapped and must not appear
     expect(s2001!.prices.length).toBe(2);
   });
+
+  it("drops the 9999 placeholder QLD uses for a fuel that is not available", async () => {
+    const stations = await qldAdapter.fetchStations(baseEnv);
+    const s2002 = stations.find((s) => s.id === "qld-2002");
+    expect(s2002!.prices.map((p) => p.fuel)).toEqual(["U95"]);
+  });
 });

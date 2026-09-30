@@ -10,6 +10,9 @@ import { titleCasePlace } from "../utils/place-names";
 
 const BASE_URL = "https://fppdirectapi-prod.fuelpricesqld.com.au";
 
+// QLD reports 9999 (999.9c/L) when a site lists a fuel it cannot sell right now.
+const UNAVAILABLE_PRICE = 9999;
+
 async function fetchWithAuth<T>(url: string, token: string): Promise<T> {
   const res = await fetch(url, {
     headers: {
@@ -42,7 +45,7 @@ export const qldAdapter: StateAdapter = {
     const pricesBySite = new Map<number, FuelPrice[]>();
     for (const p of pricesRes.SitePrices) {
       const fuelType = mapQldFuelType(p.FuelId);
-      if (!fuelType) continue;
+      if (!fuelType || p.Price >= UNAVAILABLE_PRICE) continue;
 
       const prices = pricesBySite.get(p.SiteId) ?? [];
       prices.push({

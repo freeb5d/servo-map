@@ -3,6 +3,7 @@
     { "SiteId": 2001, "FuelId": 2,  "Price": 1859, "TransactionDateUtc": "2026-03-28T01:20:38Z" },
     { "SiteId": 2001, "FuelId": 3,  "Price": 2050, "TransactionDateUtc": "2026-03-28T01:20:38Z" },
     { "SiteId": 2001, "FuelId": 99, "Price": 950,  "TransactionDateUtc": "2026-03-28T01:20:38Z" },
-    { "SiteId": 2002, "FuelId": 5,  "Price": 2010, "TransactionDateUtc": "2026-03-28T01:15:00Z" }
+    { "SiteId": 2002, "FuelId": 5,  "Price": 2010, "TransactionDateUtc": "2026-03-28T01:15:00Z" },
+    { "SiteId": 2002, "FuelId": 12, "Price": 9999, "TransactionDateUtc": "2026-03-28T01:15:00Z" }
   ]
 }
