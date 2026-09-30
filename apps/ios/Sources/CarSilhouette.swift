@@ -1,21 +1,5 @@
 import SwiftUI
 
-/** Body shapes the car catalogue maps every model to (decision 0004); drawn by ServoMap, not photos. */
-enum BodyType: String, CaseIterable, Codable, Sendable, Identifiable {
-    case hatch, sedan, wagon, suv, ute, van
-    var id: String { rawValue }
-    var label: String {
-        switch self {
-        case .hatch: "Hatch"
-        case .sedan: "Sedan"
-        case .wagon: "Wagon"
-        case .suv: "SUV"
-        case .ute: "Ute"
-        case .van: "Van"
-        }
-    }
-}
-
 /**
  * A car in side view: body, glasshouse and wheels, in one flat style for every body type. The
  * body takes the car's colour; windows and wheels come from the page palette.

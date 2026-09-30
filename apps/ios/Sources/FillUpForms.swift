@@ -79,28 +79,3 @@ struct AddFillUpSheet: View {
         dismiss()
     }
 }
-
-/** The car profile: a name, the fuel it takes and the tank size used for fill-up costs. */
-struct CarForm: View {
-    @Environment(Store.self) private var store
-    @AppStorage("carName") private var carName = "My car"
-    @AppStorage("tankLitres") private var tankLitres = 50
-    @AppStorage("defaultFuel") private var defaultFuel = FuelType.u91.rawValue
-
-    var body: some View {
-        Form {
-            Section {
-                TextField("Name", text: $carName).paperRow()
-                Picker("Fuel", selection: $defaultFuel) {
-                    ForEach(FuelType.allCases) { Text($0.rawValue).tag($0.rawValue) }
-                }
-                .paperRow()
-                Stepper("Tank  \(tankLitres) L", value: $tankLitres, in: 20...150, step: 1).paperRow()
-            } footer: {
-                Text("ServoMap opens on this fuel and prices a full tank at this size.")
-            }
-        }
-        .paperList()
-        .onChange(of: defaultFuel) { if let f = FuelType(rawValue: defaultFuel) { store.fuel = f } }
-    }
-}

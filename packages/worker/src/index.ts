@@ -4,6 +4,7 @@ import { stationsRoute } from "./routes/stations";
 import { metadataRoute } from "./routes/metadata";
 import { brandsRoute } from "./routes/brands";
 import { trendsRoute } from "./routes/trends";
+import { vehiclesRoute } from "./routes/vehicles";
 import { dispatchIngest } from "./cron/dispatch";
 import type { Env } from "./env";
 
@@ -20,6 +21,7 @@ api.route("/stations", stationsRoute);
 api.route("/metadata", metadataRoute);
 api.route("/brands", brandsRoute);
 api.route("/trends", trendsRoute);
+api.route("/vehicles", vehiclesRoute);
 
 export default {
   fetch: app.fetch,

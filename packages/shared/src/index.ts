@@ -20,3 +20,12 @@ export type {
   ApiResponse,
   ApiErrorResponse,
 } from "./types";
+export {
+  type Vehicle,
+  type BodyType,
+  BODY_TYPES,
+  parseVehicles,
+  searchVehicles,
+  vehicleMakes,
+} from "./vehicles";
+export { VEHICLES } from "./generated/vehicles.data";

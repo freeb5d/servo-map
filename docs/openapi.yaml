@@ -285,6 +285,67 @@ paths:
                   - United
                   - Woolworths
 
+  /vehicles:
+    get:
+      operationId: searchVehicles
+      tags: [Reference]
+      summary: Search the car catalogue
+      description: |
+        The shared car catalogue used by "My car": model generations sold in Australia with body
+        type, recommended fuel and fuel-tank capacity, each with the source it was read from.
+        Every word of `q` must match the make or model; a four-digit word matches a model year.
+      parameters:
+        - name: q
+          in: query
+          description: Search words, e.g. `corolla 2020`. Empty returns the first `limit` models.
+          schema:
+            type: string
+            maxLength: 60
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        "200":
+          description: Matching model generations, by make, model and newest first
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/Vehicle"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+  /vehicles/makes:
+    get:
+      operationId: listVehicleMakes
+      tags: [Reference]
+      summary: List makes in the car catalogue
+      responses:
+        "200":
+          description: Makes, alphabetical
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          type: string
+
+
 components:
   parameters:
     State:
@@ -400,6 +461,37 @@ components:
         minimum: 0
 
   schemas:
+    Vehicle:
+      type: object
+      required: [id, make, model, fromYear, body, fuel, tankLitres, source]
+      properties:
+        id:
+          type: string
+          example: toyota-corolla-2019
+        make:
+          type: string
+          example: Toyota
+        model:
+          type: string
+          example: Corolla
+        fromYear:
+          type: integer
+          example: 2019
+        toYear:
+          type: integer
+          description: Last model year; absent while still on sale.
+        body:
+          type: string
+          enum: [hatch, sedan, wagon, suv, ute, van]
+        fuel:
+          $ref: "#/components/schemas/FuelType"
+        tankLitres:
+          type: integer
+          example: 50
+        source:
+          type: string
+          format: uri
+          description: Where the tank capacity was read.
     FuelType:
       type: string
       enum: [U91, U95, U98, E10, Diesel]

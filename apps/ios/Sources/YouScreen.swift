@@ -18,6 +18,7 @@ struct YouScreen: View {
     @AppStorage("carName") private var carName = "My car"
     @AppStorage("tankLitres") private var tankLitres = 50
     @AppStorage("carBody") private var carBody = BodyType.hatch.rawValue
+    @AppStorage("carPaint") private var carPaint = CarPaint.silver.rawValue
     @AppStorage("priceAlerts") private var priceAlerts = false
     @AppStorage("alertCycleLow") private var cycleLow = false
 
@@ -85,7 +86,7 @@ struct YouScreen: View {
     private var carCard: some View {
         NavigationLink(value: Page.car) {
             VStack(alignment: .leading, spacing: 10) {
-                CarSilhouette(BodyType(rawValue: carBody) ?? .hatch)
+                CarSilhouette(BodyType(rawValue: carBody) ?? .hatch, paint: (CarPaint(rawValue: carPaint) ?? .silver).color)
                     .frame(maxWidth: 260)
                     .frame(maxWidth: .infinity)
                     .padding(.top, 6)

@@ -87,6 +87,40 @@ struct Station: Codable, Identifiable, Hashable, Sendable {
     var coordinate: CLLocationCoordinate2D { CLLocationCoordinate2D(latitude: lat, longitude: lng) }
 }
 
+/** Body shapes the car catalogue maps every model to (decision 0004); drawn by ServoMap, not photos. */
+enum BodyType: String, CaseIterable, Codable, Sendable, Identifiable {
+    case hatch, sedan, wagon, suv, ute, van
+    var id: String { rawValue }
+    var label: String {
+        switch self {
+        case .hatch: "Hatch"
+        case .sedan: "Sedan"
+        case .wagon: "Wagon"
+        case .suv: "SUV"
+        case .ute: "Ute"
+        case .van: "Van"
+        }
+    }
+}
+
+/** One model generation from the shared car catalogue (`/api/v1/vehicles`, `@servo-map/shared`). */
+struct Vehicle: Codable, Hashable, Sendable, Identifiable {
+    let id: String
+    let make: String
+    let model: String
+    let fromYear: Int
+    let toYear: Int?
+    let body: String
+    let fuel: String
+    let tankLitres: Int
+    let source: String
+
+    var name: String { "\(make) \(model)" }
+    var years: String { toYear.map { "\(fromYear)–\($0)" } ?? "\(fromYear)–" }
+    var bodyType: BodyType { BodyType(rawValue: body) ?? .hatch }
+    var fuelType: FuelType? { FuelType(rawValue: fuel) }
+}
+
 struct Snapshot: Codable, Hashable, Sendable {
     let date: String
     let fuel: String

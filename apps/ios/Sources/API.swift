@@ -35,6 +35,15 @@ struct API: Sendable {
         ])
     }
 
+    /** The shared car catalogue (decision 0004). */
+    func vehicles(_ query: String, limit: Int = 30) async throws -> [Vehicle] {
+        try await get("vehicles", ["q": query, "limit": "\(limit)"])
+    }
+
+    func vehicleMakes() async throws -> [String] {
+        try await get("vehicles/makes", [:])
+    }
+
     func search(_ query: String, fuel: FuelType) async throws -> [Station] {
         try await get("stations", ["q": query, "fuel": fuel.rawValue, "limit": "100", "sort": "price_asc"])
     }

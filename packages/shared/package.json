@@ -16,7 +16,7 @@
     "typecheck": "tsc --noEmit",
     "lint": "echo 'no linter configured'",
     "test": "vitest run",
-    "generate": "tsx scripts/generate-swift.ts"
+    "generate": "tsx scripts/generate-swift.ts && tsx scripts/generate-vehicles.ts"
   },
   "devDependencies": {
     "typescript": "^5.7.0",
