@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { Station } from "@servo-map/shared";
 import { getStation } from "@/lib/api";
-import { recordVisit, type MarksById } from "@/lib/saved";
+import { movedIds, recordVisit, type MarksById } from "@/lib/saved";
 
 const MARKS_KEY = "servo-map:saved-prices";
 
@@ -52,7 +52,11 @@ async function loadEntry(id: string): Promise<[string, SavedEntry]> {
  * the previous visit. The comparison baseline is captured before the new prices are stored, so
  * the change stays visible for the whole visit and only resets on the next one.
  */
-export function useSavedStations(ids: readonly string[], ready: boolean): SavedStations {
+export function useSavedStations(
+  ids: readonly string[],
+  ready: boolean,
+  onMoved: (from: string, to: string) => void,
+): SavedStations {
   const [entries, setEntries] = useState<Record<string, SavedEntry>>({});
   const [baseline, setBaseline] = useState<MarksById>({});
   const requested = useRef(new Set<string>());
@@ -75,6 +79,9 @@ export function useSavedStations(ids: readonly string[], ready: boolean): SavedS
       const stations = results.flatMap(([, e]) => (e.status === "ok" ? [e.station] : []));
       const next = recordVisit(stored, stations, new Date(), ids);
       if (next !== stored) writeMarks(next);
+
+      const loaded = results.map(([id, e]) => [id, e.status === "ok" ? e.station : null] as const);
+      for (const [from, to] of movedIds(loaded)) onMoved(from, to);
     });
     // `ids` is captured through idsKey; the array identity changes on every render.
     // eslint-disable-next-line react-hooks/exhaustive-deps

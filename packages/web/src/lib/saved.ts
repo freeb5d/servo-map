@@ -88,3 +88,19 @@ export function rankByPrice<T extends { station: Station }>(items: readonly T[],
   const priced = (item: T): number => getFuelPrice(item.station.prices, fuel)?.price ?? Infinity;
   return [...items].sort((a, b) => priced(a) - priced(b));
 }
+
+/**
+ * Saved ids to replace: the API answers a retired id with the station under its current id
+ * (ACT stations moved from "nsw-<code>" to "act-<code>"), and the saved list should follow.
+ */
+export function movedIds(loaded: readonly (readonly [string, Station | null])[]): [string, string][] {
+  return loaded.flatMap(([requested, station]) =>
+    station && station.id !== requested ? [[requested, station.id] as [string, string]] : [],
+  );
+}
+
+/** Replaces `from` with `to` in place, dropping `from` when `to` is already saved. */
+export function replaceId(ids: readonly string[], from: string, to: string): string[] {
+  if (!ids.includes(from)) return [...ids];
+  return ids.includes(to) ? ids.filter((id) => id !== from) : ids.map((id) => (id === from ? to : id));
+}

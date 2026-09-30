@@ -56,6 +56,19 @@ describe("KV round-trip", () => {
     expect(one).toEqual(fixtureStations[0]);
   });
 
+  it("readStationById resolves a retired nsw- id to the station now filed under ACT", async () => {
+    const kv = createMemoryKV();
+    const act: Station = { ...fixtureStations[0], id: "act-18711", state: "act", postcode: "2913" };
+    await writeStations(kv, "nsw", fixtureStations);
+    await writeStations(kv, "act", [act]);
+
+    expect(await readStationById(kv, "nsw-18711")).toEqual(act);
+    expect(await readStationById(kv, "act-18711")).toEqual(act);
+    // A current nsw- id still wins over the alias.
+    expect(await readStationById(kv, "nsw-1")).toEqual(fixtureStations[0]);
+    expect(await readStationById(kv, "nsw-99999")).toBeNull();
+  });
+
   it("readStationById returns null for a missing id, unknown state, or junk", async () => {
     const kv = createMemoryKV();
     await writeStations(kv, "nsw", fixtureStations);

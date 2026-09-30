@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useMemo, useSyncExternalStore } from "react";
+import { replaceId } from "@/lib/saved";
 
 const STORAGE_KEY = "servo-map:favourites";
 const CHANGE_EVENT = "servo-map:favourites-change";
@@ -73,5 +74,12 @@ export function useFavourites() {
     writeIds(current.includes(id) ? current.filter((x) => x !== id) : [...current, id]);
   }, []);
 
-  return { favouriteIds: ids, isFavourite, toggle, count: ids.length, ready };
+  /** Follows a station to its current id (see movedIds in lib/saved). */
+  const rename = useCallback((from: string, to: string) => {
+    const current = parse(readRaw());
+    const next = replaceId(current, from, to);
+    if (next.join() !== current.join()) writeIds(next);
+  }, []);
+
+  return { favouriteIds: ids, isFavourite, toggle, rename, count: ids.length, ready };
 }
