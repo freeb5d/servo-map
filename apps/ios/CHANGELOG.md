@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.11.0](https://github.com/Misoto22/servo-map/compare/ios-v0.10.0...ios-v0.11.0) (2026-09-30)
+
+
+### Features
+
+* **ios:** move to the system tab bar and add Settings ([#74](https://github.com/Misoto22/servo-map/issues/74)) ([a86e465](https://github.com/Misoto22/servo-map/commit/a86e465d1761f438efedfb11d74d8d74ebf7d297))
+
 ## [0.10.0](https://github.com/Misoto22/servo-map/compare/ios-v0.9.0...ios-v0.10.0) (2026-09-30)
 
 
