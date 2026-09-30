@@ -1,14 +1,16 @@
 "use client";
 
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { StationWithDistance } from "@servo-map/shared";
 import { TopBar } from "@/components/shell/TopBar";
 import { MobileTabs } from "@/components/shell/MobileTabs";
 import { MapView } from "@/components/map/MapView";
 import { useMapViewport } from "@/components/map/useMapViewport";
+import type { ViewBounds } from "@/components/map/viewArea";
 import { Ledger } from "@/components/ledger/Ledger";
 import { useNow } from "@/components/ledger/useNow";
 import { cheapestRankedId } from "@/components/ledger/rank";
+import { cheapestInView, headlineScope, stationsInView } from "@/components/ledger/inView";
 import { centroid, dominantState } from "@/components/ledger/stationMeta";
 import { FilterPanel } from "@/components/filters/FilterPanel";
 import { QuickFilters } from "@/components/filters/QuickFilters";
@@ -56,6 +58,8 @@ export default function HomeMap() {
     [setFilters],
   );
   const viewport = useMapViewport(clearSearch);
+  // What the map shows right now; the verdict and the list rank only these stations.
+  const [view, setView] = useState<ViewBounds | null>(null);
 
   const geo = useGeolocation();
   const hasLocated = geo.lat != null && geo.lng != null;
@@ -75,7 +79,12 @@ export default function HomeMap() {
     }),
     [fuel, viewport.center.lat, viewport.center.lng, viewport.radius, filters.q],
   );
-  const { stations: loaded, loading, noResults, error, refresh } = useStations(stationsOpts);
+  const { stations: loaded, loading, noResults, error, total, refresh } = useStations(stationsOpts);
+
+  // A settled, complete circle lets the map pan and zoom inside it without another request.
+  const loadedComplete = !filters.q && !loading && !error && total <= loaded.length;
+  const { setLoadedComplete } = viewport;
+  useEffect(() => setLoadedComplete(loadedComplete), [loadedComplete, setLoadedComplete]);
 
   // Distances are measured from the viewer, else from what the map shows.
   const origin = useMemo(
@@ -86,7 +95,9 @@ export default function HomeMap() {
     () => applyFilters(loaded, filters, fuel, origin, now),
     [loaded, filters, fuel, origin, now],
   );
-  const cheapestId = useMemo(() => cheapestRankedId(stations, fuel, now), [stations, fuel, now]);
+  const inView = useMemo(() => stationsInView(stations, view), [stations, view]);
+  const cheapest = useMemo(() => cheapestInView(stations, view, fuel, now), [stations, view, fuel, now]);
+  const cheapestId = useMemo(() => cheapestRankedId(inView, fuel, now), [inView, fuel, now]);
   const filterCount = activeFilterCount(filters);
 
   const { metadata } = useMetadata();
@@ -124,7 +135,7 @@ export default function HomeMap() {
     [setFilters],
   );
 
-  const place = filters.q || (hasLocated ? "you" : "Sydney CBD");
+  const scope = headlineScope(filters.q, userLocation, view);
   const liveMessage = loading
     ? "Loading stations…"
     : error
@@ -133,15 +144,17 @@ export default function HomeMap() {
         ? `No stations found for ${filters.q}.`
         : noCoverage
           ? "No live prices in this area yet."
-          : stations.length > 0
-            ? `Showing ${stations.length} station${stations.length !== 1 ? "s" : ""}.`
+          : inView.length > 0
+            ? `Showing ${inView.length} station${inView.length !== 1 ? "s" : ""} in view.`
             : "";
 
   const ledger = (
     <Ledger
       fuel={fuel}
       sort={filters.sort}
-      stations={stations}
+      stations={inView}
+      matched={stations}
+      cheapest={cheapest}
       loadedCount={loaded.length}
       loading={loading}
       error={error}
@@ -152,7 +165,7 @@ export default function HomeMap() {
       liveStates={liveStateList}
       filterCount={filterCount}
       onResetFilters={resetFilters}
-      place={place}
+      scope={scope}
       cycle={cycle}
       updatedAt={updatedAt}
       now={now}
@@ -253,6 +266,7 @@ export default function HomeMap() {
               searchQuery={filters.q}
               onStationClick={setActive}
               onMoveEnd={viewport.handleMoveEnd}
+              onViewChange={setView}
             />
             {isDesktop && panel && (
               <div className="absolute bottom-2 left-2 top-2 z-20 grid w-[460px] max-w-[calc(100%-16px)] grid-rows-[minmax(0,1fr)]">

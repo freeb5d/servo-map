@@ -43,6 +43,8 @@ import {
 import { buildStationCollection, splitCheapest } from "./mapData";
 import { preloadBrandImages, registerBrandImages } from "./brandImages";
 import { registerTagImages } from "./tagImages";
+import type { MapBounds } from "./useMapViewport";
+import type { ViewBounds } from "./viewArea";
 import "mapbox-gl/dist/mapbox-gl.css";
 
 const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || "";
@@ -65,11 +67,10 @@ interface MapViewProps {
   userLocation: { lat: number; lng: number } | null;
   searchQuery: string;
   onStationClick: (station: StationWithDistance) => void;
-  onMoveEnd?: (bounds: {
-    ne: [number, number];
-    sw: [number, number];
-    zoom: number;
-  }) => void;
+  /** User-driven moves only; drives the fetch area. */
+  onMoveEnd?: (bounds: MapBounds) => void;
+  /** Every settled view (load, any move, resize); drives what the ledger ranks. */
+  onViewChange?: (bounds: ViewBounds) => void;
 }
 
 export function MapView({
@@ -81,6 +82,7 @@ export function MapView({
   searchQuery,
   onStationClick,
   onMoveEnd,
+  onViewChange,
 }: MapViewProps) {
   const mapRef = useRef<MapRef>(null);
   const { theme } = useTheme();
@@ -191,22 +193,33 @@ export function MapView({
     }
   }, [searchQuery, stations]);
 
+  const readBounds = useCallback((): MapBounds | null => {
+    const map = mapRef.current;
+    const bounds = map?.getBounds();
+    if (!map || !bounds) return null;
+    return {
+      ne: [bounds.getNorthEast().lng, bounds.getNorthEast().lat],
+      sw: [bounds.getSouthWest().lng, bounds.getSouthWest().lat],
+      zoom: map.getZoom(),
+    };
+  }, []);
+
+  // Reported once a move settles rather than on every frame, so dragging never re-renders the ledger.
+  const reportView = useCallback(() => {
+    const bounds = readBounds();
+    if (bounds && onViewChange) onViewChange({ ne: bounds.ne, sw: bounds.sw });
+  }, [readBounds, onViewChange]);
+
   // 只上报用户手动触发的移动。程序化移动(flyTo/fitBounds)没有 originalEvent，
   // 忽略它们可以避免搜索后的自动飞行把 searchSuburb 清空。
   const handleMoveEnd = useCallback(
     (e: ViewStateChangeEvent) => {
-      if (!mapRef.current || !onMoveEnd) return;
-      if (!e.originalEvent) return;
-      const bounds = mapRef.current.getBounds();
-      if (bounds) {
-        onMoveEnd({
-          ne: [bounds.getNorthEast().lng, bounds.getNorthEast().lat],
-          sw: [bounds.getSouthWest().lng, bounds.getSouthWest().lat],
-          zoom: mapRef.current.getZoom(),
-        });
-      }
+      reportView();
+      if (!onMoveEnd || !e.originalEvent) return;
+      const bounds = readBounds();
+      if (bounds) onMoveEnd(bounds);
     },
-    [onMoveEnd],
+    [onMoveEnd, readBounds, reportView],
   );
 
   // 点击：聚类点 → 展开缩放；单站点 → 选中并打开详情
@@ -257,6 +270,7 @@ export function MapView({
           initialViewState={INITIAL_VIEW}
           mapStyle={mapStyle}
           onMoveEnd={handleMoveEnd}
+          onResize={reportView}
           onLoad={(e) => {
             applyStyleOverrides(e.target, theme);
             registerTagImages(e.target, theme);
@@ -264,6 +278,7 @@ export function MapView({
             e.target.off("style.load", handleStyleLoad);
             e.target.on("style.load", handleStyleLoad);
             setReady(true);
+            reportView();
           }}
           onStyleData={() => {
             const map = mapRef.current?.getMap();

@@ -8,9 +8,10 @@ import { RangeLine } from "@/components/ui/RangeLine";
 
 interface VerdictProps {
   fuel: FuelType;
-  /** Searched suburb, "you" once located, else the default view's name. */
-  place: string;
-  cheapest: StationWithDistance;
+  /** Where the verdict looks: "near you", "near <suburb>" or "in view". */
+  scope: string;
+  /** Null when nothing on screen has a current price; the verdict then says so. */
+  cheapest: StationWithDistance | null;
   count: number;
   spread: PriceSpread | null;
   cycle: TrendCycle | null;
@@ -22,7 +23,7 @@ interface VerdictProps {
 /** "What is cheapest near here, and should I fill up now?", answered before any list. */
 export function Verdict({
   fuel,
-  place,
+  scope,
   cheapest,
   count,
   spread,
@@ -30,10 +31,10 @@ export function Verdict({
   updatedAt,
   refreshing,
 }: VerdictProps) {
-  const price = getFuelPrice(cheapest.prices, fuel)?.price ?? 0;
+  const price = cheapest ? (getFuelPrice(cheapest.prices, fuel)?.price ?? 0) : 0;
   const under = spread ? spread.avg - price : 0;
   const underText =
-    spread && under >= 0.1
+    cheapest && spread && under >= 0.1
       ? `${formatPriceCents(under)}¢ below the local average of ${formatPriceCents(spread.avg)}.`
       : null;
   const stale = updatedAt !== null && isStale(updatedAt);
@@ -42,7 +43,7 @@ export function Verdict({
     <section aria-label="Price verdict" className="grid gap-[9px] border-b border-line px-5 pt-4 pb-3.5">
       <div className="flex items-baseline justify-between gap-3">
         <h2 className="text-small font-semibold text-price-cheap">
-          Cheapest {fuel} near {place}
+          Cheapest {fuel} {scope}
         </h2>
         {!stale && (updatedAt || refreshing) && (
           <span className="text-[10.5px] text-ink-3">
@@ -51,17 +52,23 @@ export function Verdict({
         )}
       </div>
 
-      <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-        <span className="font-display text-[34px] md:text-[40px] leading-none font-semibold tabular-nums text-ink">
-          {formatPriceCents(price)}
-          <span className="ml-0.5 font-body text-[0.45em] font-normal text-ink-3">¢/L</span>
-        </span>
-        <span className="flex min-w-0 items-center gap-1.5 text-body text-ink-2">
-          <BrandSeal brand={cheapest.brand} />
-          <span className="truncate">{cheapest.suburb}</span>
-          <span className="shrink-0 text-small text-ink-3">lowest of {count}</span>
-        </span>
-      </div>
+      {cheapest ? (
+        <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+          <span className="font-display text-[34px] md:text-[40px] leading-none font-semibold tabular-nums text-ink">
+            {formatPriceCents(price)}
+            <span className="ml-0.5 font-body text-[0.45em] font-normal text-ink-3">¢/L</span>
+          </span>
+          <span className="flex min-w-0 items-center gap-1.5 text-body text-ink-2">
+            <BrandSeal brand={cheapest.brand} />
+            <span className="truncate">{cheapest.suburb}</span>
+            <span className="shrink-0 text-small text-ink-3">lowest of {count}</span>
+          </span>
+        </div>
+      ) : (
+        <p className="text-body text-ink-2">
+          No current {fuel} price on this part of the map. Zoom out or pan to find one.
+        </p>
+      )}
 
       {stale && updatedAt && (
         <p role="status" className="text-small text-price-expensive">

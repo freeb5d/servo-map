@@ -10,13 +10,17 @@ import { LedgerNotice } from "./LedgerNotices";
 import { LedgerRow } from "./LedgerRow";
 import { LedgerSkeleton } from "./LedgerSkeleton";
 import { Verdict } from "./Verdict";
-import { OLD_PRICE_HOURS, cheapestRankedId, cheapestStation, rankStations } from "./rank";
+import { OLD_PRICE_HOURS, cheapestRankedId, rankStations } from "./rank";
 
 interface LedgerProps {
   fuel: FuelType;
   sort: SortMode;
-  /** Stations after filtering. */
+  /** Stations after filtering that lie inside the visible map; the list ranks these. */
   stations: StationWithDistance[];
+  /** Every loaded station after filtering, on screen or not; the local average spans these. */
+  matched: StationWithDistance[];
+  /** Cheapest station in view with a current price (see cheapestInView); null when there is none. */
+  cheapest: StationWithDistance | null;
   /** Stations the query returned, before filtering; tells "no coverage" from "filters too tight". */
   loadedCount: number;
   loading: boolean;
@@ -29,7 +33,8 @@ interface LedgerProps {
   liveStates: AustralianState[];
   filterCount: number;
   onResetFilters: () => void;
-  place: string;
+  /** "near you", "near <suburb>" or "in view", from headlineScope. */
+  scope: string;
   cycle: TrendCycle | null;
   updatedAt: string | null;
   now: number;
@@ -43,20 +48,21 @@ interface LedgerProps {
 
 /** The ledger column: verdict, filter tools, then stations ranked by price with old prices set aside. */
 export function Ledger(props: LedgerProps) {
-  const { fuel, sort, stations, loading, now } = props;
+  const { fuel, sort, stations, matched, cheapest, loading, now } = props;
   const ranked = useMemo(() => rankStations(stations, fuel, sort, now), [stations, fuel, sort, now]);
-  const spread = useMemo(() => priceSpread(stations, fuel), [stations, fuel]);
-  const cheapest = useMemo(() => cheapestStation(stations, fuel, now), [stations, fuel, now]);
+  const spread = useMemo(() => priceSpread(matched, fuel), [matched, fuel]);
   const cheapestId = useMemo(() => cheapestRankedId(stations, fuel, now), [stations, fuel, now]);
 
   const firstLoad = loading && props.loadedCount === 0;
+  // Stations match the filters but none on screen has a current price: the verdict says so.
+  const emptyView = !cheapest && !loading && !props.error && matched.length > 0;
 
   return (
     <div className="md:flex md:min-h-0 md:flex-1 md:flex-col">
-      {cheapest && (
+      {(cheapest || emptyView) && (
         <Verdict
           fuel={fuel}
-          place={props.place}
+          scope={props.scope}
           cheapest={cheapest}
           count={stations.length}
           spread={spread}
@@ -93,7 +99,7 @@ export function Ledger(props: LedgerProps) {
               ? `Live now: ${props.liveStates.map((s) => STATE_LABELS[s]).join(", ")}. Pan to a covered area or search a ${STATE_LABELS[props.liveStates[0]]} suburb.`
               : "Coverage is rolling out. Pan to a covered area or try a search."}
           </LedgerNotice>
-        ) : stations.length === 0 && !loading && !props.error ? (
+        ) : matched.length === 0 && !loading && !props.error ? (
           <LedgerNotice
             title="No stations match"
             action={
