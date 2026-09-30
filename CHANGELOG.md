@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.10.0](https://github.com/Misoto22/servo-map/compare/v0.9.0...v0.10.0) (2026-09-30)
+
+
+### Features
+
+* **ingest:** import NSW, ACT and TAS history from a public aggregate ([#73](https://github.com/Misoto22/servo-map/issues/73)) ([35d8c0d](https://github.com/Misoto22/servo-map/commit/35d8c0d8f2396d1293a3e6a6786193e8275751b9))
+* **ios:** redesign You and the add-a-car flow ([#71](https://github.com/Misoto22/servo-map/issues/71)) ([b23263b](https://github.com/Misoto22/servo-map/commit/b23263bf9a0119a0e80a8edd437c4fb0ac1e5670))
+
 ## [0.9.0](https://github.com/Misoto22/servo-map/compare/v0.8.1...v0.9.0) (2026-09-30)
 
 
