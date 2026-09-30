@@ -34,3 +34,15 @@ jobs:
           CF_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CF_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CF_KV_NAMESPACE_ID: "7bb3949a4e20480fbde7fefeadd1fe41"
+      - name: Send personal alerts
+        # Decision 0004. Skips itself until the D1 database and APNs key are configured.
+        run: npx tsx scripts/send-alerts.ts
+        env:
+          CF_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CF_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CF_KV_NAMESPACE_ID: "7bb3949a4e20480fbde7fefeadd1fe41"
+          D1_DATABASE_ID: ${{ vars.D1_DATABASE_ID }}
+          APNS_KEY: ${{ secrets.APNS_KEY }}
+          APNS_KEY_ID: ${{ secrets.APNS_KEY_ID }}
+          APNS_TEAM_ID: BZVKP6884D
+          APNS_TOPIC: com.misoto22.servomap
