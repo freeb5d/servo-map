@@ -1,7 +1,7 @@
 {
   "S": [
     { "S": 2001, "N": "7-Eleven Brisbane", "A": "1 Test St",  "B": 5, "Bn": "7-Eleven",   "P": "4000", "Lt": -27.4698, "Ln": 153.0251, "Sb": "Brisbane" },
-    { "S": 2002, "N": "Shell Gold Coast",  "A": "2 Beach Rd", "B": 7, "Bn": "Shell",      "P": "4217", "Lt": -28.0167, "Ln": 153.4000, "Sb": "Surfers Paradise" },
+    { "S": 2002, "N": "SHELL GOLD COAST",  "A": "2 BEACH RD", "B": 7, "Bn": "Shell",      "P": "4217", "Lt": -28.0167, "Ln": 153.4000, "Sb": "SURFERS PARADISE" },
     { "S": 2003, "N": "No Coords Site",    "A": "3 Nowhere",  "B": 1, "Bn": "Independent","P": "4001", "Lt": 0,        "Ln": 0,        "Sb": "Unknown" }
   ]
 }

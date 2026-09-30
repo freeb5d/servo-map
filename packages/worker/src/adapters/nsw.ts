@@ -7,6 +7,7 @@ import type {
   NswStation,
 } from "./types";
 import { mapNswFuelType } from "../utils/fuel-map";
+import { titleCasePlace } from "../utils/place-names";
 
 const OAUTH_URL =
   "https://api.onegov.nsw.gov.au/oauth/client_credential/accesstoken?grant_type=client_credentials";
@@ -148,10 +149,10 @@ export const nswAdapter: StateAdapter = {
 
       stations.push({
         id: `${state}-${code}`,
-        name: ref.name,
+        name: titleCasePlace(ref.name),
         brand: ref.brand,
-        address: ref.address,
-        suburb,
+        address: titleCasePlace(ref.address),
+        suburb: titleCasePlace(suburb),
         state,
         postcode,
         lat: ref.location.latitude,

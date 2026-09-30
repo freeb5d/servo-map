@@ -6,6 +6,7 @@ import type {
   QldSitePricesResponse,
 } from "./types";
 import { mapQldFuelType } from "../utils/fuel-map";
+import { titleCasePlace } from "../utils/place-names";
 
 const BASE_URL = "https://fppdirectapi-prod.fuelpricesqld.com.au";
 
@@ -60,10 +61,10 @@ export const qldAdapter: StateAdapter = {
       const prices = pricesBySite.get(site.S) ?? [];
       stations.push({
         id: `qld-${site.S}`,
-        name: site.N,
+        name: titleCasePlace(site.N),
         brand: site.Bn,
-        address: site.A,
-        suburb: site.Sb,
+        address: titleCasePlace(site.A),
+        suburb: titleCasePlace(site.Sb),
         state: "qld",
         postcode: site.P,
         lat: site.Lt,

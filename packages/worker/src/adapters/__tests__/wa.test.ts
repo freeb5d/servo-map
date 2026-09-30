@@ -145,6 +145,18 @@ describe("waAdapter", () => {
     expect(idA).toBe(idB);
   });
 
+  it("title-cases the all-caps FuelWatch suburb", async () => {
+    const stations = await waAdapter.fetchStations(baseEnv);
+    const burk = stations.find((s) => s.name === "Burk Oakford");
+    expect([burk?.address, burk?.suburb]).toEqual(["1526 Thomas Rd", "Oakford"]);
+  });
+
+  it("derives the id from the raw feed text, so recasing keeps stored ids", async () => {
+    const stations = await waAdapter.fetchStations(baseEnv);
+    // FNV-1a of "Burk|Burk Oakford|1526 Thomas Rd|OAKFORD", as ingested before recasing.
+    expect(stations.find((s) => s.name === "Burk Oakford")?.id).toBe("wa-66cc34e9");
+  });
+
   it("leaves postcode empty (FuelWatch feed has none)", async () => {
     const stations = await waAdapter.fetchStations(baseEnv);
     expect(stations.every((s) => s.postcode === "")).toBe(true);
