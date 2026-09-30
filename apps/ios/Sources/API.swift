@@ -4,6 +4,9 @@ import Foundation
 struct API: Sendable {
     static let base = URL(string: "https://api.servo-map.com/api/v1")!
 
+    /** Most stations one nearby fetch returns; the cheapest come first, so a capped fetch drops the dearest. */
+    static let stationLimit = 500
+
     private struct Envelope<T: Decodable>: Decodable { let data: T }
     private struct Trend: Decodable { let series: [Snapshot] }
 
@@ -31,7 +34,7 @@ struct API: Sendable {
     func stations(fuel: FuelType, lat: Double, lng: Double, radiusKm: Int) async throws -> [Station] {
         try await get("stations", [
             "fuel": fuel.rawValue, "lat": "\(lat)", "lng": "\(lng)",
-            "radius": "\(radiusKm)", "limit": "500", "sort": "price_asc",
+            "radius": "\(radiusKm)", "limit": "\(Self.stationLimit)", "sort": "price_asc",
         ])
     }
 

@@ -33,6 +33,12 @@ final class Store {
     var viewport: Viewport? { didSet { if viewport != oldValue { deriveInView() } } }
     /** Ranked stations inside `viewport`, cheapest first: the map's "cheapest" follows what is on screen. */
     private(set) var inView: [Station] = []
+    /**
+     * `inView.first`, kept on its own so the map depends on it alone: Observation skips an
+     * assignment of an equal value, so a settle that leaves the same station cheapest does not
+     * redraw every annotation, while the list below still follows `inView`.
+     */
+    private(set) var cheapestInView: Station?
 
     var fuel: FuelType = .u91 {
         didSet { derive(); Task { await loadStations() } }
@@ -54,6 +60,8 @@ final class Store {
     private(set) var outdated: [Station] = []
     /** How far around `center` stations are fetched; follows the map's zoom. */
     private(set) var radiusKm = 20
+    /** Whether the last fetch hit the API's cap, so it holds only the cheapest stations around `center`. */
+    var fetchWasCapped: Bool { stations.count >= API.stationLimit }
     /** Price tiers across every station nearby for the selected fuel. */
     private(set) var range = PriceRange([])
     /** Mean price nearby for the selected fuel. */
@@ -67,6 +75,8 @@ final class Store {
     }
 
     private let api = API()
+    /** Bumped by each fetch of stations; a response that is no longer the latest is dropped. */
+    private var stationsRequest = 0
 
     init(fuel: FuelType = .u91) {
         self.fuel = fuel
@@ -83,34 +93,53 @@ final class Store {
     }
 
     func load() async {
+        stationsRequest += 1
+        let request = stationsRequest
         loading = true
-        defer { loading = false }
         do {
             async let s = api.stations(fuel: fuel, lat: center.lat, lng: center.lng, radiusKm: radiusKm)
             async let t = api.trends(state: "nsw")
             async let live = api.liveStates()
-            (stations, history) = try await (s, t)
+            let (fetched, trend) = try await (s, t)
+            history = trend
             liveStates = ((try? await live) ?? []).map { $0.uppercased() }
-            failed = false
+            // A pan or fuel change during the first load owns the station list now.
+            if request == stationsRequest { stations = fetched; failed = false }
         } catch {
-            failed = true
+            if request == stationsRequest { failed = true }
         }
+        if request == stationsRequest { loading = false }
     }
 
+    /**
+     * Fetches stations around `center`. Pans and fuel changes can overlap fetches; only the latest
+     * one's result (or failure) is kept, so a slow earlier response never replaces a newer area.
+     */
     func loadStations() async {
+        stationsRequest += 1
+        let request = stationsRequest
         loading = true
-        defer { loading = false }
+        let result: Result<[Station], Error>
         do {
-            stations = try await api.stations(fuel: fuel, lat: center.lat, lng: center.lng, radiusKm: radiusKm)
-            failed = false
+            result = .success(try await api.stations(fuel: fuel, lat: center.lat, lng: center.lng, radiusKm: radiusKm))
         } catch {
-            failed = true
+            result = .failure(error)
+        }
+        guard request == stationsRequest else { return }
+        loading = false
+        switch result {
+        case .success(let fetched): stations = fetched; failed = false
+        case .failure: failed = true
         }
     }
 
     private func deriveInView() {
-        guard let viewport else { inView = ranked; return }
-        inView = ranked.filter { viewport.contains(lat: $0.lat, lng: $0.lng) }
+        if let viewport {
+            inView = ranked.filter { viewport.contains(lat: $0.lat, lng: $0.lng) }
+        } else {
+            inView = ranked
+        }
+        cheapestInView = inView.first
     }
 
     /** Records the user's position; the map keeps showing it however far they pan away. */
@@ -161,9 +190,12 @@ final class Store {
         return text.isEmpty ? nil : text
     }
 
-    /** Moves the fetch area; a new radius (from the map's zoom) is clamped to what the list can use. */
+    /** A radius the map's zoom asks for, clamped to what the list can use (5 to 50 km). */
+    nonisolated static func fetchRadius(_ km: Int) -> Int { min(max(km, 5), 50) }
+
+    /** Moves the fetch area; a new radius (from the map's zoom) is clamped by `fetchRadius`. */
     func move(to lat: Double, _ lng: Double, name: String, radiusKm: Int? = nil) async {
-        if let radiusKm { self.radiusKm = min(max(radiusKm, 5), 50) }
+        if let radiusKm { self.radiusKm = Store.fetchRadius(radiusKm) }
         center = (lat, lng)
         placeName = name
         await loadStations()

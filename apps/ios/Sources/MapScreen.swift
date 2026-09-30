@@ -16,6 +16,10 @@ struct MapScreen: View {
     @State private var location = Location()
     /** Stations drawn as full tags; recomputed whenever the camera settles or the list changes. */
     @State private var placement = TagPlacement.Result()
+    /** Stations drawn as dots (see MapDots), chosen with `placement`; nil (every dot) until the camera first settles. */
+    @State private var dots: Set<String>?
+    /** The fetch a settled pan may start, held briefly so a run of flicks makes one request. */
+    @State private var pendingFetch: Task<Void, Never>?
     @State private var proxy: MapProxy?
     @State private var mapSize: CGSize = .zero
     /** Set before the app moves the camera itself, so that move is not mistaken for a user pan. */
@@ -42,66 +46,14 @@ struct MapScreen: View {
 
     var body: some View {
         MapReader { reader in
-        Map(position: $camera, selection: $selected) {
-            if store.located { UserAnnotation() }
-            // Stations whose price is more than a week old: hollow, so they read as "a station is here"
-            // without competing with current prices. Still selectable.
-            ForEach(store.outdated.filter { $0 != selected }) { station in
-                Annotation(station.name, coordinate: station.coordinate) {
-                    Circle()
-                        .stroke(ServoMapColor.ink3, lineWidth: 1.5)
-                        .background(Circle().fill(ServoMapColor.surface))
-                        .frame(width: 9, height: 9)
-                }
-                .annotationTitles(.hidden)
-                .tag(station)
+            // Compared by what it draws: this closure re-runs on every settle, and the sheet's detent
+            // and tabs re-run the body, without redrawing the map. A skipped map keeps its earlier
+            // `onSettle`, whose proxy still converts for the live camera.
+            StationMap(camera: $camera, selection: $selected, selected: selected, placement: placement, dots: dots) { region in
+                settle(on: region, reader)
             }
-            // Tags go to the cheapest stations that have room; the rest are dots, so the map reads at a glance.
-            // Dots are added first and tags after, so a tag is never covered by a neighbour's dot.
-            ForEach(store.ranked.filter { !showsTag($0) && !placement.hiddenDots.contains($0.id) }) { station in
-                if let p = station.price(store.fuel) {
-                    Annotation(station.name, coordinate: station.coordinate) {
-                        Circle()
-                            .fill(store.range.tier(p.price).color)
-                            .stroke(ServoMapColor.surface, lineWidth: 1.5)
-                            .frame(width: 9, height: 9)
-                    }
-                    .annotationTitles(.hidden)
-                    .tag(station)
-                }
-            }
-            // A picked station that is not ranked (outdated, or filtered out) still gets its tag.
-            if let selected, !store.ranked.contains(selected), let p = selected.price(store.fuel) {
-                Annotation(selected.name, coordinate: selected.coordinate, anchor: .bottom) {
-                    PriceTag(family: selected.family, cents: p.price, tier: store.range.tier(p.price), active: true)
-                }
-                .annotationTitles(.hidden)
-                .tag(selected)
-            }
-            // Drawn last, so the cheapest tag sits on top of its neighbours.
-            ForEach(store.ranked.filter(showsTag).reversed()) { station in
-                if let p = station.price(store.fuel) {
-                    Annotation(station.name, coordinate: station.coordinate, anchor: .bottom) {
-                        if station == store.inView.first {
-                            CheapestTag(family: station.family, cents: p.price, active: selected == station)
-                        } else {
-                            PriceTag(family: station.family, cents: p.price, tier: store.range.tier(p.price), active: selected == station)
-                        }
-                    }
-                    .annotationTitles(.hidden)
-                    .tag(station)
-                }
-            }
-        }
-        .mapStyle(.standard(elevation: .flat, emphasis: .muted, pointsOfInterest: .excludingAll))
-        .onMapCameraChange(frequency: .onEnd) { context in
-            proxy = reader
-            lastRegion = context.region
-            store.viewport = viewport(reader)
-            placeTags()
-            Task { await followPan(to: context.region) }
-        }
-        .onGeometryChange(for: CGSize.self) { $0.size } action: { mapSize = $0 }
+            .equatable()
+            .onGeometryChange(for: CGSize.self) { $0.size } action: { mapSize = $0 }
         }
         .safeAreaInset(edge: .top) { topControls }
         // A new fuel or filter re-colours and re-ranks every dot; ease it like the design's list rows.
@@ -166,9 +118,13 @@ struct MapScreen: View {
         }
     }
 
-    /** The cheapest station on screen always has its tag, whatever the placement pass chose. */
-    private func showsTag(_ station: Station) -> Bool {
-        placement.tagged.contains(station.id) || selected == station || station == store.inView.first
+    /** The camera came to rest: the list follows what is on screen, tags are re-placed, and prices fetched if needed. */
+    private func settle(on region: MKCoordinateRegion, _ reader: MapProxy) {
+        proxy = reader
+        lastRegion = region
+        store.viewport = viewport(reader)
+        placeTags()
+        followPan(to: region)
     }
 
     /**
@@ -177,6 +133,8 @@ struct MapScreen: View {
      */
     private func locate() async {
         guard let here = await location.locate() else { return }
+        // A fetch a pan scheduled must not land after, and replace, the prices around the user.
+        pendingFetch?.cancel()
         store.setUserLocation(here.latitude, here.longitude)
         appMoved = true
         withAnimation(.smooth(duration: 0.6)) {
@@ -204,29 +162,41 @@ struct MapScreen: View {
         return CGRect(x: 0, y: 70, width: mapSize.width, height: max(0, bottom - 70))
     }
 
+    /** Chooses tags and dots together, so a settle changes the map's annotations in one update. */
     private func placeTags() {
         guard let proxy else { return }
-        let next = TagPlacement.choose(store.ranked, id: \.id, point: {
+        let point: (Station) -> CGPoint? = {
             proxy.convert(CLLocationCoordinate2D(latitude: $0.lat, longitude: $0.lng), to: .local)
-        }, visible: visibleMap)
-        guard next != placement else { return }
+        }
+        let next = TagPlacement.choose(store.ranked, id: \.id, point: point, visible: visibleMap)
+        let nextDots = lastRegion.map { region in
+            MapDots.choose(store.ranked + store.outdated, id: \.id, lat: \.lat, lng: \.lng,
+                           degreesPerPoint: region.span.longitudeDelta / mapSize.width)
+        }
+        guard next != placement || nextDots != dots else { return }
         // Tags that change hands fade over the design system's 200 ms instead of popping.
-        withAnimation(ServoMapMotion.standard) { placement = next }
+        withAnimation(ServoMapMotion.standard) { placement = next; dots = nextDots }
     }
 
     /**
-     * After the user drags the map more than 2 km, fetch prices around the new centre. The camera
-     * is left where the user put it; moves the app makes itself are skipped via `appMoved`.
+     * Once the map settles beyond what was fetched (see MapReload), fetch prices around the new
+     * view. The camera is left where the user put it; moves the app makes itself are skipped via
+     * `appMoved`. A short pause first lets a run of flicks end in one request.
      */
-    private func followPan(to region: MKCoordinateRegion) async {
+    private func followPan(to region: MKCoordinateRegion) {
         if appMoved { appMoved = false; return }
-        let here = CLLocation(latitude: store.center.lat, longitude: store.center.lng)
-        let there = CLLocation(latitude: region.center.latitude, longitude: region.center.longitude)
-        // Fetch as far as the visible map reaches, so zooming out shows the stations it uncovers.
-        let reach = Int((max(region.span.latitudeDelta, region.span.longitudeDelta) * 111 / 2).rounded(.up))
-        let zoomedOut = reach > Int(Double(store.radiusKm) * 1.4)
-        guard here.distance(from: there) > 2_000 || zoomedOut else { return }
-        await store.move(to: region.center.latitude, region.center.longitude, name: "this area", radiusKm: reach)
+        let reach = MapReload.reachKm(latitudeDelta: region.span.latitudeDelta, longitudeDelta: region.span.longitudeDelta)
+        let showing = MapReload.Area(lat: region.center.latitude, lng: region.center.longitude, radiusKm: Store.fetchRadius(reach))
+        pendingFetch?.cancel()
+        pendingFetch = Task {
+            do { try await Task.sleep(for: .milliseconds(300)) } catch { return }
+            let loaded = MapReload.Area(lat: store.center.lat, lng: store.center.lng, radiusKm: store.radiusKm)
+            guard MapReload.needed(loaded: loaded, capped: store.fetchWasCapped, showing: showing) else { return }
+            // Past the view's edges, so zooming out shows the stations it uncovers and the next pans need nothing.
+            let radius = MapReload.fetchKm(reachKm: showing.radiusKm)
+            // Its own task: a later settle cancels the pause above, never a request already sent.
+            Task { await store.move(to: showing.lat, showing.lng, name: "this area", radiusKm: radius) }
+        }
     }
 
     /** Brings a picked station into the visible upper half of the map, keeping the zoom. */
