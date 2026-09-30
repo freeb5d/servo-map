@@ -70,6 +70,18 @@ Defined in `packages/worker/src/kv/keys.ts`:
 
 > No per-station `station:<id>` key — `/stations/:id` resolves from the state chunk, keeping ingest to ~one KV write per state.
 
+## D1 price history
+
+`servo-map-prices` (binding `PRICES`, schema in `packages/worker/migrations-prices/`, decision 0006) keeps what KV overwrites. The ingest script writes it through `packages/worker/src/prices-db/sync.ts`; no route reads it yet.
+
+| Table            | Row                                           | Written when                              |
+|------------------|-----------------------------------------------|-------------------------------------------|
+| `stations`       | one per station id                            | details change, or first run of a UTC day |
+| `current_prices` | latest price per station and fuel             | the price changes                         |
+| `price_changes`  | every price a station has shown (append-only) | by trigger when `current_prices` changes  |
+| `daily_prices`   | `PriceSnapshot` per state, fuel and day       | the day's numbers change                  |
+| `ingest_runs`    | one per state per run: written/guarded/failed | every run                                 |
+
 **Rules:**
 
 - `metadata` is **merged** with the previous value (`writeMetadata`) so a state that failed to fetch keeps its last-good timestamp.

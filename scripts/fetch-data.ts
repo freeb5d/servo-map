@@ -9,6 +9,7 @@
  *   NSW_API_KEY, NSW_API_AUTH — NSW FuelCheck API 认证
  *   QLD_API_TOKEN — QLD Fuel Prices API token
  *   CF_ACCOUNT_ID, CF_API_TOKEN, CF_KV_NAMESPACE_ID — Cloudflare KV 写入
+ *   D1_PRICES_DATABASE_ID — servo-map-prices D1（决策 0006）；未设置时跳过 D1 同步
  */
 
 import type {
@@ -25,6 +26,12 @@ import {
   utcDate,
 } from "../packages/worker/src/utils/price-history";
 import type { Env } from "../packages/worker/src/env";
+import {
+  recordIngestRuns,
+  syncStatePrices,
+  type IngestRunRecord,
+} from "../packages/worker/src/prices-db/sync";
+import { d1Executor } from "./d1-rest";
 
 // 当某州本次抓取数量低于上次的该比例时，跳过覆盖以保护 KV 中的健康数据
 const MIN_RETENTION_RATIO = 0.5;
@@ -98,6 +105,10 @@ async function main() {
     adapters.map((a) => a.fetchStations(env)),
   );
 
+  const runAt = new Date();
+  // 每州本轮结果，写入 D1 ingest_runs —— 断档与失败事后可查
+  const runRecords: IngestRunRecord[] = [];
+
   const allStations: Station[] = [];
   for (let i = 0; i < results.length; i++) {
     const r = results[i];
@@ -107,11 +118,16 @@ async function main() {
       allStations.push(...r.value);
     } else {
       console.error(`[fetch-data] ${label}: FAILED —`, r.reason);
+      const detail = String(r.reason).slice(0, 500);
+      for (const state of adapters[i].states) {
+        runRecords.push({ state, status: "failed", stationCount: 0, rowsWritten: 0, detail });
+      }
     }
   }
 
   if (allStations.length === 0) {
     console.error("[fetch-data] No stations fetched. Exiting.");
+    await syncPriceStore(new Map(), runRecords, runAt);
     process.exit(1);
   }
 
@@ -144,6 +160,13 @@ async function main() {
         `[fetch-data] ${state}: ${stations.length} stations vs previous ${prev} ` +
           `(< ${MIN_RETENTION_RATIO * 100}% retention) — skipping overwrite, preserving prior KV`,
       );
+      runRecords.push({
+        state,
+        status: "guarded",
+        stationCount: stations.length,
+        rowsWritten: 0,
+        detail: `previous ${prev}`,
+      });
       continue;
     }
     console.log(`[fetch-data] Writing ${state}: ${stations.length} stations...`);
@@ -160,6 +183,7 @@ async function main() {
     console.error(
       "[fetch-data] Every state failed the retention guard; nothing written.",
     );
+    await syncPriceStore(new Map(), runRecords, runAt);
     process.exit(1);
   }
 
@@ -176,6 +200,9 @@ async function main() {
 
   // 价格历史每日 roll-up（成功 ingest 后追加，幂等、每州每天一条）
   await capturePriceHistory(writtenByState);
+
+  // D1 价格历史（决策 0006）：KV 仍是读路径，D1 失败只告警
+  await syncPriceStore(writtenByState, runRecords, runAt);
 
   console.log(
     `[fetch-data] Done: ${writtenStations.length} stations written, ${brands.length} brands`,
@@ -211,6 +238,49 @@ async function capturePriceHistory(
       // 历史是次要副作用 —— 失败仅告警，不让主流程退出
       console.error(`[fetch-data] ${state}: price history capture failed —`, err);
     }
+  }
+}
+
+/**
+ * 把本轮写入 KV 的各州数据同步进 servo-map-prices D1，并记录每州的 ingest 结果。
+ *
+ * D1 是历史存储，不在读路径上：未配置时跳过，单州失败只告警、不让 ingest 失败。
+ */
+async function syncPriceStore(
+  writtenByState: Map<AustralianState, Station[]>,
+  runRecords: IngestRunRecord[],
+  runAt: Date,
+): Promise<void> {
+  const databaseId = process.env.D1_PRICES_DATABASE_ID;
+  if (!databaseId) {
+    console.log("[fetch-data] D1_PRICES_DATABASE_ID not set — skipping D1 price history");
+    return;
+  }
+  const exec = d1Executor(databaseId);
+  const date = utcDate(runAt);
+
+  for (const [state, stations] of writtenByState) {
+    try {
+      const snapshots = computeDailySnapshots(stations, date);
+      const rowsWritten = await syncStatePrices(exec, stations, snapshots, state, runAt);
+      console.log(`[fetch-data] ${state}: D1 wrote ${rowsWritten} rows`);
+      runRecords.push({ state, status: "written", stationCount: stations.length, rowsWritten });
+    } catch (err) {
+      console.error(`[fetch-data] ${state}: D1 price sync failed —`, err);
+      runRecords.push({
+        state,
+        status: "written",
+        stationCount: stations.length,
+        rowsWritten: 0,
+        detail: `KV written; D1 sync failed: ${String(err).slice(0, 400)}`,
+      });
+    }
+  }
+
+  try {
+    await recordIngestRuns(exec, runAt, runRecords);
+  } catch (err) {
+    console.error("[fetch-data] D1 ingest_runs write failed —", err);
   }
 }
 

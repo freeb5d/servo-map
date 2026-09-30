@@ -16,6 +16,15 @@ database_name = "servo-map-accounts"
 database_id = "e16b836e-8809-4a34-89fb-fb40442a7889"
 migrations_dir = "migrations"
 
+# Price history (decision 0006), written by the ingest script over D1's REST API. Kept apart from
+# the accounts database so its growth never counts against that database's 500 MB free-plan cap.
+# Apply migrations with `wrangler d1 migrations apply servo-map-prices --remote`.
+[[d1_databases]]
+binding = "PRICES"
+database_name = "servo-map-prices"
+database_id = "68620ec7-0764-417f-8b05-f62b511b7274"
+migrations_dir = "migrations-prices"
+
 # Reliable scheduler: CF Cron Triggers fire on time, then the scheduled handler
 # dispatches the GitHub Actions ingest (which runs on GH egress IPs the state
 # APIs are happy with). Requires the GH_DISPATCH_TOKEN secret.

@@ -15,6 +15,9 @@ export interface Env {
   APPLE_AUDIENCES?: string;
   GOOGLE_CLIENT_IDS?: string;
 
+  // Price history (decision 0006). Written by the ingest script; optional until a route reads it.
+  PRICES?: D1Database;
+
   // Fine-grained GitHub PAT (Actions: read+write) used by the scheduled handler
   // to dispatch the ingest workflow. Optional — only the cron path needs it.
   GH_DISPATCH_TOKEN?: string;

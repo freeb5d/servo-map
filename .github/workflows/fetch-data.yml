@@ -34,6 +34,8 @@ jobs:
           CF_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CF_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CF_KV_NAMESPACE_ID: "7bb3949a4e20480fbde7fefeadd1fe41"
+          # Decision 0006: price history in D1; the step skips D1 when this is unset.
+          D1_PRICES_DATABASE_ID: ${{ vars.D1_PRICES_DATABASE_ID }}
       - name: Send personal alerts
         # Decision 0004. Skips itself until the D1 database and APNs key are configured.
         run: npx tsx scripts/send-alerts.ts
