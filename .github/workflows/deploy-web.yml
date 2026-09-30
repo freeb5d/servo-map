@@ -1,11 +1,15 @@
 name: Deploy Web
 
+# The only path to production. Vercel's Git integration is switched off in packages/web/vercel.json:
+# it deployed every branch push and every main push, which spent the Hobby plan's 100 deployments a
+# day on previews nobody could open without signing in, and raced this job on main.
 on:
   push:
     branches: [main]
     paths:
       - packages/web/**
       - packages/shared/**
+      - packages/design-tokens/**
       - .github/workflows/deploy-web.yml
   workflow_dispatch:
 
