@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.1](https://github.com/Misoto22/servo-map/compare/ios-v0.5.0...ios-v0.5.1) (2026-09-30)
+
+
+### Bug Fixes
+
+* **ios:** run the TestFlight script under a UTF-8 locale ([#47](https://github.com/Misoto22/servo-map/issues/47)) ([1c0e104](https://github.com/Misoto22/servo-map/commit/1c0e1040dc472c590b0ee0987959bee3edae253e))
+
 ## [0.5.0](https://github.com/Misoto22/servo-map/compare/ios-v0.4.0...ios-v0.5.0) (2026-09-30)
 
 
