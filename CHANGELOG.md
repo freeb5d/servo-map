@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.2](https://github.com/Misoto22/servo-map/compare/v0.2.1...v0.2.2) (2026-09-30)
+
+
+### Refactoring
+
+* **clients:** drop client-side place-name casing ([#32](https://github.com/Misoto22/servo-map/issues/32)) ([5acddad](https://github.com/Misoto22/servo-map/commit/5acddadb2a943ff8546edddca62c5ee8d36150f3))
+
 ## [0.2.1](https://github.com/Misoto22/servo-map/compare/v0.2.0...v0.2.1) (2026-09-30)
 
 

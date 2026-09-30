@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.2](https://github.com/Misoto22/servo-map/compare/ios-v0.1.1...ios-v0.1.2) (2026-09-30)
+
+
+### Refactoring
+
+* **clients:** drop client-side place-name casing ([#32](https://github.com/Misoto22/servo-map/issues/32)) ([5acddad](https://github.com/Misoto22/servo-map/commit/5acddadb2a943ff8546edddca62c5ee8d36150f3))
+
 ## [0.1.1](https://github.com/Misoto22/servo-map/compare/ios-v0.1.0...ios-v0.1.1) (2026-09-30)
 
 
