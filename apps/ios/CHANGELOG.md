@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.0](https://github.com/Misoto22/servo-map/compare/ios-v0.3.0...ios-v0.4.0) (2026-09-30)
+
+
+### Features
+
+* **ios:** move saved, log, car and alerts behind a You sheet ([#36](https://github.com/Misoto22/servo-map/issues/36)) ([7450a8c](https://github.com/Misoto22/servo-map/commit/7450a8c2a07596887e7b2e07d5e69719f8c5971a))
+
 ## [0.3.0](https://github.com/Misoto22/servo-map/compare/ios-v0.2.0...ios-v0.3.0) (2026-09-30)
 
 
