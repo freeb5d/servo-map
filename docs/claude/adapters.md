@@ -1,7 +1,7 @@
 # Adding a State Adapter
 
 > Last reviewed: 2026-04-22
-> Status: NSW (+ TAS, ACT) and QLD live. WA / VIC / SA pending.
+> Status: NSW, ACT, TAS and WA live; QLD adapter waiting on its token. VIC / SA / NT pending.
 
 This is the repo's most repeated work. Follow the playbook — do not invent new patterns.
 
@@ -13,8 +13,11 @@ Every adapter implements `StateAdapter` from `packages/worker/src/adapters/types
 
 ```ts
 export interface StateAdapter {
-  /** Which states this adapter covers (can be more than one if the upstream spans multiple, e.g. NSW covers TAS+ACT). */
+  /** Which states this adapter covers (can be more than one if the upstream spans multiple, e.g. the NSW feed covers ACT). */
   readonly states: readonly AustralianState[];
+
+  /** Minimum minutes between fetches, for upstreams with a call quota (TAS: 120). Omit to fetch every run. */
+  readonly minIntervalMinutes?: number;
 
   /** Fetch all stations with current prices. Throws on upstream failure. */
   fetchStations(env: Env): Promise<Station[]>;
@@ -183,4 +186,4 @@ Confirm:
 | Using upstream ids as global ids                   | Always prefix with state code                                        |
 | Forgetting to filter stations with no coordinates | The map cannot render them; drop them in the adapter                 |
 | Treating transient 5xx as fatal                    | Do throw — cron retries every 15 min; prior KV data is still served  |
-| Hardcoding the state code inside a multi-state adapter (e.g. NSW covers TAS+ACT) | Use the upstream's state field and map it via a lookup; see `mapState` in `adapters/nsw.ts` |
+| Hardcoding the state code inside a multi-state adapter (e.g. the NSW feed covers ACT) | Derive it per station; see `stationState` in `adapters/nsw.ts`, which reads the address suffix because FuelCheck labels ACT stations "NSW" |

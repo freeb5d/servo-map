@@ -26,6 +26,7 @@ import {
   utcDate,
 } from "../packages/worker/src/utils/price-history";
 import type { Env } from "../packages/worker/src/env";
+import { isAdapterDue } from "../packages/worker/src/utils/adapter-schedule";
 import {
   recordIngestRuns,
   syncStatePrices,
@@ -99,27 +100,44 @@ async function kvGet(key: string): Promise<string | null> {
 async function main() {
   console.log("[fetch-data] Starting...");
 
+  // 先读已有 metadata —— 用于限频判断、护栏比较 + 合并
+  const existingRaw = await kvGet(KV_KEYS.metadata);
+  const existingMeta: Record<string, StateMetadata> = existingRaw
+    ? JSON.parse(existingRaw)
+    : {};
+
+  // 有配额的上游（minIntervalMinutes）在数据仍新鲜时跳过本轮，保留 KV 中的上次结果
+  const now = new Date();
+  const dueAdapters = adapters.filter((a) => {
+    const due = isAdapterDue(a, existingMeta, now);
+    if (!due) {
+      const label = a.states.join("/").toUpperCase();
+      console.log(`[fetch-data] ${label}: skipped (fetched within ${a.minIntervalMinutes} min)`);
+    }
+    return due;
+  });
+
   // 并行调用所有 adapter，互不阻塞（一个失败不影响其他）
   const env = buildAdapterEnv();
   const results = await Promise.allSettled(
-    adapters.map((a) => a.fetchStations(env)),
+    dueAdapters.map((a) => a.fetchStations(env)),
   );
 
-  const runAt = new Date();
+  const runAt = now;
   // 每州本轮结果，写入 D1 ingest_runs —— 断档与失败事后可查
   const runRecords: IngestRunRecord[] = [];
 
   const allStations: Station[] = [];
   for (let i = 0; i < results.length; i++) {
     const r = results[i];
-    const label = adapters[i].states.join("/").toUpperCase();
+    const label = dueAdapters[i].states.join("/").toUpperCase();
     if (r.status === "fulfilled") {
       console.log(`[fetch-data] ${label}: ${r.value.length} stations`);
       allStations.push(...r.value);
     } else {
       console.error(`[fetch-data] ${label}: FAILED —`, r.reason);
       const detail = String(r.reason).slice(0, 500);
-      for (const state of adapters[i].states) {
+      for (const state of dueAdapters[i].states) {
         runRecords.push({ state, status: "failed", stationCount: 0, rowsWritten: 0, detail });
       }
     }
@@ -138,12 +156,6 @@ async function main() {
     group.push(s);
     grouped.set(s.state, group);
   }
-
-  // 先读已有 metadata —— 用于护栏比较 + 合并
-  const existingRaw = await kvGet(KV_KEYS.metadata);
-  const existingMeta: Record<string, StateMetadata> = existingRaw
-    ? JSON.parse(existingRaw)
-    : {};
 
   // 写入按州 chunk，带最小数量护栏
   const metadataUpdates: Record<string, StateMetadata> = {};

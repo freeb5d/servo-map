@@ -15,7 +15,7 @@ SwiftUI iOS app.
 
 - **Domain:** `servo-map.com` (pending)
 - **API:** `api.servo-map.com` (Cloudflare)
-- **Status:** NSW + WA live; QLD / VIC / SA pending (see `plan.md`). iOS app in TestFlight.
+- **Status:** NSW, ACT, TAS + WA live; QLD / VIC / SA / NT pending (see `plan.md`). iOS app in TestFlight.
 - **Cost target:** $0/month on free tiers
 
 ---
