@@ -8,7 +8,6 @@ import type {
   PriceTrend,
   FuelType,
 } from "@servo-map/shared";
-import { normalizeStation } from "./place-names";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8787";
 
@@ -39,15 +38,13 @@ export async function getStations(params?: {
     });
   }
   const qs = search.toString();
-  const res = await fetchApi<StationWithDistance[]>(`/api/v1/stations${qs ? `?${qs}` : ""}`);
-  return { ...res, data: res.data.map(normalizeStation) };
+  return fetchApi<StationWithDistance[]>(`/api/v1/stations${qs ? `?${qs}` : ""}`);
 }
 
 export async function getStation(
   id: string,
 ): Promise<ApiResponse<Station>> {
-  const res = await fetchApi<Station>(`/api/v1/stations/${id}`);
-  return { ...res, data: normalizeStation(res.data) };
+  return fetchApi<Station>(`/api/v1/stations/${id}`);
 }
 
 export async function getBrands(): Promise<ApiResponse<string[]>> {
