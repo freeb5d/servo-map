@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0](https://github.com/Misoto22/servo-map/compare/ios-v0.2.0...ios-v0.3.0) (2026-09-30)
+
+
+### Features
+
+* **web:** adopt brand logos and the cheapest station emphasis ([#37](https://github.com/Misoto22/servo-map/issues/37)) ([4c9e6bc](https://github.com/Misoto22/servo-map/commit/4c9e6bc39aef18ba6eddbb4e284ce362615a90db))
+
 ## [0.2.0](https://github.com/Misoto22/servo-map/compare/ios-v0.1.2...ios-v0.2.0) (2026-09-30)
 
 
