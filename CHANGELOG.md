@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.0](https://github.com/Misoto22/servo-map/compare/v0.5.0...v0.6.0) (2026-09-30)
+
+
+### Features
+
+* **worker:** keep price history in a D1 database ([#45](https://github.com/Misoto22/servo-map/issues/45)) ([49fee1d](https://github.com/Misoto22/servo-map/commit/49fee1dd8d1c07495dd2a377e7cce9ffbdd4d85a))
+
 ## [0.5.0](https://github.com/Misoto22/servo-map/compare/v0.4.1...v0.5.0) (2026-09-30)
 
 
