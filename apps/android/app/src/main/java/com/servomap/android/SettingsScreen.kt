@@ -29,7 +29,7 @@ fun SettingsScreen(ui: UiState, vm: MainViewModel) {
     fun open(url: String) { runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) } }
 
     Column(Modifier.fillMaxSize().statusBarsPadding().verticalScroll(rememberScrollState())) {
-        Text("Settings", fontSize = 28.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(16.dp))
+        ScreenTitle("Settings")
 
         Heading("APPEARANCE")
         Row(Modifier.padding(horizontal = 16.dp)) {

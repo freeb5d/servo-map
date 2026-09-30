@@ -52,5 +52,5 @@ private fun ServoScheme(dark: Boolean, content: @Composable () -> Unit) {
         onBackground = Ink.ink, onSurface = Ink.ink, surfaceVariant = Ink.wash,
         onSurfaceVariant = Ink.ink2, outline = Ink.line,
     )
-    MaterialTheme(colorScheme = scheme, content = content)
+    MaterialTheme(colorScheme = scheme, typography = ServoTypography, content = content)
 }

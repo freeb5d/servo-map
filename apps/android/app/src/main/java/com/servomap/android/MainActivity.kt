@@ -10,6 +10,20 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.automirrored.filled.TrendingUp
+import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material.icons.filled.Map
+import androidx.compose.material.icons.filled.MyLocation
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Arrangement
@@ -57,6 +71,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
         setContent {
             val ui by vm.state.collectAsStateWithLifecycle()
             ServoTheme(ui.settings.theme) { App(vm, ui) { lastKnown() } }
@@ -73,8 +88,11 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-private enum class Tab(val label: String, val glyph: String) {
-    Nearby("Nearby", "◎"), Trends("Trends", "↗"), You("You", "★"), Settings("Settings", "⚙")
+private enum class Tab(val label: String, val icon: ImageVector) {
+    Nearby("Nearby", Icons.Filled.Map),
+    Trends("Trends", Icons.AutoMirrored.Filled.TrendingUp),
+    You("You", Icons.Filled.Person),
+    Settings("Settings", Icons.Filled.Settings),
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -97,6 +115,7 @@ fun App(vm: MainViewModel, ui: UiState, locate: () -> Pair<Double, Double>?) {
         permission.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION))
     }
     val visible = ui.visible
+    val cheapest = remember(visible, ui.fuel) { visible.filter { it.hasCurrentPrice(ui.fuel) }.minByOrNull { it.price(ui.fuel)!!.price } }
 
     fun directions(s: Station) {
         val app = NavApp.entries.firstOrNull { it.key == ui.settings.nav }
@@ -111,6 +130,15 @@ fun App(vm: MainViewModel, ui: UiState, locate: () -> Pair<Double, Double>?) {
                         value = searchText,
                         onValueChange = { searchText = it },
                         placeholder = { Text("Suburb or postcode") },
+                        leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
+                        trailingIcon = {
+                            IconButton(onClick = {
+                                searchText = ""
+                                val here = locate()
+                                if (here != null) vm.setCentre(here.first, here.second)
+                                else permission.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION))
+                            }) { Icon(Icons.Filled.MyLocation, contentDescription = "Use my location") }
+                        },
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
                         keyboardActions = KeyboardActions(onSearch = { vm.search(searchText) }),
@@ -118,11 +146,12 @@ fun App(vm: MainViewModel, ui: UiState, locate: () -> Pair<Double, Double>?) {
                     )
                     Row(Modifier.padding(top = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
                         Box(Modifier.weight(1f)) { FuelChips(ui.fuel, vm::setFuel) }
-                        FilterChip(selected = ui.filters.active, onClick = { showFilters = true }, label = { Text(if (ui.filters.active) "Filters ●" else "Filters") })
+                        FilterChip(selected = ui.filters.active, onClick = { showFilters = true }, label = { Text(if (ui.filters.active) "Filters ●" else "Filters") },
+                            leadingIcon = { Icon(Icons.Filled.FilterList, contentDescription = null, Modifier.size(18.dp)) })
                     }
                     if (!wide) Row(Modifier.padding(top = 4.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        FilterChip(selected = !showList, onClick = { showList = false }, label = { Text("Map") })
-                        FilterChip(selected = showList, onClick = { showList = true }, label = { Text("List") })
+                        FilterChip(selected = !showList, onClick = { showList = false }, label = { Text("Map") }, leadingIcon = { Icon(Icons.Filled.Map, contentDescription = null, Modifier.size(18.dp)) })
+                        FilterChip(selected = showList, onClick = { showList = true }, label = { Text("List") }, leadingIcon = { Icon(Icons.AutoMirrored.Filled.List, contentDescription = null, Modifier.size(18.dp)) })
                     }
                 }
             }
@@ -130,7 +159,7 @@ fun App(vm: MainViewModel, ui: UiState, locate: () -> Pair<Double, Double>?) {
         bottomBar = {
             NavigationBar {
                 Tab.entries.forEach { t ->
-                    NavigationBarItem(selected = tab == t.ordinal, onClick = { tab = t.ordinal }, icon = { Text(t.glyph) }, label = { Text(t.label) })
+                    NavigationBarItem(selected = tab == t.ordinal, onClick = { tab = t.ordinal }, icon = { Icon(t.icon, contentDescription = null) }, label = { Text(t.label) })
                 }
             }
         },
@@ -140,13 +169,17 @@ fun App(vm: MainViewModel, ui: UiState, locate: () -> Pair<Double, Double>?) {
                 Tab.Nearby -> {
                     if (wide) {
                         Row(Modifier.fillMaxSize()) {
-                            Box(Modifier.weight(0.4f).fillMaxHeight()) { StationList(visible, ui, onSelect = vm::select) }
-                            Box(Modifier.weight(0.6f).fillMaxHeight()) { StationMap(visible, ui.tiers, ui.fuel, ui.centre, onSelect = vm::select) }
+                            Box(Modifier.weight(0.4f).fillMaxHeight()) { ResultsList(visible, ui, vm::select) }
+                            Box(Modifier.weight(0.6f).fillMaxHeight()) {
+                                StationMap(visible, ui.tiers, ui.fuel, ui.centre, onSelect = vm::select)
+                                cheapest?.let { CheapestCard(it, ui.fuel, ui.tiers[it.id], Modifier.align(Alignment.BottomCenter)) { vm.select(it) } }
+                            }
                         }
                     } else if (showList) {
-                        StationList(visible, ui, onSelect = vm::select)
+                        ResultsList(visible, ui, vm::select)
                     } else {
                         StationMap(visible, ui.tiers, ui.fuel, ui.centre, onSelect = vm::select)
+                        cheapest?.let { CheapestCard(it, ui.fuel, ui.tiers[it.id], Modifier.align(Alignment.BottomCenter)) { vm.select(it) } }
                     }
                     if (ui.loading) LinearProgressIndicator(Modifier.fillMaxWidth())
                     ui.error?.let {
@@ -207,3 +240,18 @@ fun App(vm: MainViewModel, ui: UiState, locate: () -> Pair<Double, Double>?) {
 
 fun isTelevision(context: Context): Boolean =
     (context.getSystemService(Context.UI_MODE_SERVICE) as UiModeManager).currentModeType == UiConfig.UI_MODE_TYPE_TELEVISION
+
+/** The results list, with a placeholder while the first fetch runs and a hint when nothing matches. */
+@Composable
+private fun ResultsList(stations: List<Station>, ui: UiState, onSelect: (Station) -> Unit) {
+    when {
+        stations.isEmpty() && ui.loading -> ListSkeleton()
+        stations.isEmpty() -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text(
+                if (ui.filters.active) "No stations match these filters." else "No stations found here. Try another suburb or a wider radius in Settings.",
+                color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(24.dp),
+            )
+        }
+        else -> StationList(stations, ui, onSelect)
+    }
+}

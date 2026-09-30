@@ -34,6 +34,9 @@ data class Station(
     val prices: List<FuelPrice>,
     val distance: Double? = null,
 ) {
+    /** The brand family this station belongs to (BP, Shell, ...); unknown brands are Independent. */
+    val family: BrandFamily get() = Brands.resolve(brand)
+
     fun price(fuel: Fuel): FuelPrice? = prices.firstOrNull { it.fuel == fuel.code }
 
     /** A price older than a week may be from a station that stopped reporting: shown, but not ranked. */
@@ -58,12 +61,12 @@ data class Station(
 @Serializable
 data class Envelope<T>(val data: T)
 
-/** What the filter sheet narrows the loaded stations to: brands to hide and how recent a price must be. */
+/** What the filter sheet narrows the loaded stations to: brand family ids to hide and how recent a price must be. */
 data class Filters(val hiddenBrands: Set<String> = emptySet(), val freshHours: Int? = null) {
     val active: Boolean get() = hiddenBrands.isNotEmpty() || freshHours != null
 
     fun apply(stations: List<Station>, fuel: Fuel): List<Station> =
-        stations.filter { it.brand !in hiddenBrands && it.reportedWithin(fuel, freshHours) }
+        stations.filter { it.family.id !in hiddenBrands && it.reportedWithin(fuel, freshHours) }
 
     companion object {
         /** The "reported within" choices: label to hours (null means any age). */

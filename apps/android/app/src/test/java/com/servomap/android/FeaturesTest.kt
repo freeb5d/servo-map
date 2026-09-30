@@ -91,7 +91,7 @@ class FeaturesTest {
             Station(id, id, brand, "", "", "nsw", "", 0.0, 0.0, listOf(FuelPrice("U91", 200.0, at.toString())))
         val list = listOf(st("a", "BP", now), st("b", "Shell", now), st("c", "BP", now.minusSeconds(48 * 3600L)))
         assertEquals(3, Filters().apply(list, Fuel.U91).size)
-        assertEquals(listOf("b"), Filters(hiddenBrands = setOf("BP")).apply(list, Fuel.U91).map { it.id })
+        assertEquals(listOf("b"), Filters(hiddenBrands = setOf("bp")).apply(list, Fuel.U91).map { it.id })
         assertEquals(listOf("a", "b"), Filters(freshHours = 24).apply(list, Fuel.U91).map { it.id })
         assertTrue(Filters(freshHours = 24).active)
         assertNotNull(Fuel.fromCode("Diesel"))

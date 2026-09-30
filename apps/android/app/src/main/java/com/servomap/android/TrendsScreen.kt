@@ -42,7 +42,7 @@ fun TrendsScreen(ui: UiState, vm: MainViewModel) {
 
     LazyColumn(Modifier.fillMaxSize().statusBarsPadding()) {
         item {
-            Text("Trends", fontSize = 28.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(16.dp))
+            ScreenTitle("Trends")
             FuelChips(ui.fuel, vm::setFuel, Modifier.padding(horizontal = 16.dp))
             if (ui.trendsLoading) LinearProgressIndicator(Modifier.fillMaxWidth().padding(top = 8.dp))
             if (ui.trendsError) Note("Couldn't load price history. Pull up the tab again to retry.")

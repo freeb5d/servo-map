@@ -51,7 +51,7 @@ fun YouScreen(ui: UiState, vm: MainViewModel, onSelect: (Station) -> Unit) {
     val average = ui.areaAverage(fuel)
 
     LazyColumn(Modifier.fillMaxSize().statusBarsPadding()) {
-        item { Text("You", fontSize = 28.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(16.dp)) }
+        item { ScreenTitle("You") }
 
         item { Heading("SAVED STATIONS") }
         if (ui.saved.isEmpty()) item { Note("Nothing saved yet. Open a station and tap Save.") }

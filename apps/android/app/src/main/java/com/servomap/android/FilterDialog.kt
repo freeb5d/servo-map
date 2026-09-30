@@ -19,9 +19,10 @@ import androidx.compose.foundation.layout.Column
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun FilterDialog(ui: UiState, vm: MainViewModel, onDismiss: () -> Unit) {
-    val brands = ui.stations.map { it.brand }.filter { it.isNotBlank() }.distinct().sorted()
+    val present = ui.stations.map { it.family.id }.toSet()
+    val brands = Brands.all.filter { it.id in present }
     val f = ui.filters
-    val shown = brands.count { it !in f.hiddenBrands }
+    val shown = brands.count { it.id !in f.hiddenBrands }
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text("Filters") },
@@ -31,9 +32,10 @@ fun FilterDialog(ui: UiState, vm: MainViewModel, onDismiss: () -> Unit) {
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     brands.forEach { b ->
                         FilterChip(
-                            selected = b !in f.hiddenBrands,
-                            onClick = { vm.setFilters(f.copy(hiddenBrands = if (b in f.hiddenBrands) f.hiddenBrands - b else f.hiddenBrands + b)) },
-                            label = { Text(b) },
+                            selected = b.id !in f.hiddenBrands,
+                            onClick = { vm.setFilters(f.copy(hiddenBrands = if (b.id in f.hiddenBrands) f.hiddenBrands - b.id else f.hiddenBrands + b.id)) },
+                            label = { Text(b.name) },
+                            leadingIcon = { BrandMark(b.name, 20.dp) },
                         )
                     }
                 }
