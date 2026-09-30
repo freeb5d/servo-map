@@ -56,6 +56,48 @@ export interface PriceTrend {
   series: PriceSnapshot[];
 }
 
+/** Counts of prices in equal-width bins: bin `i` covers [start + i * width, start + (i + 1) * width). */
+export interface PriceHistogram {
+  /** Lower edge of the first bin, cents per litre. */
+  start: number;
+  /** Width of every bin, whole cents. */
+  width: number;
+  counts: number[];
+}
+
+/**
+ * One city's prices for one fuel, from the current station data. The "recent" figures use
+ * prices reported in the last 7 days; the distribution uses every price, whatever its age.
+ */
+export interface CityInsight {
+  id: string;
+  name: string;
+  state: AustralianState;
+  /** Stations within this many km of the city's centre count as the city. */
+  radius_km: number;
+  /** Stations within the city's radius that list this fuel, whatever the price's age. */
+  station_count: number;
+  /** Stations whose price was reported in the last 7 days. */
+  count: number;
+  /** Mean, lowest and highest recent price; null when `count` is 0. */
+  average: number | null;
+  min: number | null;
+  max: number | null;
+  /** Median of every price (the distribution's middle); null when `station_count` is 0. */
+  median: number | null;
+  /** Share (0 to 1) of `station_count` reported in the last 24 hours; null when `station_count` is 0. */
+  reported_within_24h_share: number | null;
+  /** Every price, whatever its age; null when `station_count` is 0. */
+  histogram: PriceHistogram | null;
+}
+
+/** City comparisons for one fuel, computed from the stations in KV at `generated_at`. */
+export interface CityInsights {
+  fuel: FuelType;
+  generated_at: string;
+  cities: CityInsight[];
+}
+
 export interface ApiResponse<T> {
   status: "success";
   data: T;

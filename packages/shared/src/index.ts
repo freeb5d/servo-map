@@ -17,6 +17,9 @@ export type {
   StateMetadata,
   PriceSnapshot,
   PriceTrend,
+  PriceHistogram,
+  CityInsight,
+  CityInsights,
   ApiResponse,
   ApiErrorResponse,
 } from "./types";
@@ -29,6 +32,7 @@ export {
   vehicleMakes,
 } from "./vehicles";
 export { VEHICLES } from "./generated/vehicles.data";
+export { type City, CITIES } from "./cities";
 export { type DataSource, DATA_SOURCES, dataAttribution } from "./data-sources";
 export type {
   Account,

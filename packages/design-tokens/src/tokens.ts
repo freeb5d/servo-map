@@ -49,6 +49,10 @@ export const color = {
   mapWater: { light: "#D9DFE2", dark: "#182025" },
   // 朱 Shu: the ServoMap mark's needle and nothing else (decision 0005), so price tiers stay the only UI chroma.
   markAccent: { light: "#C25E3A", dark: "#D9764F" },
+  // Trends charts (decision 0008): the cheapest-to-dearest band behind an average line, between wash and line.
+  chartBand: { light: "#E3E1DA", dark: "#33322F" },
+  // The median marker on a price distribution, drawn in the mark's 朱 as the Trends artboards specify.
+  chartMedian: { light: "#C25E3A", dark: "#D9764F" },
 } as const satisfies Record<string, ThemeColor>;
 
 export type ColorToken = keyof typeof color;

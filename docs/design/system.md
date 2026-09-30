@@ -41,6 +41,8 @@ Every value below passes WCAG AA (≥ 4.5:1) for text on `bg` and `surface` in i
 | `*-soft` tiers | `#E3EAE3` / `#EFE8DA` / `#F1E3DF` | `#243028` / `#312B1F` / `#34241F` | Banner fills |
 | `map-land` / `map-water` | `#F2F1ED` / `#D9DFE2` | `#1E1E1C` / `#182025` | Web map base overrides |
 | `mark-accent` 朱 | `#C25E3A` | `#D9764F` | The ServoMap mark's needle only ([decision 0005](../decisions/0005-mark-colour.md)) |
+| `chart-band` | `#E3E1DA` | `#33322F` | Cheapest-to-dearest band behind an average line (Trends, decision 0008) |
+| `chart-median` 朱 | `#C25E3A` | `#D9764F` | The median marker on a price distribution (Trends artboards, decision 0008) |
 
 Variant A 藍 (indigo accent) was the alternative; it was not chosen.
 
@@ -71,7 +73,7 @@ Rules added after the owner found the first v2 build "too AI" (2026-09-29). They
 - **No KPI tile rows.** Headline figures sit unboxed in a ruled row, like a newspaper table.
 - **Facts, not advice.** Verdicts state where the price is ("Near the 90-day high.", "10.6¢ below the local average"), never what the reader should do.
 - **No explaining the chart.** If a chart needs a caption to be honest (a bar axis that does not start at zero), change the chart: use dots on a scale or a row of figures.
-- **No decorative colour.** No gradients; the cycle position is a hairline with one ink tick. Colour marks price tier, freshness and selection only; the one exception is the `mark-accent` needle of the ServoMap mark.
+- **No decorative colour.** No gradients; the cycle position is a hairline with one ink tick. Colour marks price tier, freshness and selection only; the exceptions are the `mark-accent` needle of the ServoMap mark and the `chart-median` marker the Trends artboards draw in the same 朱.
 - **Fewer separators.** Use a comma or space; `·` chains are out.
 
 ## Space, shape, elevation

@@ -43,7 +43,7 @@ Active error codes (see `packages/worker/src/routes/stations.ts`):
 | Code                 | HTTP | When                                         |
 |----------------------|------|----------------------------------------------|
 | `INVALID_STATE`      | 400  | `state` query param not in `AUSTRALIAN_STATES` |
-| `INVALID_FUEL`       | 400  | `fuel` query param not in `FUEL_TYPES`         |
+| `INVALID_FUEL`       | 400  | `fuel` query param not in `FUEL_TYPES` (or missing on `/insights/cities`) |
 | `INVALID_GEO`        | 400  | lat/lng/radius partially supplied              |
 | `STATION_NOT_FOUND`  | 404  | `GET /stations/:id` where id is unknown        |
 
@@ -59,6 +59,7 @@ Active error codes (see `packages/worker/src/routes/stations.ts`):
 | GET    | `/api/v1/brands`              | Sorted unique brand list               |
 | GET    | `/api/v1/metadata`            | Per-state ingest metadata              |
 | GET    | `/api/v1/trends`              | Daily price history series per state   |
+| GET    | `/api/v1/insights/cities`     | Per-city figures for one fuel, today   |
 
 ### `GET /api/v1/stations` query params
 
@@ -85,11 +86,26 @@ roll-up (`date`, `fuel`, `min`, `avg`, `max`, `station_count`). The ingest cron
 appends one entry per state + fuel per day (idempotent — same-day re-runs refresh,
 never duplicate), capped to ~90 days.
 
+### `GET /api/v1/insights/cities` query params
+
+- `fuel` — **required** `FuelType` (missing or unknown → 400 `INVALID_FUEL`).
+
+Returns `{ fuel, generated_at, cities: CityInsight[] }`, one entry per city in
+`CITIES` (`@servo-map/shared`, the single list of cities, centres and radii). Stations
+are matched by distance from the centre, whatever their state. `count`, `average`,
+`min` and `max` use prices reported in the last 7 days; `median` and `histogram`
+(2¢ bins) use every price; `reported_within_24h_share` is the share of stations
+reported in the last 24 h. The aggregation lives in `packages/worker/src/utils/city-insights.ts`.
+
 ### Edge caching
 
 Read routes (`/stations`, `/metadata`, `/brands`, `/trends`) set
 `Cache-Control: public, max-age=60, s-maxage=120, stale-while-revalidate=600`
 so Cloudflare's edge can absorb repeat reads between 15-min ingest cycles.
+
+`/insights/cities` aggregates every city station on a miss, so it also stores its answer
+in the Workers Cache API, one entry per fuel, for up to 15 minutes
+(`Cache-Control: public, max-age=300, s-maxage=900`).
 
 ## Changing the contract
 

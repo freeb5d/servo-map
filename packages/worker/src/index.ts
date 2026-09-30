@@ -5,6 +5,7 @@ import { metadataRoute } from "./routes/metadata";
 import { brandsRoute } from "./routes/brands";
 import { trendsRoute } from "./routes/trends";
 import { vehiclesRoute } from "./routes/vehicles";
+import { insightsRoute } from "./routes/insights";
 import { authRoute } from "./routes/auth";
 import { meRoute } from "./routes/me";
 import { dispatchIngest } from "./cron/dispatch";
@@ -33,6 +34,7 @@ api.route("/metadata", metadataRoute);
 api.route("/brands", brandsRoute);
 api.route("/trends", trendsRoute);
 api.route("/vehicles", vehiclesRoute);
+api.route("/insights", insightsRoute);
 api.route("/auth", authRoute);
 api.route("/me", meRoute);
 

@@ -6,7 +6,7 @@
 
 Cloudflare Worker + Hono. Two responsibilities:
 
-1. **Read API** (`/api/v1/*`): serves station, brand, metadata, trend and vehicle data from KV and `@servo-map/shared`. The worker never writes KV.
+1. **Read API** (`/api/v1/*`): serves station, brand, metadata, trend, city-insight and vehicle data from KV and `@servo-map/shared`. The worker never writes KV.
 2. **Accounts** (`/api/v1/auth/*`, `/api/v1/me*`, decision 0004): verifies Apple and Google identity tokens (`src/auth/`), issues session tokens, and reads and writes the user's data in D1 (`src/db/`, schema in `migrations/`). Every query is scoped to the session's user id.
 
 Ingest lives outside the worker: GitHub Actions runs `scripts/fetch-data.ts` every 15 min, which imports this package's `StateAdapter` list and writes to the same KV via the Cloudflare REST API.

@@ -127,6 +127,10 @@ struct Snapshot: Codable, Hashable, Sendable {
     let min: Double
     let avg: Double
     let max: Double
+    /** Stations that reported the fuel that day; absent from older cached payloads. */
+    var stationCount: Int? = nil
+
+    enum CodingKeys: String, CodingKey { case date, fuel, min, avg, max, stationCount = "station_count" }
 }
 
 enum PriceTier: String, Sendable {

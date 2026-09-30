@@ -31,6 +31,8 @@ public enum ServoMapColor {
     public static let mapLand = Color(light: 0xF2F1ED, dark: 0x1E1E1C)
     public static let mapWater = Color(light: 0xD9DFE2, dark: 0x182025)
     public static let markAccent = Color(light: 0xC25E3A, dark: 0xD9764F)
+    public static let chartBand = Color(light: 0xE3E1DA, dark: 0x33322F)
+    public static let chartMedian = Color(light: 0xC25E3A, dark: 0xD9764F)
 }
 
 public enum ServoMapSpace {
@@ -112,6 +114,8 @@ public enum ServoMapMotion {
     public static let slow: Double = 0.3
     public static let riseDistance: CGFloat = 4
     public static let standard = Animation.timingCurve(0.4, 0, 0.2, 1, duration: normal)
+    /** Switching between sub-pages under a segmented bar: the system's snappy spring at the slow duration. */
+    public static let snappy = Animation.snappy(duration: slow)
 }
 
 extension Color {

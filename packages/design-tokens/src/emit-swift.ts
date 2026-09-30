@@ -123,6 +123,8 @@ public enum ServoMapMotion {
     public static let slow: Double = ${motion.durationMs.slow / 1000}
     public static let riseDistance: CGFloat = ${motion.riseDistance}
     public static let standard = Animation.timingCurve(${x1}, ${y1}, ${x2}, ${y2}, duration: normal)
+    /** Switching between sub-pages under a segmented bar: the system's snappy spring at the slow duration. */
+    public static let snappy = Animation.snappy(duration: slow)
 }
 
 extension Color {

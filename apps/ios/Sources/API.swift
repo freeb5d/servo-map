@@ -2,7 +2,13 @@ import Foundation
 
 /** Read-only client for the public ServoMap API; the same endpoints the web app uses. */
 struct API: Sendable {
-    static let base = URL(string: "https://api.servo-map.com/api/v1")!
+    static let base: URL = {
+        #if DEBUG
+        // `-apiBase http://127.0.0.1:8787/api/v1` points a debug build at a local `wrangler dev`.
+        if let raw = UserDefaults.standard.string(forKey: "apiBase"), let url = URL(string: raw) { return url }
+        #endif
+        return URL(string: "https://api.servo-map.com/api/v1")!
+    }()
 
     /** Most stations one nearby fetch returns; the cheapest come first, so a capped fetch drops the dearest. */
     static let stationLimit = 500
@@ -23,7 +29,8 @@ struct API: Sendable {
         return d
     }()
 
-    private func get<T: Decodable>(_ path: String, _ query: [String: String]) async throws -> T {
+    /** One GET, unwrapped from the `{ status, data }` envelope; app-only endpoints extend API elsewhere. */
+    func get<T: Decodable>(_ path: String, _ query: [String: String]) async throws -> T {
         var parts = URLComponents(url: Self.base.appending(path: path), resolvingAgainstBaseURL: false)!
         parts.queryItems = query.map { URLQueryItem(name: $0.key, value: $0.value) }
         let (data, response) = try await URLSession.shared.data(from: parts.url!)

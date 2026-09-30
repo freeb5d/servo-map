@@ -253,6 +253,78 @@ paths:
         "400":
           $ref: "#/components/responses/BadRequest"
 
+  /insights/cities:
+    get:
+      operationId: getCityInsights
+      tags: [Reference]
+      summary: Compare cities for one fuel
+      description: |
+        Per-city figures for one fuel, computed from the current station data: every station
+        within each city's radius of its centre (the city list is `CITIES` in `@servo-map/shared`),
+        whatever its state. `count`, `average`, `min` and `max` use prices reported in the last
+        7 days; `median` and `histogram` use every price, whatever its age;
+        `reported_within_24h_share` is the share of `station_count` reported in the last 24 hours.
+        A city with no stations answers zeros and nulls. Responses are cached for up to 15 minutes.
+      parameters:
+        - name: fuel
+          in: query
+          required: true
+          description: Fuel to compare.
+          schema:
+            $ref: "#/components/schemas/FuelType"
+      responses:
+        "200":
+          description: Successful response
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                example: "public, max-age=300, s-maxage=900"
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/CityInsights"
+              example:
+                status: success
+                data:
+                  fuel: U91
+                  generated_at: "2026-09-30T06:00:00.000Z"
+                  cities:
+                    - id: sydney
+                      name: Sydney
+                      state: nsw
+                      radius_km: 20
+                      station_count: 336
+                      count: 284
+                      average: 236.7
+                      min: 218.5
+                      max: 248.9
+                      median: 237.9
+                      reported_within_24h_share: 0.19
+                      histogram:
+                        start: 222
+                        width: 2
+                        counts: [2, 3, 21, 24, 46]
+                    - id: hobart
+                      name: Hobart
+                      state: tas
+                      radius_km: 20
+                      station_count: 0
+                      count: 0
+                      average: null
+                      min: null
+                      max: null
+                      median: null
+                      reported_within_24h_share: null
+                      histogram: null
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
   /brands:
     get:
       operationId: listBrands
@@ -847,6 +919,80 @@ components:
           items:
             $ref: "#/components/schemas/PriceSnapshot"
 
+    PriceHistogram:
+      type: object
+      description: Bin `i` counts prices in [start + i × width, start + (i + 1) × width).
+      required: [start, width, counts]
+      properties:
+        start:
+          type: number
+          description: Lower edge of the first bin (cents/L), a multiple of `width`.
+          example: 222
+        width:
+          type: integer
+          description: Bin width in whole cents; 2 unless the spread needs more than 60 bins.
+          example: 2
+        counts:
+          type: array
+          items:
+            type: integer
+
+    CityInsight:
+      type: object
+      required: [id, name, state, radius_km, station_count, count, average, min, max, median, reported_within_24h_share, histogram]
+      properties:
+        id:
+          type: string
+          example: sydney
+        name:
+          type: string
+          example: Sydney
+        state:
+          $ref: "#/components/schemas/AustralianState"
+        radius_km:
+          type: number
+          description: Stations within this many km of the city's centre count as the city.
+          example: 20
+        station_count:
+          type: integer
+          description: Stations within the city's radius that list this fuel, whatever the price's age.
+        count:
+          type: integer
+          description: Stations whose price was reported in the last 7 days.
+        average:
+          type: [number, "null"]
+          description: Mean of the recent prices (cents/L), one decimal; null when `count` is 0.
+        min:
+          type: [number, "null"]
+          description: Cheapest recent price; null when `count` is 0.
+        max:
+          type: [number, "null"]
+          description: Dearest recent price; null when `count` is 0.
+        median:
+          type: [number, "null"]
+          description: Median of every price, one decimal; null when `station_count` is 0.
+        reported_within_24h_share:
+          type: [number, "null"]
+          description: Share (0 to 1) of `station_count` reported in the last 24 hours.
+        histogram:
+          oneOf:
+            - $ref: "#/components/schemas/PriceHistogram"
+            - type: "null"
+
+    CityInsights:
+      type: object
+      required: [fuel, generated_at, cities]
+      properties:
+        fuel:
+          $ref: "#/components/schemas/FuelType"
+        generated_at:
+          type: string
+          format: date-time
+        cities:
+          type: array
+          items:
+            $ref: "#/components/schemas/CityInsight"
+
     SuccessEnvelope:
       type: object
       required: [status]
@@ -874,7 +1020,7 @@ components:
       description: |
         Invalid request parameters. `code` is one of:
         `INVALID_STATE` (a `state` code is not a valid `AustralianState`),
-        `INVALID_FUEL` (`fuel` is not a valid `FuelType`), or
+        `INVALID_FUEL` (`fuel` is not a valid `FuelType`, or is missing where required), or
         `INVALID_GEO` (`lat`/`lng`/`radius` were not all provided together).
       content:
         application/json:
